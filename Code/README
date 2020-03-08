@@ -1,0 +1,16 @@
+Run compile.sh to compile the fortran files.
+
+ai_feynman_example.py contains an example of running a code on some examples (found in the example_data directory). The function has the following parameters
+
+pathdir - path to the directory containing the data file
+filename - the name of the file containing the data
+BF_try_time - time limit for each brute force call (set by default to 60 seconds)
+BF_ops_file_type - file containing the symbols to be used in the brute force code (set by default to "14ops.txt")
+polyfit_deg - maximum degree of the polynomial tried by the polynomial fit routine (set be default to 4)
+NN_epochs - number of epochs for the training (set by default to 4000)
+
+The solution file will be saved in the directory called results under the name solution_{filename}.
+
+ai_feynman_terminal_example.py allows calling the aiFeynman function from the command line. 
+e.g. python ai_feynman_terminal_example.py --pathdir=../example_data/ --filename=example1.txt
+python ai_feynman_terminal_example.py --help displays all the available parameters that can be passed to the function.
