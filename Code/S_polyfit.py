@@ -45,11 +45,11 @@ def polyfit(maxdeg, filename):
             z = z + ["z"+str(ii)]
 
         variables = np.matmul(C_1_2,variables.T).T
-
-        parameters = getBest(variables,f_dependent,maxdeg)[0]
-        params_error = getBest(variables,f_dependent,maxdeg)[1]
-        deg = getBest(variables,f_dependent,maxdeg)[2]     
-
+        res = getBest(variables,f_dependent,maxdeg)
+        parameters = res[0]
+        params_error = res[1]
+        deg = res[2]
+        
         x = sympy.Matrix(x)
         M = sympy.Matrix(C_1_2)
         b = sympy.Matrix(means)
@@ -64,11 +64,15 @@ def polyfit(maxdeg, filename):
         eq = simplify(eq)
         
     else:
-        parameters = getBest(variables,f_dependent,maxdeg)[0]
-        params_error = getBest(variables,f_dependent,maxdeg)[1]
-        deg = getBest(variables,f_dependent,maxdeg)[2]
+        res = getBest(variables,f_dependent,maxdeg)
+        parameters = res[0]
+        params_error = res[1]
+        deg = res[2]
         eq = mk_sympy_function(parameters,n_variables,deg)
-        eq = eq.subs("z0","x0")  
-    
+        try:
+            eq = eq.subs("z0","x0")  
+        except:
+            pass
+
     return (eq, params_error)
 

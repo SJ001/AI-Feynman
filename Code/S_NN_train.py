@@ -41,7 +41,7 @@ def rmse_loss(pred, targ):
     denom = torch.sqrt(denom.sum()/len(denom))
     return torch.sqrt(F.mse_loss(pred, targ))/denom
 
-def NN_train(pathdir, filename, epochs=-1):
+def NN_train(pathdir, filename, epochs=1000, lrs=1e-2, N_red_lr=4, pretrained_path=""):
     try:
         os.mkdir("results/NN_trained_models/")
     except:
@@ -55,13 +55,14 @@ def NN_train(pathdir, filename, epochs=-1):
         n_variables = np.loadtxt(pathdir+"%s" %filename, dtype='str').shape[1]-1
         variables = np.loadtxt(pathdir+"%s" %filename, usecols=(0,))
 
-        epochs = epochs//4
+        epochs = epochs//N_red_lr
+        epochs = int(epochs)
 
-        if n_variables==0:
-            print("Solved! ", variables[0])
+        if n_variables==0 or n_variables==1:
+            print("Solved!")#, variables[0])
             return 0
-        elif n_variables==1:
-            variables = np.reshape(variables,(len(variables),1))
+        #elif n_variables==1:
+        #    variables = np.reshape(variables,(len(variables),1))
         else:
             for j in range(1,n_variables):
                 v = np.loadtxt(pathdir+"%s" %filename, usecols=(j,))
@@ -113,10 +114,14 @@ def NN_train(pathdir, filename, epochs=-1):
         else:
             model_feynman = SimpleNet(n_variables)
 
+        if pretrained_path!="":
+            model_feynman.load_state_dict(torch.load(pretrained_path))
+
         max_loss = 10000
 
-        lrs = 1e-2
-        for i_i in range(4):
+        print("EPOCH", epochs)
+
+        for i_i in range(N_red_lr):
             optimizer_feynman = optim.Adam(model_feynman.parameters(), lr = lrs)
             for epoch in range(epochs):
                 model_feynman.train()

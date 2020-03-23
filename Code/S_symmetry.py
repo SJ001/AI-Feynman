@@ -14,6 +14,7 @@ from torch.utils import data
 import pickle
 from torch.optim.lr_scheduler import CosineAnnealingLR
 from matplotlib import pyplot as plt
+from S_remove_input_neuron import remove_input_neuron
 import time
 
 is_cuda = torch.cuda.is_available()
@@ -156,6 +157,7 @@ def do_translational_symmetry_minus(pathdir, filename, i,j):
 
         with torch.no_grad():   
             file_name = filename + "-translated_minus"
+            ct_median = torch.median(torch.from_numpy(variables[:,j]))
             data_translated = variables
             data_translated[:,i] = variables[:,i]-variables[:,j]
             data_translated =  np.delete(data_translated, j, axis=1)
@@ -165,8 +167,9 @@ def do_translational_symmetry_minus(pathdir, filename, i,j):
             except:
                 pass
             np.savetxt("results/translated_data_minus/"+file_name , data_translated)
+            remove_input_neuron(model,n_variables,j,ct_median,"results/NN_trained_models/models/"+filename + "-translated_minus_pretrained.h5")
             return ("results/translated_data_minus/",file_name)
-        
+
     except Exception as e:
         print(e)
         return (-1,-1)
@@ -286,6 +289,7 @@ def do_translational_symmetry_divide(pathdir, filename, i,j):
         with torch.no_grad():             
             file_name = filename + "-translated_divide"
             data_translated = variables
+            ct_median =torch.median(torch.from_numpy(variables[:,j]))
             data_translated[:,i] = variables[:,i]/variables[:,j]
             data_translated =  np.delete(data_translated, j, axis=1)
             data_translated = np.column_stack((data_translated,f_dependent))
@@ -294,8 +298,9 @@ def do_translational_symmetry_divide(pathdir, filename, i,j):
             except:
                 pass
             np.savetxt("results/translated_data_divide/"+file_name , data_translated)
+            remove_input_neuron(model,n_variables,j,ct_median,"results/NN_trained_models/models/"+filename + "-translated_divide_pretrained.h5")
             return ("results/translated_data_divide/",file_name)
-        
+
     except Exception as e:
         print(e)
         return (-1,1)
@@ -413,6 +418,7 @@ def do_translational_symmetry_multiply(pathdir, filename, i,j):
         with torch.no_grad():             
             file_name = filename + "-translated_multiply"
             data_translated = variables
+            ct_median =torch.median(torch.from_numpy(variables[:,j]))
             data_translated[:,i] = variables[:,i]*variables[:,j]
             data_translated =  np.delete(data_translated, j, axis=1)
             data_translated = np.column_stack((data_translated,f_dependent))
@@ -421,8 +427,9 @@ def do_translational_symmetry_multiply(pathdir, filename, i,j):
             except:
                 pass
             np.savetxt("results/translated_data_multiply/"+file_name , data_translated)
+            remove_input_neuron(model,n_variables,j,ct_median,"results/NN_trained_models/models/"+filename + "-translated_multiply_pretrained.h5")
             return ("results/translated_data_multiply/",file_name)
-        
+
     except Exception as e:
         print(e)
         return (-1,1)
@@ -539,6 +546,7 @@ def do_translational_symmetry_plus(pathdir, filename, i,j):
         with torch.no_grad():             
             file_name = filename + "-translated_plus"
             data_translated = variables
+            ct_median =torch.median(torch.from_numpy(variables[:,j]))
             data_translated[:,i] = variables[:,i]+variables[:,j]
             data_translated =  np.delete(data_translated, j, axis=1)
             data_translated = np.column_stack((data_translated,f_dependent))
@@ -547,6 +555,7 @@ def do_translational_symmetry_plus(pathdir, filename, i,j):
             except:
                 pass
             np.savetxt("results/translated_data_plus/"+file_name , data_translated)
+            remove_input_neuron(model,n_variables,j,ct_median,"results/NN_trained_models/models/"+filename + "-translated_plus_pretrained.h5")
             return ("results/translated_data_plus/", file_name)
         
     except Exception as e:

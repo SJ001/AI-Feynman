@@ -13,6 +13,7 @@ from sympy import preorder_traversal, count_ops
 from S_polyfit import polyfit
 from S_get_symbolic_expr_error import get_symbolic_expr_error
 from S_add_sym_on_pareto import add_sym_on_pareto
+from S_add_snap_expr_on_pareto_polyfit import add_snap_expr_on_pareto_polyfit
 import os
 from os import path
 
@@ -25,153 +26,157 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
     print("Checking for brute force + \n")
     brute_force(pathdir_transformed,filename,BF_try_time,BF_ops_file_type,"+")
     
-    # load the BF output data
-    bf_all_output = np.loadtxt("results.dat", dtype="str")
-    express = bf_all_output[:,2]
-    prefactors = bf_all_output[:,1]
-    prefactors = [str(i) for i in prefactors] 
-    
-    # Calculate the complexity of the bf expression the same way as for gradient descent case
-    complexity = []
-    errors = []
-    eqns = []
-    for i in range(len(prefactors)):
-        try:            
-            if output_type=="":
-                eqn = prefactors[i] + "+" + RPN_to_eq(express[i])
-            elif output_type=="acos":
-                eqn = "cos(" + prefactors[i] + "+" + RPN_to_eq(express[i]) + ")"
-            elif output_type=="asin":
-                eqn = "sin(" + prefactors[i] + "+" + RPN_to_eq(express[i]) + ")" 
-            elif output_type=="atan":
-                eqn = "tan(" + prefactors[i] + "+" + RPN_to_eq(express[i]) + ")"
-            elif output_type=="cos":
-                eqn = "acos(" + prefactors[i] + "+" + RPN_to_eq(express[i]) + ")"
-            elif output_type=="exp":
-                eqn = "log(" + prefactors[i] + "+" + RPN_to_eq(express[i]) + ")"
-            elif output_type=="inverse":
-                eqn = "1/(" + prefactors[i] + "+" + RPN_to_eq(express[i]) + ")"
-            elif output_type=="log":
-                eqn = "exp(" + prefactors[i] + "+" + RPN_to_eq(express[i]) + ")"
-            elif output_type=="sin":
-                eqn = "acos(" + prefactors[i] + "+" + RPN_to_eq(express[i]) + ")"
-            elif output_type=="sqrt":
-                eqn = "(" + prefactors[i] + "+" + RPN_to_eq(express[i]) + ")**2"
-            elif output_type=="squared":
-                eqn = "sqrt(" + prefactors[i] + "+" + RPN_to_eq(express[i]) + ")"
-            elif output_type=="tan":
-                eqn = "atan(" + prefactors[i] + "+" + RPN_to_eq(express[i]) + ")"
+    try:
+        # load the BF output data
+        bf_all_output = np.loadtxt("results.dat", dtype="str")
+        express = bf_all_output[:,2]
+        prefactors = bf_all_output[:,1]
+        prefactors = [str(i) for i in prefactors]
+        
+        # Calculate the complexity of the bf expression the same way as for gradient descent case
+        complexity = []
+        errors = []
+        eqns = []
+        for i in range(len(prefactors)):
+            try:
+                if output_type=="":
+                    eqn = prefactors[i] + "+" + RPN_to_eq(express[i])
+                elif output_type=="acos":
+                    eqn = "cos(" + prefactors[i] + "+" + RPN_to_eq(express[i]) + ")"
+                elif output_type=="asin":
+                    eqn = "sin(" + prefactors[i] + "+" + RPN_to_eq(express[i]) + ")"
+                elif output_type=="atan":
+                    eqn = "tan(" + prefactors[i] + "+" + RPN_to_eq(express[i]) + ")"
+                elif output_type=="cos":
+                    eqn = "acos(" + prefactors[i] + "+" + RPN_to_eq(express[i]) + ")"
+                elif output_type=="exp":
+                    eqn = "log(" + prefactors[i] + "+" + RPN_to_eq(express[i]) + ")"
+                elif output_type=="inverse":
+                    eqn = "1/(" + prefactors[i] + "+" + RPN_to_eq(express[i]) + ")"
+                elif output_type=="log":
+                    eqn = "exp(" + prefactors[i] + "+" + RPN_to_eq(express[i]) + ")"
+                elif output_type=="sin":
+                    eqn = "acos(" + prefactors[i] + "+" + RPN_to_eq(express[i]) + ")"
+                elif output_type=="sqrt":
+                    eqn = "(" + prefactors[i] + "+" + RPN_to_eq(express[i]) + ")**2"
+                elif output_type=="squared":
+                    eqn = "sqrt(" + prefactors[i] + "+" + RPN_to_eq(express[i]) + ")"
+                elif output_type=="tan":
+                    eqn = "atan(" + prefactors[i] + "+" + RPN_to_eq(express[i]) + ")"
                 
-            eqns = eqns + [eqn]
-            errors = errors + [get_symbolic_expr_error(pathdir,filename,eqn)]
-            expr = parse_expr(eqn)
-            is_atomic_number = lambda expr: expr.is_Atom and expr.is_number
-            numbers_expr = [subexpression for subexpression in preorder_traversal(expr) if is_atomic_number(subexpression)]
-            compl = 0
-            for j in numbers_expr:
-                try:
-                    compl = compl + get_number_DL(float(j))
-                except:
-                    compl = compl + 1000000
+                eqns = eqns + [eqn]
+                errors = errors + [get_symbolic_expr_error(pathdir,filename,eqn)]
+                expr = parse_expr(eqn)
+                is_atomic_number = lambda expr: expr.is_Atom and expr.is_number
+                numbers_expr = [subexpression for subexpression in preorder_traversal(expr) if is_atomic_number(subexpression)]
+                compl = 0
+                for j in numbers_expr:
+                    try:
+                        compl = compl + get_number_DL(float(j))
+                    except:
+                        compl = compl + 1000000
 
-            # Add the complexity due to symbols
-            n_variables = len(expr.free_symbols)
-            n_operations = len(count_ops(expr,visual=True).free_symbols)
-            if n_operations!=0 or n_variables!=0:
-                compl = compl + (n_variables+n_operations)*np.log2((n_variables+n_operations))
+                # Add the complexity due to symbols
+                n_variables = len(expr.free_symbols)
+                n_operations = len(count_ops(expr,visual=True).free_symbols)
+                if n_operations!=0 or n_variables!=0:
+                    compl = compl + (n_variables+n_operations)*np.log2((n_variables+n_operations))
 
-            complexity = complexity + [compl]
-        except:
-            continue
+                complexity = complexity + [compl]
+            except:
+                continue
 
-    for i in range(len(complexity)):
-        PA.add(Point(x=complexity[i], y=errors[i], data=eqns[i]))
-    
-    # run gradient descent of BF output parameters and add the results to the Pareto plot
-    for i in range(len(express)):
-        try:
-            bf_gd_update = RPN_to_pytorch(pathdir+filename,eqns[i])
-            PA.add(Point(x=bf_gd_update[1],y=bf_gd_update[0],data=bf_gd_update[2]))
-        except:
-            continue
+        for i in range(len(complexity)):
+            PA.add(Point(x=complexity[i], y=errors[i], data=eqns[i]))
 
+        # run gradient descent of BF output parameters and add the results to the Pareto plot
+        for i in range(len(express)):
+            try:
+                bf_gd_update = RPN_to_pytorch(pathdir+filename,eqns[i])
+                PA.add(Point(x=bf_gd_update[1],y=bf_gd_update[0],data=bf_gd_update[2]))
+            except:
+                continue
+    except:
+        pass
 
 #############################################################################################################################
     # run BF on the data (*)
     print("Checking for brute force * \n")
     brute_force(pathdir_transformed,filename,BF_try_time,BF_ops_file_type,"*")
-    
-    # load the BF output data
-    bf_all_output = np.loadtxt("results.dat", dtype="str")
-    express = bf_all_output[:,2]
-    prefactors = bf_all_output[:,1]
-    prefactors = [str(i) for i in prefactors] 
+
+    try:
+        # load the BF output data
+        bf_all_output = np.loadtxt("results.dat", dtype="str")
+        express = bf_all_output[:,2]
+        prefactors = bf_all_output[:,1]
+        prefactors = [str(i) for i in prefactors]
+        
+        # Calculate the complexity of the bf expression the same way as for gradient descent case
+        complexity = []
+        errors = []
+        eqns = []
+        for i in range(len(prefactors)):
+            try:
+                if output_type=="":
+                    eqn = prefactors[i] + "*" + RPN_to_eq(express[i])
+                elif output_type=="acos":
+                    eqn = "cos(" + prefactors[i] + "*" + RPN_to_eq(express[i]) + ")"
+                elif output_type=="asin":
+                    eqn = "sin(" + prefactors[i] + "*" + RPN_to_eq(express[i]) + ")"
+                elif output_type=="atan":
+                    eqn = "tan(" + prefactors[i] + "*" + RPN_to_eq(express[i]) + ")"
+                elif output_type=="cos":
+                    eqn = "acos(" + prefactors[i] + "*" + RPN_to_eq(express[i]) + ")"
+                elif output_type=="exp":
+                    eqn = "log(" + prefactors[i] + "*" + RPN_to_eq(express[i]) + ")"
+                elif output_type=="inverse":
+                    eqn = "1/(" + prefactors[i] + "*" + RPN_to_eq(express[i]) + ")"
+                elif output_type=="log":
+                    eqn = "exp(" + prefactors[i] + "*" + RPN_to_eq(express[i]) + ")"
+                elif output_type=="sin":
+                    eqn = "acos(" + prefactors[i] + "*" + RPN_to_eq(express[i]) + ")"
+                elif output_type=="sqrt":
+                    eqn = "(" + prefactors[i] + "*" + RPN_to_eq(express[i]) + ")**2"
+                elif output_type=="squared":
+                    eqn = "sqrt(" + prefactors[i] + "*" + RPN_to_eq(express[i]) + ")"
+                elif output_type=="tan":
+                    eqn = "atan(" + prefactors[i] + "*" + RPN_to_eq(express[i]) + ")"
                 
-    # Calculate the complexity of the bf expression the same way as for gradient descent case
-    complexity = []
-    errors = []
-    eqns = []
-    for i in range(len(prefactors)):
-        try: 
-            if output_type=="":
-                eqn = prefactors[i] + "*" + RPN_to_eq(express[i])
-            elif output_type=="acos":
-                eqn = "cos(" + prefactors[i] + "*" + RPN_to_eq(express[i]) + ")"
-            elif output_type=="asin":
-                eqn = "sin(" + prefactors[i] + "*" + RPN_to_eq(express[i]) + ")" 
-            elif output_type=="atan":
-                eqn = "tan(" + prefactors[i] + "*" + RPN_to_eq(express[i]) + ")"
-            elif output_type=="cos":
-                eqn = "acos(" + prefactors[i] + "*" + RPN_to_eq(express[i]) + ")"
-            elif output_type=="exp":
-                eqn = "log(" + prefactors[i] + "*" + RPN_to_eq(express[i]) + ")"
-            elif output_type=="inverse":
-                eqn = "1/(" + prefactors[i] + "*" + RPN_to_eq(express[i]) + ")"
-            elif output_type=="log":
-                eqn = "exp(" + prefactors[i] + "*" + RPN_to_eq(express[i]) + ")"
-            elif output_type=="sin":
-                eqn = "acos(" + prefactors[i] + "*" + RPN_to_eq(express[i]) + ")"
-            elif output_type=="sqrt":
-                eqn = "(" + prefactors[i] + "*" + RPN_to_eq(express[i]) + ")**2"
-            elif output_type=="squared":
-                eqn = "sqrt(" + prefactors[i] + "*" + RPN_to_eq(express[i]) + ")"
-            elif output_type=="tan":
-                eqn = "atan(" + prefactors[i] + "*" + RPN_to_eq(express[i]) + ")"
-            
-            eqns = eqns + [eqn]
-            errors = errors + [get_symbolic_expr_error(pathdir,filename,eqn)]
-            expr = parse_expr(eqn)
-            is_atomic_number = lambda expr: expr.is_Atom and expr.is_number
-            numbers_expr = [subexpression for subexpression in preorder_traversal(expr) if is_atomic_number(subexpression)]
-            compl = 0
-            for j in numbers_expr:
-                try:
-                    compl = compl + get_number_DL(float(j))
-                except:
-                    compl = compl + 1000000
+                eqns = eqns + [eqn]
+                errors = errors + [get_symbolic_expr_error(pathdir,filename,eqn)]
+                expr = parse_expr(eqn)
+                is_atomic_number = lambda expr: expr.is_Atom and expr.is_number
+                numbers_expr = [subexpression for subexpression in preorder_traversal(expr) if is_atomic_number(subexpression)]
+                compl = 0
+                for j in numbers_expr:
+                    try:
+                        compl = compl + get_number_DL(float(j))
+                    except:
+                        compl = compl + 1000000
 
-            # Add the complexity due to symbols
-            n_variables = len(expr.free_symbols)
-            n_operations = len(count_ops(expr,visual=True).free_symbols)
-            if n_operations!=0 or n_variables!=0:
-                compl = compl + (n_variables+n_operations)*np.log2((n_variables+n_operations))
+                # Add the complexity due to symbols
+                n_variables = len(expr.free_symbols)
+                n_operations = len(count_ops(expr,visual=True).free_symbols)
+                if n_operations!=0 or n_variables!=0:
+                    compl = compl + (n_variables+n_operations)*np.log2((n_variables+n_operations))
 
-            complexity = complexity + [compl]
-        except:
-            continue
+                complexity = complexity + [compl]
+            except:
+                continue
 
-    # add the BF output to the Pareto plot
-    for i in range(len(complexity)):
-        PA.add(Point(x=complexity[i], y=errors[i], data=eqns[i]))
+        # add the BF output to the Pareto plot
+        for i in range(len(complexity)):
+            PA.add(Point(x=complexity[i], y=errors[i], data=eqns[i]))
 
-    # run gradient descent of BF output parameters and add the results to the Pareto plot
-    for i in range(len(express)):
-        try:
-            bf_gd_update = RPN_to_pytorch(pathdir+filename,eqns[i])
-            PA.add(Point(x=bf_gd_update[1],y=bf_gd_update[0],data=bf_gd_update[2]))
-        except:
-            continue
-
+        # run gradient descent of BF output parameters and add the results to the Pareto plot
+        for i in range(len(express)):
+            try:
+                bf_gd_update = RPN_to_pytorch(pathdir+filename,eqns[i])
+                PA.add(Point(x=bf_gd_update[1],y=bf_gd_update[0],data=bf_gd_update[2]))
+            except:
+                continue
+    except:
+        pass
 #############################################################################################################################
     # run polyfit on the data
     print("Checking polyfit \n")
@@ -210,15 +215,27 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
     numbers_expr = [subexpression for subexpression in preorder_traversal(expr) if is_atomic_number(subexpression)]
     complexity = 0
     for j in numbers_expr:
-        complexity = complexity + get_number_DL(float(j)) 
-    # Add the complexity due to symbols
-    n_variables = len(polyfit_result[0].free_symbols)
-    n_operations = len(count_ops(polyfit_result[0],visual=True).free_symbols)
-    if n_operations!=0 or n_variables!=0:
-        complexity = complexity + (n_variables+n_operations)*np.log2((n_variables+n_operations))
-    
-    PA.add(Point(x=complexity, y=polyfit_err, data=str(eqn)))
+        complexity = complexity + get_number_DL(float(j))
+    try:
+        # Add the complexity due to symbols
+        n_variables = len(polyfit_result[0].free_symbols)
+        n_operations = len(count_ops(polyfit_result[0],visual=True).free_symbols)
+        if n_operations!=0 or n_variables!=0:
+            complexity = complexity + (n_variables+n_operations)*np.log2((n_variables+n_operations))
+    except:
+        pass
 
+    
+    #run zero snap on polyfit output
+    PA_poly = ParetoSet()
+    PA_poly.add(Point(x=complexity, y=polyfit_err, data=str(eqn)))
+    PA_poly = add_snap_expr_on_pareto_polyfit(pathdir, filename, str(eqn), PA_poly)
+    
+    
+    for l in range(len(PA_poly.get_pareto_points())):
+        PA.add(Point(PA_poly.get_pareto_points()[l][0],PA_poly.get_pareto_points()[l][1],PA_poly.get_pareto_points()[l][2]))
+
+    print("Complexity  RMSE  Expression")
     for pareto_i in range(len(PA.get_pareto_points())):
         print(PA.get_pareto_points()[pareto_i])
     

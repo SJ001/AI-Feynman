@@ -1,0 +1,19 @@
+#!/bin/csh
+# USAGE EXAMPLE: solve_mysteries.scr ops6.txt 2
+# USAGE EXAMPLE: solve_mysteries.scr allops.txt 1800
+set opsfile = $1
+set maxtime = $2
+set f = $3
+
+set outfile = brute_solutions.dat
+set outfile2 = brute_formulas.dat
+if -f $outfile /bin/rm $outfile
+if -f $outfile2 /bin/rm $outfile2
+
+echo Trying to solve mysteries with brute force...
+
+echo Trying to solve $f...
+echo /bin/cp -p $f mystery.dat
+/bin/cp -p $f mystery.dat
+echo $opsfile arity2templates.txt mystery.dat results.dat >args.dat
+timeout {$maxtime}s ./symbolic_regress1.x  

@@ -26,9 +26,14 @@ from get_pareto import Point, ParetoSet
 from sympy import preorder_traversal, count_ops
 from sympy.abc import x,y
 from sympy.parsing.sympy_parser import parse_expr
-from sympy import Symbol, lambdify, N, simplify, powsimp, Rational, symbols
+from sympy import Symbol, lambdify, N, simplify, powsimp, Rational, symbols, S,Float
 
 from S_get_number_DL_snapped import get_number_DL_snapped
+
+def intify(expr):
+    floats = S(expr).atoms(Float)
+    ints = [i for i in floats if int(i) == i]
+    return expr.xreplace(dict(zip(ints, [int(i) for i in ints])))
 
 # parameters: path to data, math (not RPN) expression 
 def add_snap_expr_on_pareto(pathdir, filename, math_expr, PA, DR_file=""):
@@ -66,7 +71,7 @@ def add_snap_expr_on_pareto(pathdir, filename, math_expr, PA, DR_file=""):
 
     eq = parse_expr(str(math_expr))
     expr = eq
-    
+        
     # Get the numbers appearing in the expression
     is_atomic_number = lambda expr: expr.is_Atom and expr.is_number
     eq_numbers = [subexpression for subexpression in preorder_traversal(expr) if is_atomic_number(subexpression)]
@@ -134,8 +139,7 @@ def add_snap_expr_on_pareto(pathdir, filename, math_expr, PA, DR_file=""):
         
     snapped_expr = np.append(integer_snapped_expr,zero_snapped_expr)
     snapped_expr = np.append(snapped_expr,rational_snapped_expr)
-    
-    
+        
     for i in range(len(snapped_expr)):
         try:
             # Calculate the error of the new, snapped expression
@@ -145,6 +149,8 @@ def add_snap_expr_on_pareto(pathdir, filename, math_expr, PA, DR_file=""):
             for s in (expr.free_symbols):
                 s = symbols(str(s), real = True)
             expr =  simplify(parse_expr(str(snapped_expr[i]),locals()))
+            #print("expr 0", expr)
+            expr = intify(expr)
             is_atomic_number = lambda expr: expr.is_Atom and expr.is_number
             numbers_expr = [subexpression for subexpression in preorder_traversal(expr) if is_atomic_number(subexpression)]
             
@@ -167,12 +173,14 @@ def add_snap_expr_on_pareto(pathdir, filename, math_expr, PA, DR_file=""):
                 for i_dr in range(len(old_vars)):
                     expr = expr.replace(old_vars[i_dr],"("+dr_data[i_dr+2]+")")
                 expr = "("+dr_data[1]+")*(" + expr +")"
-
+                
                 expr = parse_expr(expr)
                 for s in (expr.free_symbols):
                     s = symbols(str(s), real = True)
                 expr =  simplify(parse_expr(str(expr),locals()))
-
+                #print("expr 1", expr)
+                #expr = intify(expr)
+                #print("expr 2", expr)
                 snapped_complexity = 0
                 for j in numbers_expr:
                     snapped_complexity = snapped_complexity + get_number_DL_snapped(float(j))
