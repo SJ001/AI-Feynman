@@ -215,4 +215,4 @@ def run_aifeynman(pathdir,filename,BF_try_time,BF_ops_file_type, polyfit_deg=4, 
         save_data = np.column_stack((test_errors,log_err,log_err_all,list_dt))
     else:
         save_data = np.column_stack((log_err,log_err_all,list_dt))
-    np.savetxt("results/solution_%s.txt" %filename_orig,save_data,fmt="%s")
+    np.savetxt("results/solution_%s" %filename_orig,save_data,fmt="%s")
