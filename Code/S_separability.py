@@ -230,7 +230,13 @@ def check_separability_multiply(pathdir, filename):
         
 
         f_dependent = np.loadtxt(pathdir+filename, usecols=(n_variables,))
+
+        # Pick only data which is close enough to the maximum value (5 times less or higher)                                                                   
+        max_output = np.max(abs(f_dependent))
+        use_idx = np.where(abs(f_dependent)>=max_output/5)
+        f_dependent = f_dependent[use_idx]
         f_dependent = np.reshape(f_dependent,(len(f_dependent),1))
+        variables = variables[use_idx]
 
         factors = torch.from_numpy(variables)
         if is_cuda:
