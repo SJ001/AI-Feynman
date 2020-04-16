@@ -25,9 +25,16 @@ def get_symbolic_expr_error(pathdir,filename,expr):
         check_var = "x"+str(i)
         if check_var in np.array(variables).astype('str'):
             real_variables = real_variables + [data[:,i]]
-
+    
+    # Remove accidental nan's
+    good_idx = np.where(np.isnan(f(*real_variables))==False)
+   
     # use this to get rid of cases where the loss gets complex because of transformations of the output variable
     if isinstance(np.mean((f(*real_variables)-data[:,-1])**2), complex):
         return 1000000
     else:
-        return np.sqrt(np.mean((f(*real_variables)-data[:,-1])**2))/np.sqrt(np.mean(data[:,-1]**2))
+        try:
+            return np.sqrt(np.mean((f(*real_variables)[good_idx]-data[good_idx][:,-1])**2))/np.sqrt(np.mean(data[good_idx][:,-1]**2))
+        except:
+            # use this for the case in which the expression is just one number (i.e. not array)
+            return np.sqrt(np.mean((f(*real_variables)-data[:,-1])**2))/np.sqrt(np.mean(data[:,-1]**2))

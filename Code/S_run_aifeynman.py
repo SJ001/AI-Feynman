@@ -174,28 +174,28 @@ def run_aifeynman(pathdir,filename,BF_try_time,BF_ops_file_type, polyfit_deg=4, 
     np.savetxt("results/solution_before_snap_%s.txt" %filename,PA_list,fmt="%s")
 
     # Run zero, integer and rational snap on the resulted equations  
-    PA_snapped_1 = ParetoSet()
     for j in range(len(PA_list)):
-        PA_snapped_1 = add_snap_expr_on_pareto(pathdir,filename,PA_list[j][-1],PA_snapped_1, "")
+        PA = add_snap_expr_on_pareto(pathdir,filename,PA_list[j][-1],PA, "")
 
-    PA_list = PA_snapped_1.get_pareto_points()
+    PA_list = PA.get_pareto_points()
     np.savetxt("results/solution_first_snap_%s.txt" %filename,PA_list,fmt="%s")
     
     # Run gradient descent on the data one more time                                                                                                                          
     for i in range(len(PA_list)):
         try:
             gd_update = final_gd(pathdir+filename,PA_list[i][-1])
-            PA_snapped_1.add(Point(x=gd_update[1],y=gd_update[0],data=gd_update[2]))
+            PA.add(Point(x=gd_update[1],y=gd_update[0],data=gd_update[2]))
         except:
             continue
   
-    PA_list = PA_snapped_1.get_pareto_points()
-    
-    PA_snapped = ParetoSet()
+    PA_list = PA.get_pareto_points()
+    print("test_1 ", PA_list)
     for j in range(len(PA_list)):
-        PA_snapped = add_snap_expr_on_pareto(pathdir,filename,PA_list[j][-1],PA_snapped, DR_file)
-    
-    list_dt = np.array(PA_snapped.get_pareto_points())
+        print(PA_list[j][-1])
+        PA = add_snap_expr_on_pareto(pathdir,filename,PA_list[j][-1],PA, DR_file)
+
+    print("test_2 ", PA.get_pareto_points())
+    list_dt = np.array(PA.get_pareto_points())
     data_file_len = len(np.loadtxt(pathdir+filename))
     log_err = []
     log_err_all = []
