@@ -56,7 +56,7 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
                 elif output_type=="log":
                     eqn = "exp(" + prefactors[i] + "+" + RPN_to_eq(express[i]) + ")"
                 elif output_type=="sin":
-                    eqn = "acos(" + prefactors[i] + "+" + RPN_to_eq(express[i]) + ")"
+                    eqn = "asin(" + prefactors[i] + "+" + RPN_to_eq(express[i]) + ")"
                 elif output_type=="sqrt":
                     eqn = "(" + prefactors[i] + "+" + RPN_to_eq(express[i]) + ")**2"
                 elif output_type=="squared":
@@ -134,7 +134,7 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
                 elif output_type=="log":
                     eqn = "exp(" + prefactors[i] + "*" + RPN_to_eq(express[i]) + ")"
                 elif output_type=="sin":
-                    eqn = "acos(" + prefactors[i] + "*" + RPN_to_eq(express[i]) + ")"
+                    eqn = "asin(" + prefactors[i] + "*" + RPN_to_eq(express[i]) + ")"
                 elif output_type=="sqrt":
                     eqn = "(" + prefactors[i] + "*" + RPN_to_eq(express[i]) + ")**2"
                 elif output_type=="squared":
@@ -201,7 +201,7 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
     elif output_type=="log":
         eqn = "exp(" + eqn + ")"
     elif output_type=="sin":
-        eqn = "acos(" + eqn + ")"
+        eqn = "asin(" + eqn + ")"
     elif output_type=="sqrt":
         eqn = "(" + eqn + ")**2"
     elif output_type=="squared":
