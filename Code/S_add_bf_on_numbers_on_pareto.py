@@ -72,30 +72,34 @@ def add_bf_on_numbers_on_pareto(pathdir, filename, PA, math_expr):
     eq_numbers = [subexpression for subexpression in preorder_traversal(expr) if is_atomic_number(subexpression)]
     # Do bf on one parameter at a time
     bf_on_numbers_expr = []
-    for w in range(len(eq_numbers)):        
-        param_dict = {}
-        unsnapped_param_dict = {'p':1}
-        eq_ = unsnap_recur(expr,param_dict,unsnapped_param_dict)
-        eq = eq_
-        
-        np.savetxt(pathdir+"number_for_bf_%s.txt" %w, [eq_numbers[w]])
-        brute_force_number(pathdir,"number_for_bf_%s.txt" %w)
-        # Load the predictions made by the bf code
-        bf_numbers = np.loadtxt("results.dat",usecols=(1,),dtype="str")
-        new_numbers = copy.deepcopy(eq_numbers)
-        
-        # replace the number under consideration by all the proposed bf numbers
-        for kk in range(len(bf_numbers)):
+    for w in range(len(eq_numbers)):
+        try:
+            param_dict = {}
+            unsnapped_param_dict = {'p':1}
+            eq_ = unsnap_recur(expr,param_dict,unsnapped_param_dict)
             eq = eq_
-            new_numbers[w] = parse_expr(RPN_to_eq(bf_numbers[kk]))  
             
-            jj = 0
-            for parm in unsnapped_param_dict:
-                if parm!="p":
-                    eq = eq.subs(parm, new_numbers[jj])
-                    jj = jj + 1
+            np.savetxt(pathdir+"number_for_bf_%s.txt" %w, [eq_numbers[w]])
+            brute_force_number(pathdir,"number_for_bf_%s.txt" %w)
+            # Load the predictions made by the bf code
+            bf_numbers = np.loadtxt("results.dat",usecols=(1,),dtype="str")
+            new_numbers = copy.deepcopy(eq_numbers)
+            
+            # replace the number under consideration by all the proposed bf numbers
+            for kk in range(len(bf_numbers)):
+                eq = eq_
+                new_numbers[w] = parse_expr(RPN_to_eq(bf_numbers[kk]))
+                
+                jj = 0
+                for parm in unsnapped_param_dict:
+                    if parm!="p":
+                        eq = eq.subs(parm, new_numbers[jj])
+                        jj = jj + 1
 
-            bf_on_numbers_expr = bf_on_numbers_expr + [eq]
+                bf_on_numbers_expr = bf_on_numbers_expr + [eq]
+        except:
+            continue
+                
     for i in range(len(bf_on_numbers_expr)):
         try:
             # Calculate the error of the new, snapped expression

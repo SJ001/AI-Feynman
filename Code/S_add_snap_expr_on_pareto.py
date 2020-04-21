@@ -79,19 +79,22 @@ def add_snap_expr_on_pareto(pathdir, filename, math_expr, PA, DR_file=""):
     # Do integer snap one parameter at a time
     integer_snapped_expr = []
     for w in range(len(eq_numbers)):
-        param_dict = {}
-        unsnapped_param_dict = {'p':1}
-        eq = unsnap_recur(expr,param_dict,unsnapped_param_dict)
-        new_numbers = integerSnap(eq_numbers,w+1)
-        for kk in range(len(new_numbers)):
-            eq_numbers[new_numbers[kk][0]] = new_numbers[kk][1]
-        jj = 0
-        for parm in unsnapped_param_dict:
-            if parm!="p":
-                eq = eq.subs(parm, eq_numbers[jj])
-                jj = jj + 1
-        integer_snapped_expr = integer_snapped_expr + [eq]
-    
+        try:
+            param_dict = {}
+            unsnapped_param_dict = {'p':1}
+            eq = unsnap_recur(expr,param_dict,unsnapped_param_dict)
+            new_numbers = integerSnap(eq_numbers,w+1)
+            for kk in range(len(new_numbers)):
+                eq_numbers[new_numbers[kk][0]] = new_numbers[kk][1]
+            jj = 0
+            for parm in unsnapped_param_dict:
+                if parm!="p":
+                    eq = eq.subs(parm, eq_numbers[jj])
+                    jj = jj + 1
+            integer_snapped_expr = integer_snapped_expr + [eq]
+        except:
+            continue
+                
     # Get the numbers appearing in the expression
     is_atomic_number = lambda expr: expr.is_Atom and expr.is_number
     eq_numbers = [subexpression for subexpression in preorder_traversal(expr) if is_atomic_number(subexpression)]
@@ -99,18 +102,21 @@ def add_snap_expr_on_pareto(pathdir, filename, math_expr, PA, DR_file=""):
     # Do zero snap one parameter at a time
     zero_snapped_expr = []
     for w in range(len(eq_numbers)):
-        param_dict = {}
-        unsnapped_param_dict = {'p':1} 
-        eq = unsnap_recur(expr,param_dict,unsnapped_param_dict)
-        new_numbers = zeroSnap(eq_numbers,w+1)
-        for kk in range(len(new_numbers)):
-            eq_numbers[new_numbers[kk][0]] = new_numbers[kk][1]
-        jj = 0
-        for parm in unsnapped_param_dict:
-            if parm!="p":
-                eq = eq.subs(parm, eq_numbers[jj])
-                jj = jj + 1
-        zero_snapped_expr = zero_snapped_expr + [eq]
+        try:
+            param_dict = {}
+            unsnapped_param_dict = {'p':1}
+            eq = unsnap_recur(expr,param_dict,unsnapped_param_dict)
+            new_numbers = zeroSnap(eq_numbers,w+1)
+            for kk in range(len(new_numbers)):
+                eq_numbers[new_numbers[kk][0]] = new_numbers[kk][1]
+            jj = 0
+            for parm in unsnapped_param_dict:
+                if parm!="p":
+                    eq = eq.subs(parm, eq_numbers[jj])
+                    jj = jj + 1
+            zero_snapped_expr = zero_snapped_expr + [eq]
+        except:
+            continue
 
     # Get the numbers appearing in the expression
     is_atomic_number = lambda expr: expr.is_Atom and expr.is_number
@@ -119,24 +125,27 @@ def add_snap_expr_on_pareto(pathdir, filename, math_expr, PA, DR_file=""):
     # Do rational snap one parameter at a time
     rational_snapped_expr = []
     for w in range(len(eq_numbers)):
-        eq_numbers_snap = copy.deepcopy(eq_numbers)
-        param_dict = {}
-        unsnapped_param_dict = {'p':1}
-        eq = unsnap_recur(expr,param_dict,unsnapped_param_dict)
-        new_numbers = rationalSnap(eq_numbers,w+1)
-        for kk in range(len(new_numbers)):
-            eq_numbers_snap[new_numbers[kk][0]] = new_numbers[kk][1][1:3]
-        jj = 0
-        for parm in unsnapped_param_dict:
-            if parm!="p":
-                
-                try:
-                    eq = eq.subs(parm, Rational(eq_numbers_snap[jj][0],eq_numbers_snap[jj][1])) 
-                except:
-                    eq = eq.subs(parm, eq_numbers_snap[jj])
-                jj = jj + 1
-        rational_snapped_expr = rational_snapped_expr + [eq]
-        
+        try:
+            eq_numbers_snap = copy.deepcopy(eq_numbers)
+            param_dict = {}
+            unsnapped_param_dict = {'p':1}
+            eq = unsnap_recur(expr,param_dict,unsnapped_param_dict)
+            new_numbers = rationalSnap(eq_numbers,w+1)
+            for kk in range(len(new_numbers)):
+                eq_numbers_snap[new_numbers[kk][0]] = new_numbers[kk][1][1:3]
+            jj = 0
+            for parm in unsnapped_param_dict:
+                if parm!="p":
+                    
+                    try:
+                        eq = eq.subs(parm, Rational(eq_numbers_snap[jj][0],eq_numbers_snap[jj][1]))
+                    except:
+                        eq = eq.subs(parm, eq_numbers_snap[jj])
+                    jj = jj + 1
+            rational_snapped_expr = rational_snapped_expr + [eq]
+        except:
+            continue
+
     snapped_expr = np.append(integer_snapped_expr,zero_snapped_expr)
     snapped_expr = np.append(snapped_expr,rational_snapped_expr)
         

@@ -138,6 +138,10 @@ def final_gd(data_file, math_expr, lr = 1e-2, N_epochs = 5000):
         else:
             eq = eq.subs(parm, trainable_parameters[ii])
             complexity = complexity + get_number_DL(trainable_parameters[ii].detach().numpy())
+            n_variables = len(eq.free_symbols)
+            n_operations = len(count_ops(eq,visual=True).free_symbols)
+            if n_operations!=0 or n_variables!=0:
+                complexity = complexity + (n_variables+n_operations)*np.log2((n_variables+n_operations))
             ii = ii+1
             
         
