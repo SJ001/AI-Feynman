@@ -4,3 +4,4 @@ matplotlib
 sympy = 1.4
 pandas
 scipy
+sortedcontainers
