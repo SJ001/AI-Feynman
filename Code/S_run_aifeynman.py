@@ -189,12 +189,9 @@ def run_aifeynman(pathdir,filename,BF_try_time,BF_ops_file_type, polyfit_deg=4, 
             continue
   
     PA_list = PA.get_pareto_points()
-    print("test_1 ", PA_list)
     for j in range(len(PA_list)):
-        print(PA_list[j][-1])
         PA = add_snap_expr_on_pareto(pathdir,filename,PA_list[j][-1],PA, DR_file)
 
-    print("test_2 ", PA.get_pareto_points())
     list_dt = np.array(PA.get_pareto_points())
     data_file_len = len(np.loadtxt(pathdir+filename))
     log_err = []
