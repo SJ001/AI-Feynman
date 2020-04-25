@@ -15,5 +15,5 @@ parser.add_argument("--test_percentage", type=float, default=0, help="Percentage
 opts = parser.parse_args()
 
 run_aifeynman(opts.pathdir, opts.filename, BF_try_time=opts.BF_try_time, BF_ops_file_type=opts.BF_ops_file_type, polyfit_deg=opts.polyfit_deg,
-          NN_epochs=opts.NN_epochs)
+          NN_epochs=opts.NN_epochs, vars_name=opts.vars_name, test_percentage=opts.test_percentage)
           
