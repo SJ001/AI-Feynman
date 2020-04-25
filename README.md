@@ -30,6 +30,21 @@ The data file to be analyzed should be a text file with each column containing t
 If test_percentage is different than zero, one more number is added in the beginning of each row, showing the error of the discovered equation on the test set.
 
 ai_feynman_terminal_example.py allows calling the aiFeynman function from the command line. 
-(e.g. python ai_feynman_terminal_example.py --pathdir=../example_data/ --filename=example1.txt)
+(e.g. python ai_feynman_terminal_example.py --pathdir=../example_data/ --filename=example1.txt). Use python ai_feynman_terminal_example.py --help to display all the available parameters that can be passed to the function.
 
-python ai_feynman_terminal_example.py --help displays all the available parameters that can be passed to the function.
+# Citation
+
+If you compare with, build on, or use aspects of the AI Feynman work, please cite the following:
+
+```
+@article{udrescu2020ai,
+  title={AI Feynman: A physics-inspired method for symbolic regression},
+  author={Udrescu, Silviu-Marian and Tegmark, Max},
+  journal={Science Advances},
+  volume={6},
+  number={16},
+  pages={eaay2631},
+  year={2020},
+  publisher={American Association for the Advancement of Science}
+}
+```
