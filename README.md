@@ -30,5 +30,6 @@ The data file to be analyzed should be a text file with each column containing t
 If test_percentage is different than zero, one more number is added in the beginning of each row, showing the error of the discovered equation on the test set.
 
 ai_feynman_terminal_example.py allows calling the aiFeynman function from the command line. 
-e.g. python ai_feynman_terminal_example.py --pathdir=../example_data/ --filename=example1.txt
+(e.g. python ai_feynman_terminal_example.py --pathdir=../example_data/ --filename=example1.txt)
+
 python ai_feynman_terminal_example.py --help displays all the available parameters that can be passed to the function.
