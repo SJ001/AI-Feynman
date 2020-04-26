@@ -137,13 +137,17 @@ def NN_train(pathdir, filename, epochs=1000, lrs=1e-2, N_red_lr=4, pretrained_pa
                     optimizer_feynman.step()
 
                 # Early stopping
-                if epoch%20==0:
+                if epoch%20==0 and epoch>0:
                     if check_es_loss < loss:
                         break
                     else:
                         torch.save(model_feynman.state_dict(), "results/NN_trained_models/models/" + filename + ".h5")
                         check_es_loss = loss
-
+                if epoch==0:
+                    if check_es_loss < loss:
+                        torch.save(model_feynman.state_dict(), "results/NN_trained_models/models/" + filename + ".h5")
+                        check_es_loss = loss
+        
             print(loss)
             lrs = lrs/10
 
