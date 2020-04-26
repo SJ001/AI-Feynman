@@ -5,7 +5,7 @@ import numpy as np
 def RPN_to_eq(expr):
 
     variables = ["0","1","a","b","c","d","e","f","g","h","i","j","k","l","m","n","P"]
-    operations_1 = [">","<","~","\\","L","E","S","C","A","N","T","R"]
+    operations_1 = [">","<","~","\\","L","E","S","C","A","N","T","R","O","J"]
     operations_2 = ["+","*","-","/"]
 
     stack = np.array([])
@@ -65,5 +65,11 @@ def RPN_to_eq(expr):
                 stack = np.append(stack,a)
             if i=="R":
                 a="sqrt("+a+")"
+                stack = np.append(stack,a)
+            if i=="O":
+                a="(2*("+a+"))"
+                stack = np.append(stack,a)
+            if i=="J":
+                a="(2*("+a+")+1)"
                 stack = np.append(stack,a)
     return(stack[0])
