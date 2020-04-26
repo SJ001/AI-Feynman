@@ -6,7 +6,7 @@ Differently from the original paper (described in the mentioned paper), the new 
 
 In order to get started, run compile.sh to compile the fortran files used for the brute force code.
 
-ai_feynman_example.py contains an example of running a code on some examples (found in the example_data directory). More data files on which the code can be tested on can be found in the [Feynman Symbolic Regression Database](https://space.mit.edu/home/tegmark/aifeynman.html). 
+ai_feynman_example.py contains an example of running the code on some examples (found in the example_data directory). The examples correspond to the equations I.8.14, I.10.7 and I.50.26 in Table 4 in the paper. More data files on which the code can be tested on can be found in the [Feynman Symbolic Regression Database](https://space.mit.edu/home/tegmark/aifeynman.html). 
 
 The main function of the code, called by the user, has the following parameters:
 
