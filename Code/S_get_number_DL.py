@@ -9,6 +9,8 @@ def get_number_DL(n):
         return 1000000
     elif np.abs(n - int(n)) < epsilon:
         return np.log2(1+abs(n))
+    elif np.abs(n - np.pi) < epsilon:
+        return np.log2(1+3)
     # check if real
     else:
         PrecisionFloorLoss = 1e-14

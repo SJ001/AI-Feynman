@@ -21,6 +21,7 @@ from S_add_snap_expr_on_pareto import add_snap_expr_on_pareto
 from S_add_sym_on_pareto import add_sym_on_pareto
 from S_run_bf_polyfit import run_bf_polyfit
 from S_final_gd import final_gd
+from S_add_bf_on_numbers_on_pareto import add_bf_on_numbers_on_pareto
 from dimensionalAnalysis import dimensionalAnalysis
 
 PA = ParetoSet()

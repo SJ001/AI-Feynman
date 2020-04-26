@@ -13,6 +13,8 @@ def get_number_DL_snapped(n):
     elif np.abs(n - bestApproximation(n,10000)[0]) < epsilon:
         _, numerator, denominator, _ = bestApproximation(n, 10000)
         return np.log2((1 + abs(numerator)) * abs(denominator))
+    elif np.abs(n - np.pi) < epsilon:
+        return np.log2(1+3)
     else:
         PrecisionFloorLoss = 1e-14
         return np.log2(1 + (float(n) / PrecisionFloorLoss) ** 2) / 2
