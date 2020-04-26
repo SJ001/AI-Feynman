@@ -44,7 +44,7 @@
 	integer arities(21), nvar, nvarmax, nmax, lnblnk
 	parameter(nvarmax=20, nmax=10000000)
 	real*8 f, newloss, minloss, maxloss, rmsloss, xy(nvarmax+1,nmax), epsilon, DL, DL2, DL3
-	parameter(epsilon=0.00000001)
+	parameter(epsilon=0.000000000000000000001)
 	data arities /2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0/
 	data functions /"+*-/><~\OJLESCANTR01P"/
       	integer nn(0:2), ii(nmax), kk(nmax), radix(nmax)
