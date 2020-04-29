@@ -9,10 +9,6 @@ import torch.nn.functional as F
 import torch.optim as optim 
 import torch.utils.data as utils
 from torch.autograd import Variable
-from sklearn.metrics import roc_curve, auc
-from sklearn.preprocessing import label_binarize
-from sklearn.manifold import TSNE
-import seaborn as sns
 import copy
 import warnings
 warnings.filterwarnings("ignore")
