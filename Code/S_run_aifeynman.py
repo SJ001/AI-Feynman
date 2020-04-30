@@ -160,6 +160,7 @@ def run_aifeynman(pathdir,filename,BF_try_time,BF_ops_file_type, polyfit_deg=4, 
     if test_data.size != 0:
         np.savetxt(pathdir+filename+"_test",test_data)
 
+    PA = ParetoSet()
     # Run the code on the train data 
     PA = run_AI_all(pathdir,filename+"_train",BF_try_time,BF_ops_file_type, polyfit_deg, NN_epochs)
     PA_list = PA.get_pareto_points()
