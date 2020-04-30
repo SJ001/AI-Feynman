@@ -68,31 +68,30 @@ def add_snap_expr_on_pareto_polyfit(pathdir, filename, math_expr, PA):
     eq = parse_expr(str(math_expr))
     expr = eq
 
-    
+#    # Get the numbers appearing in the expression
+#    is_atomic_number = lambda expr: expr.is_Atom and expr.is_number
+#    eq_numbers = [subexpression for subexpression in preorder_traversal(expr) if is_atomic_number(subexpression)]
+#
+#    # Do zero snap one parameter at a time
+#    zero_snapped_expr = []
+#    for w in range(len(eq_numbers)):
+#        try:
+#            param_dict = {}
+#            unsnapped_param_dict = {'p':1}
+#            eq = unsnap_recur(expr,param_dict,unsnapped_param_dict)
+#            new_numbers = zeroSnap(eq_numbers,w+1)
+#            for kk in range(len(new_numbers)):
+#                eq_numbers[new_numbers[kk][0]] = new_numbers[kk][1]
+#            jj = 0
+#            for parm in unsnapped_param_dict:
+#                if parm!="p":
+#                    eq = eq.subs(parm, eq_numbers[jj])
+#                    jj = jj + 1
+#            zero_snapped_expr = zero_snapped_expr + [eq]
+#        except:
+#            continue
+
     # Get the numbers appearing in the expression
-    is_atomic_number = lambda expr: expr.is_Atom and expr.is_number
-    eq_numbers = [subexpression for subexpression in preorder_traversal(expr) if is_atomic_number(subexpression)]
-       
-    # Do zero snap one parameter at a time
-    zero_snapped_expr = []
-    for w in range(len(eq_numbers)):
-        try:
-            param_dict = {}
-            unsnapped_param_dict = {'p':1}
-            eq = unsnap_recur(expr,param_dict,unsnapped_param_dict)
-            new_numbers = zeroSnap(eq_numbers,w+1)
-            for kk in range(len(new_numbers)):
-                eq_numbers[new_numbers[kk][0]] = new_numbers[kk][1]
-            jj = 0
-            for parm in unsnapped_param_dict:
-                if parm!="p":
-                    eq = eq.subs(parm, eq_numbers[jj])
-                    jj = jj + 1
-            zero_snapped_expr = zero_snapped_expr + [eq]
-        except:
-            continue
-    
-    # Get the numbers appearing in the expression                                                                                                                                
     is_atomic_number = lambda expr:expr.is_Atom and expr.is_number
     eq_numbers = [subexpression for subexpression in preorder_traversal(expr) if is_atomic_number(subexpression)]
 
@@ -117,47 +116,46 @@ def add_snap_expr_on_pareto_polyfit(pathdir, filename, math_expr, PA):
 
             # Get the numbers appearing in the expression                                                                                                            
     
-    is_atomic_number = lambda expr: expr.is_Atom and expr.is_number
-    eq_numbers = [subexpression for subexpression in preorder_traversal(expr) if is_atomic_number(subexpression)]
+#    is_atomic_number = lambda expr: expr.is_Atom and expr.is_number
+#    eq_numbers = [subexpression for subexpression in preorder_traversal(expr) if is_atomic_number(subexpression)]
 
-    # Do rational snap one parameter at a time                                                                                                                                     
-    rational_snapped_expr = []
-    for w in range(len(eq_numbers)):
-        try:
-            eq_numbers_snap = copy.deepcopy(eq_numbers)
-            param_dict = {}
-            unsnapped_param_dict = {'p':1}
-            eq = unsnap_recur(expr,param_dict,unsnapped_param_dict)
-            new_numbers = rationalSnap(eq_numbers,w+1)
-            for kk in range(len(new_numbers)):
-                eq_numbers_snap[new_numbers[kk][0]] = new_numbers[kk][1][1:3]
-            jj = 0
-            for parm in unsnapped_param_dict:
-                if parm!="p":
+#    # Do rational snap one parameter at a time
+#    rational_snapped_expr = []
+#    for w in range(len(eq_numbers)):
+#        try:
+#            eq_numbers_snap = copy.deepcopy(eq_numbers)
+#            param_dict = {}
+#            unsnapped_param_dict = {'p':1}
+#            eq = unsnap_recur(expr,param_dict,unsnapped_param_dict)
+#            new_numbers = rationalSnap(eq_numbers,w+1)
+#            for kk in range(len(new_numbers)):
+#                eq_numbers_snap[new_numbers[kk][0]] = new_numbers[kk][1][1:3]
+#            jj = 0
+#            for parm in unsnapped_param_dict:
+#                if parm!="p":
+#
+#                    try:
+#                        eq = eq.subs(parm, Rational(eq_numbers_snap[jj][0],eq_numbers_snap[jj][1]))
+#                    except:
+#                        eq = eq.subs(parm, eq_numbers_snap[jj])
+#                    jj = jj + 1
+#            rational_snapped_expr = rational_snapped_expr + [eq]
+#        except:
+#            continue
 
-                    try:
-                        eq = eq.subs(parm, Rational(eq_numbers_snap[jj][0],eq_numbers_snap[jj][1]))
-                    except:
-                        eq = eq.subs(parm, eq_numbers_snap[jj])
-                    jj = jj + 1
-            rational_snapped_expr = rational_snapped_expr + [eq]
-        except:
-            continue
+#    snapped_expr = np.append(integer_snapped_expr,zero_snapped_expr)
+#    snapped_expr = np.append(snapped_expr,rational_snapped_expr)
 
-    snapped_expr = np.append(integer_snapped_expr,zero_snapped_expr)
-    snapped_expr = np.append(snapped_expr,rational_snapped_expr)
-    
-
-    for i in range(len(snapped_expr)):
+    for i in range(len(integer_snapped_expr)):
         try:
         
             # Calculate the error of the new, snapped expression
-            snapped_error = get_symbolic_expr_error(pathdir,filename,str(snapped_expr[i]))
+            snapped_error = get_symbolic_expr_error(pathdir,filename,str(integer_snapped_expr[i]))
             # Calculate the complexity of the new, snapped expression
-            expr = simplify(powsimp(snapped_expr[i]))
+            expr = simplify(powsimp(integer_snapped_expr[i]))
             for s in (expr.free_symbols):
                 s = symbols(str(s), real = True)
-            expr =  simplify(parse_expr(str(snapped_expr[i]),locals()))
+            expr =  simplify(parse_expr(str(integer_snapped_expr[i]),locals()))
             expr = intify(expr)
 
             is_atomic_number = lambda expr: expr.is_Atom and expr.is_number
