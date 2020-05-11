@@ -40,13 +40,13 @@
 	implicit none
 	character*60 opsfile, templatefile, mysteryfile, outfile, usedfuncs
 	character*60 comline, functions, ops, formula
-	integer arities(19), nvar, nvarmax, nmax, lnblnk
+	integer arities(21), nvar, nvarmax, nmax, lnblnk
 	parameter(nvarmax=20, nmax=10000000)
 	real*8 f, newloss, minloss, maxloss, rmsloss, xy(nvarmax+1,nmax), epsilon
 	real*8 ymax, prefactor, DL, DL2, DL3, limit
-	parameter(epsilon=0.000000000000000000001)
-	data arities /2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0/
-	data functions /"+*-/><~\LESCANTR01P"/
+	parameter(epsilon=0.00001)
+	data arities /2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0/
+	data functions /"+*-/><~\OJLESCANTR01P"/
       	integer nn(0:2), ii(nmax), kk(nmax), radix(nmax)
 	integer ndata, i, j, n, jmax
 	integer*8 nformulas
