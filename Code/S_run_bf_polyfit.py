@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from S_brute_force import brute_force
 from S_combine_pareto import combine_pareto
-from S_get_number_DL import get_number_DL
+from S_get_number_DL_snapped import get_number_DL_snapped
 from sympy.parsing.sympy_parser import parse_expr
 from sympy import preorder_traversal, count_ops
 from S_polyfit import polyfit
@@ -72,7 +72,7 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
                 compl = 0
                 for j in numbers_expr:
                     try:
-                        compl = compl + get_number_DL(float(j))
+                        compl = compl + get_number_DL_snapped(float(j))
                     except:
                         compl = compl + 1000000
 
@@ -150,7 +150,7 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
                 compl = 0
                 for j in numbers_expr:
                     try:
-                        compl = compl + get_number_DL(float(j))
+                        compl = compl + get_number_DL_snapped(float(j))
                     except:
                         compl = compl + 1000000
 
@@ -215,7 +215,7 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
     numbers_expr = [subexpression for subexpression in preorder_traversal(expr) if is_atomic_number(subexpression)]
     complexity = 0
     for j in numbers_expr:
-        complexity = complexity + get_number_DL(float(j))
+        complexity = complexity + get_number_DL_snapped(float(j))
     try:
         # Add the complexity due to symbols
         n_variables = len(polyfit_result[0].free_symbols)

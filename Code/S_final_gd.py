@@ -18,7 +18,7 @@ from sympy.abc import x,y
 from sympy.parsing.sympy_parser import parse_expr
 from sympy import Symbol, lambdify, N
 
-from S_get_number_DL import get_number_DL
+from S_get_number_DL_snapped import get_number_DL_snapped
 
 # parameters: path to data, RPN expression (obtained from bf)
 def final_gd(data_file, math_expr, lr = 1e-2, N_epochs = 5000):
@@ -133,7 +133,7 @@ def final_gd(data_file, math_expr, lr = 1e-2, N_epochs = 5000):
             ii = ii + 1
         else:
             eq = eq.subs(parm, trainable_parameters[ii])
-            complexity = complexity + get_number_DL(trainable_parameters[ii].detach().numpy())
+            complexity = complexity + get_number_DL_snapped(trainable_parameters[ii].detach().numpy())
             n_variables = len(eq.free_symbols)
             n_operations = len(count_ops(eq,visual=True).free_symbols)
             if n_operations!=0 or n_variables!=0:
