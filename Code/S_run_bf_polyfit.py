@@ -92,7 +92,7 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
         # run gradient descent of BF output parameters and add the results to the Pareto plot
         for i in range(len(express)):
             try:
-                bf_gd_update = RPN_to_pytorch(pathdir+filename,eqns[i])
+                bf_gd_update = RPN_to_pytorch(pathdir,filename,eqns[i])
                 PA.add(Point(x=bf_gd_update[1],y=bf_gd_update[0],data=bf_gd_update[2]))
             except:
                 continue
@@ -171,7 +171,7 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
         # run gradient descent of BF output parameters and add the results to the Pareto plot
         for i in range(len(express)):
             try:
-                bf_gd_update = RPN_to_pytorch(pathdir+filename,eqns[i])
+                bf_gd_update = RPN_to_pytorch(pathdir,filename,eqns[i])
                 PA.add(Point(x=bf_gd_update[1],y=bf_gd_update[0],data=bf_gd_update[2]))
             except:
                 continue
