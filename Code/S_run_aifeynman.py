@@ -37,7 +37,6 @@ def run_AI_all(pathdir,filename,BF_try_time=60,BF_ops_file_type="14ops", polyfit
     # Run bf and polyfit
     PA = run_bf_polyfit(pathdir,pathdir,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg)
 
-    '''
     # Run bf and polyfit on modified output
     PA = get_acos(pathdir,"results/mystery_world_acos/",filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg)
     PA = get_asin(pathdir,"results/mystery_world_asin/",filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg)
@@ -50,7 +49,7 @@ def run_AI_all(pathdir,filename,BF_try_time=60,BF_ops_file_type="14ops", polyfit
     PA = get_sqrt(pathdir,"results/mystery_world_sqrt/",filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg)
     PA = get_squared(pathdir,"results/mystery_world_squared/",filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg)
     PA = get_tan(pathdir,"results/mystery_world_tan/",filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg)
-    '''
+
 #############################################################################################################################  
     # check if the NN is trained. If it is not, train it on the data.
     print("Checking for symmetry \n", filename)
