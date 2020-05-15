@@ -19,9 +19,11 @@ from sympy.parsing.sympy_parser import parse_expr
 from sympy import Symbol, lambdify, N
 
 from S_get_number_DL_snapped import get_number_DL_snapped
+from S_get_symbolic_expr_error import get_symbolic_expr_error
 
 # parameters: path to data, RPN expression (obtained from bf)
-def final_gd(data_file, math_expr, lr = 1e-2, N_epochs = 5000):
+def final_gd(pathdir,filename, math_expr, lr = 1e-2, N_epochs = 5000):
+    data_file = pathdir + filename
     param_dict = {}
     unsnapped_param_dict = {'p':1}
 
@@ -63,11 +65,8 @@ def final_gd(data_file, math_expr, lr = 1e-2, N_epochs = 5000):
 
     # Turn BF expression to pytorch expression
     eq = parse_expr(math_expr)
-    # eq = parse_expr("cos(0.5*a)") # this is for test_sympy.txt
-    # eq = parse_expr("cos(0.5*a)+sin(1.2*b)+6") # this is for test_sympy_2.txt
     eq = unsnap_recur(eq,param_dict,unsnapped_param_dict)
     
-
     N_vars = len(data[0])-1
     N_params = len(unsnapped_param_dict)
 
@@ -75,7 +74,6 @@ def final_gd(data_file, math_expr, lr = 1e-2, N_epochs = 5000):
     variables = []
     params = []
     for i in range(N_vars):
-        #variables = variables + ["x%s" %i]
         variables = variables + [possible_vars[i]]
     for i in range(N_params-1):
         params = params + ["p%s" %i]
@@ -93,15 +91,12 @@ def final_gd(data_file, math_expr, lr = 1e-2, N_epochs = 5000):
             vars()[i].requires_grad=True
             trainable_parameters = trainable_parameters + [vars()[i]]
 
-    
     # Prepare the loaded data
-
     real_variables = []
     for i in range(len(data[0])-1):
         real_variables = real_variables + [torch.from_numpy(data[:,i]).float()]
 
     input = trainable_parameters + real_variables
-    
     y = torch.from_numpy(data[:,-1]).float()
     
 
@@ -127,21 +122,27 @@ def final_gd(data_file, math_expr, lr = 1e-2, N_epochs = 5000):
                 
     # get the updated symbolic regression
     ii = -1
-    complexity = 0
     for parm in unsnapped_param_dict:
         if ii == -1:
             ii = ii + 1
         else:
             eq = eq.subs(parm, trainable_parameters[ii])
-            complexity = complexity + get_number_DL_snapped(trainable_parameters[ii].detach().numpy())
-            n_variables = len(eq.free_symbols)
-            n_operations = len(count_ops(eq,visual=True).free_symbols)
-            if n_operations!=0 or n_variables!=0:
-                complexity = complexity + (n_variables+n_operations)*np.log2((n_variables+n_operations))
-            ii = ii+1
-            
-        
-    error = torch.mean((f(*input)-y)**2).data.numpy()*1
+            ii = ii + 1
+
+    is_atomic_number = lambda expr: expr.is_Atom and expr.is_number
+    numbers_expr = [subexpression for subexpression in preorder_traversal(eq) if is_atomic_number(subexpression)]
+    complexity = 0
+    for j in numbers_expr:
+        try:
+            complexity = complexity + get_number_DL_snapped(float(j))
+        except:
+            complexity = complexity + 1000000
+    n_variables = len(eq.free_symbols)
+    n_operations = len(count_ops(eq,visual=True).free_symbols)
+    if n_operations!=0 or n_variables!=0:
+        complexity = complexity + (n_variables+n_operations)*np.log2((n_variables+n_operations))
+
+    error = get_symbolic_expr_error(pathdir,filename,str(eq))
     return error, complexity, eq
 
 
