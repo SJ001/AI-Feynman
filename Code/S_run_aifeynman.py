@@ -25,8 +25,7 @@ from S_add_bf_on_numbers_on_pareto import add_bf_on_numbers_on_pareto
 from dimensionalAnalysis import dimensionalAnalysis
 
 PA = ParetoSet()
-
-def run_AI_all(pathdir,filename,BF_try_time=60,BF_ops_file_type="14ops", polyfit_deg=4, NN_epochs=4000, PA = PA):
+def run_AI_all(pathdir,filename,BF_try_time=60,BF_ops_file_type="14ops", polyfit_deg=4, NN_epochs=4000, PA=PA):
     try:
         os.mkdir("results/")
     except:
@@ -38,6 +37,7 @@ def run_AI_all(pathdir,filename,BF_try_time=60,BF_ops_file_type="14ops", polyfit
     # Run bf and polyfit
     PA = run_bf_polyfit(pathdir,pathdir,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg)
 
+    '''
     # Run bf and polyfit on modified output
     PA = get_acos(pathdir,"results/mystery_world_acos/",filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg)
     PA = get_asin(pathdir,"results/mystery_world_asin/",filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg)
@@ -50,7 +50,7 @@ def run_AI_all(pathdir,filename,BF_try_time=60,BF_ops_file_type="14ops", polyfit
     PA = get_sqrt(pathdir,"results/mystery_world_sqrt/",filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg)
     PA = get_squared(pathdir,"results/mystery_world_squared/",filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg)
     PA = get_tan(pathdir,"results/mystery_world_tan/",filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg)
-
+    '''
 #############################################################################################################################  
     # check if the NN is trained. If it is not, train it on the data.
     print("Checking for symmetry \n", filename)
@@ -136,7 +136,7 @@ def run_AI_all(pathdir,filename,BF_try_time=60,BF_ops_file_type="14ops", polyfit
         return PA
 
 # this runs snap on the output of aifeynman
-def run_aifeynman(pathdir,filename,BF_try_time,BF_ops_file_type, polyfit_deg=4, NN_epochs=4000, vars_name=[],test_percentage=20):
+def run_aifeynman(pathdir,filename,BF_try_time,BF_ops_file_type, polyfit_deg=4, NN_epochs=4000, vars_name=[],test_percentage=20):    
     # If the variable names are passed, do the dimensional analysis first
     filename_orig = filename
     try:
@@ -162,9 +162,9 @@ def run_aifeynman(pathdir,filename,BF_try_time,BF_ops_file_type, polyfit_deg=4, 
 
     PA = ParetoSet()
     # Run the code on the train data 
-    PA = run_AI_all(pathdir,filename+"_train",BF_try_time,BF_ops_file_type, polyfit_deg, NN_epochs)
+    PA = run_AI_all(pathdir,filename+"_train",BF_try_time,BF_ops_file_type, polyfit_deg, NN_epochs, PA=PA)
     PA_list = PA.get_pareto_points()
-    
+
     # Run bf snap on the resulted equations
     for i in range(len(PA_list)):
         try:
@@ -172,7 +172,7 @@ def run_aifeynman(pathdir,filename,BF_try_time,BF_ops_file_type, polyfit_deg=4, 
         except:
             continue
     PA_list = PA.get_pareto_points()
-    
+
     np.savetxt("results/solution_before_snap_%s.txt" %filename,PA_list,fmt="%s")
 
     # Run zero, integer and rational snap on the resulted equations  
@@ -215,3 +215,4 @@ def run_aifeynman(pathdir,filename,BF_try_time,BF_ops_file_type, polyfit_deg=4, 
     else:
         save_data = np.column_stack((log_err,log_err_all,list_dt))
     np.savetxt("results/solution_%s" %filename_orig,save_data,fmt="%s")
+    
