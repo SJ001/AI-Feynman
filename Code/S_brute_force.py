@@ -22,10 +22,10 @@ def brute_force(pathdir,filename,BF_try_time,BF_ops_file_type,sep_type="*"):
     except:
         pass
     if sep_type=="*":
-        #subprocess.call(["./brute_force_oneFile_v2.scr", file_type, "%s" %try_time, pathdir+filename])
-        subprocess.call(["./brute_force_oneFile_mdl_v3.scr", file_type, "%s" %try_time, pathdir+filename, "10", "0"])
+        subprocess.call(["./brute_force_oneFile_v2.scr", file_type, "%s" %try_time, pathdir+filename])
+        #subprocess.call(["./brute_force_oneFile_mdl_v3.scr", file_type, "%s" %try_time, pathdir+filename, "10", "0"])
     if sep_type=="+":
-        #subprocess.call(["./brute_force_oneFile_v3.scr", file_type, "%s" %try_time, pathdir+filename])
-        subprocess.call(["./brute_force_oneFile_mdl_v2.scr", file_type, "%s" %try_time, pathdir+filename, "10", "0"])
+        subprocess.call(["./brute_force_oneFile_v3.scr", file_type, "%s" %try_time, pathdir+filename])
+        #subprocess.call(["./brute_force_oneFile_mdl_v2.scr", file_type, "%s" %try_time, pathdir+filename, "10", "0"])
     return 1
 
