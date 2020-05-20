@@ -180,61 +180,63 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
 #############################################################################################################################
     # run polyfit on the data
     print("Checking polyfit \n")
-    polyfit_result = polyfit(polyfit_deg, pathdir_transformed+filename)
-    eqn = str(polyfit_result[0])
-    
-    # Calculate the complexity of the polyfit expression the same way as for gradient descent case    
-    if output_type=="":
-        eqn = eqn
-    elif output_type=="acos":
-        eqn = "cos(" + eqn + ")"
-    elif output_type=="asin":
-        eqn = "sin(" + eqn + ")" 
-    elif output_type=="atan":
-        eqn = "tan(" + eqn + ")"
-    elif output_type=="cos":
-        eqn = "acos(" + eqn + ")"
-    elif output_type=="exp":
-        eqn = "log(" + eqn + ")"
-    elif output_type=="inverse":
-        eqn = "1/(" + eqn + ")"
-    elif output_type=="log":
-        eqn = "exp(" + eqn + ")"
-    elif output_type=="sin":
-        eqn = "asin(" + eqn + ")"
-    elif output_type=="sqrt":
-        eqn = "(" + eqn + ")**2"
-    elif output_type=="squared":
-        eqn = "sqrt(" + eqn + ")"
-    elif output_type=="tan":
-        eqn = "atan(" + eqn + ")"
-    
-    polyfit_err = get_symbolic_expr_error(pathdir,filename,eqn)
-    expr = parse_expr(eqn)
-    is_atomic_number = lambda expr: expr.is_Atom and expr.is_number
-    numbers_expr = [subexpression for subexpression in preorder_traversal(expr) if is_atomic_number(subexpression)]
-    complexity = 0
-    for j in numbers_expr:
-        complexity = complexity + get_number_DL_snapped(float(j))
     try:
-        # Add the complexity due to symbols
-        n_variables = len(polyfit_result[0].free_symbols)
-        n_operations = len(count_ops(polyfit_result[0],visual=True).free_symbols)
-        if n_operations!=0 or n_variables!=0:
-            complexity = complexity + (n_variables+n_operations)*np.log2((n_variables+n_operations))
+        polyfit_result = polyfit(polyfit_deg, pathdir_transformed+filename)
+        eqn = str(polyfit_result[0])
+        
+        # Calculate the complexity of the polyfit expression the same way as for gradient descent case
+        if output_type=="":
+            eqn = eqn
+        elif output_type=="acos":
+            eqn = "cos(" + eqn + ")"
+        elif output_type=="asin":
+            eqn = "sin(" + eqn + ")"
+        elif output_type=="atan":
+            eqn = "tan(" + eqn + ")"
+        elif output_type=="cos":
+            eqn = "acos(" + eqn + ")"
+        elif output_type=="exp":
+            eqn = "log(" + eqn + ")"
+        elif output_type=="inverse":
+            eqn = "1/(" + eqn + ")"
+        elif output_type=="log":
+            eqn = "exp(" + eqn + ")"
+        elif output_type=="sin":
+            eqn = "asin(" + eqn + ")"
+        elif output_type=="sqrt":
+            eqn = "(" + eqn + ")**2"
+        elif output_type=="squared":
+            eqn = "sqrt(" + eqn + ")"
+        elif output_type=="tan":
+            eqn = "atan(" + eqn + ")"
+        
+        polyfit_err = get_symbolic_expr_error(pathdir,filename,eqn)
+        expr = parse_expr(eqn)
+        is_atomic_number = lambda expr: expr.is_Atom and expr.is_number
+        numbers_expr = [subexpression for subexpression in preorder_traversal(expr) if is_atomic_number(subexpression)]
+        complexity = 0
+        for j in numbers_expr:
+            complexity = complexity + get_number_DL_snapped(float(j))
+        try:
+            # Add the complexity due to symbols
+            n_variables = len(polyfit_result[0].free_symbols)
+            n_operations = len(count_ops(polyfit_result[0],visual=True).free_symbols)
+            if n_operations!=0 or n_variables!=0:
+                complexity = complexity + (n_variables+n_operations)*np.log2((n_variables+n_operations))
+        except:
+            pass
+
+        #run zero snap on polyfit output
+        PA_poly = ParetoSet()
+        PA_poly.add(Point(x=complexity, y=polyfit_err, data=str(eqn)))
+        PA_poly = add_snap_expr_on_pareto_polyfit(pathdir, filename, str(eqn), PA_poly)
+
+        for l in range(len(PA_poly.get_pareto_points())):
+            PA.add(Point(PA_poly.get_pareto_points()[l][0],PA_poly.get_pareto_points()[l][1],PA_poly.get_pareto_points()[l][2]))
+                
     except:
         pass
-
     
-    #run zero snap on polyfit output
-    PA_poly = ParetoSet()
-    PA_poly.add(Point(x=complexity, y=polyfit_err, data=str(eqn)))
-    PA_poly = add_snap_expr_on_pareto_polyfit(pathdir, filename, str(eqn), PA_poly)
-    
-    
-    for l in range(len(PA_poly.get_pareto_points())):
-        PA.add(Point(PA_poly.get_pareto_points()[l][0],PA_poly.get_pareto_points()[l][1],PA_poly.get_pareto_points()[l][2]))
-
     print("Complexity  RMSE  Expression")
     for pareto_i in range(len(PA.get_pareto_points())):
         print(PA.get_pareto_points()[pareto_i])
