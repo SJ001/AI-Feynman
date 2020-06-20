@@ -1,9 +1,6 @@
 # Combines 2 pareto fromtier obtained from the separability test into a new one.
 
 from get_pareto import Point, ParetoSet
-from RPN_to_pytorch import RPN_to_pytorch
-from RPN_to_eq import RPN_to_eq
-from S_get_symbolic_expr_error import get_symbolic_expr_error
 from sympy.parsing.sympy_parser import parse_expr
 import numpy as np
 import matplotlib.pyplot as plt

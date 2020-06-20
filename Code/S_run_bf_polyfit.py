@@ -6,7 +6,6 @@ from RPN_to_eq import RPN_to_eq
 import numpy as np
 import matplotlib.pyplot as plt
 from S_brute_force import brute_force
-from S_combine_pareto import combine_pareto
 from S_get_number_DL_snapped import get_number_DL_snapped
 from sympy.parsing.sympy_parser import parse_expr
 from sympy import preorder_traversal, count_ops
@@ -19,7 +18,7 @@ from os import path
 
 
 def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=3, output_type=""):
-    
+    input_data = np.loadtxt(pathdir_transformed+filename)
 #############################################################################################################################
     
     # run BF on the data (+)
@@ -65,7 +64,7 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
                     eqn = "atan(" + prefactors[i] + "+" + RPN_to_eq(express[i]) + ")"
                 
                 eqns = eqns + [eqn]
-                errors = errors + [get_symbolic_expr_error(pathdir,filename,eqn)]
+                errors = errors + [get_symbolic_expr_error(input_data,eqn)]
                 expr = parse_expr(eqn)
                 is_atomic_number = lambda expr: expr.is_Atom and expr.is_number
                 numbers_expr = [subexpression for subexpression in preorder_traversal(expr) if is_atomic_number(subexpression)]
@@ -92,7 +91,7 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
         # run gradient descent of BF output parameters and add the results to the Pareto plot
         for i in range(len(express)):
             try:
-                bf_gd_update = RPN_to_pytorch(pathdir,filename,eqns[i])
+                bf_gd_update = RPN_to_pytorch(input_data,eqns[i])
                 PA.add(Point(x=bf_gd_update[1],y=bf_gd_update[0],data=bf_gd_update[2]))
             except:
                 continue
@@ -143,7 +142,7 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
                     eqn = "atan(" + prefactors[i] + "*" + RPN_to_eq(express[i]) + ")"
                 
                 eqns = eqns + [eqn]
-                errors = errors + [get_symbolic_expr_error(pathdir,filename,eqn)]
+                errors = errors + [get_symbolic_expr_error(input_data,eqn)]
                 expr = parse_expr(eqn)
                 is_atomic_number = lambda expr: expr.is_Atom and expr.is_number
                 numbers_expr = [subexpression for subexpression in preorder_traversal(expr) if is_atomic_number(subexpression)]
@@ -171,12 +170,13 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
         # run gradient descent of BF output parameters and add the results to the Pareto plot
         for i in range(len(express)):
             try:
-                bf_gd_update = RPN_to_pytorch(pathdir,filename,eqns[i])
+                bf_gd_update = RPN_to_pytorch(input_data,eqns[i])
                 PA.add(Point(x=bf_gd_update[1],y=bf_gd_update[0],data=bf_gd_update[2]))
             except:
                 continue
     except:
         pass
+    
 #############################################################################################################################
     # run polyfit on the data
     print("Checking polyfit \n")
@@ -210,7 +210,7 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
         elif output_type=="tan":
             eqn = "atan(" + eqn + ")"
         
-        polyfit_err = get_symbolic_expr_error(pathdir,filename,eqn)
+        polyfit_err = get_symbolic_expr_error(input_data,eqn)
         expr = parse_expr(eqn)
         is_atomic_number = lambda expr: expr.is_Atom and expr.is_number
         numbers_expr = [subexpression for subexpression in preorder_traversal(expr) if is_atomic_number(subexpression)]

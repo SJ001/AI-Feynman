@@ -60,14 +60,14 @@ def integerSnap(p, top=1):
     p = np.array(p)
     metric = np.abs(p - np.round(p.astype(np.double)))
     chosen = np.argsort(metric)[:top]
-    return list(zip(chosen, np.round(p.astype(np.double))[chosen]))
+    return dict(list(zip(chosen, np.round(p.astype(np.double))[chosen])))
 
 
 def zeroSnap(p, top=1):
     p = np.array(p)
     metric = np.abs(p)
     chosen = np.argsort(metric)[:top]
-    return list(zip(chosen, np.zeros(len(chosen))))
+    return dict(list(zip(chosen, np.zeros(len(chosen)))))
 
 
 def rationalSnap(p, top=1):
@@ -75,4 +75,4 @@ def rationalSnap(p, top=1):
     p = np.array(p)
     snaps = np.array(list(bestApproximation(x,100) for x in p))
     chosen = np.argsort(snaps[:, 3])[:top]
-    return list(zip(chosen, snaps[chosen, 0:3]))
+    return dict(list(zip(chosen, snaps[chosen, 0:3])))

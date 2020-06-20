@@ -29,7 +29,8 @@ from RPN_to_eq import RPN_to_eq
 from S_get_number_DL_snapped import get_number_DL_snapped
 
 # parameters: path to data, math (not RPN) expression 
-def add_bf_on_numbers_on_pareto(pathdir, filename, PA, math_expr): 
+def add_bf_on_numbers_on_pareto(pathdir, filename, PA, math_expr):
+    input_data = np.loadtxt(pathdir+filename)
     def unsnap_recur(expr, param_dict, unsnapped_param_dict):
         """Recursively transform each numerical value into a learnable parameter."""
         import sympy
@@ -100,7 +101,7 @@ def add_bf_on_numbers_on_pareto(pathdir, filename, PA, math_expr):
     for i in range(len(bf_on_numbers_expr)):
         try:
             # Calculate the error of the new, snapped expression
-            snapped_error = get_symbolic_expr_error(pathdir,filename,str(bf_on_numbers_expr[i]))
+            snapped_error = get_symbolic_expr_error(input_data,str(bf_on_numbers_expr[i]))
             # Calculate the complexity of the new, snapped expression
             expr = simplify(powsimp(bf_on_numbers_expr[i]))
             is_atomic_number = lambda expr: expr.is_Atom and expr.is_number

@@ -23,6 +23,8 @@ from sympy import preorder_traversal, count_ops
 from sympy.abc import x,y
 from sympy.parsing.sympy_parser import parse_expr
 from sympy import Symbol, lambdify, N, simplify, powsimp, Rational, symbols, S, Float
+import time
+import re
 
 from S_get_number_DL_snapped import get_number_DL_snapped
 
@@ -33,6 +35,7 @@ def intify(expr):
 
 # parameters: path to data, math (not RPN) expression 
 def add_snap_expr_on_pareto_polyfit(pathdir, filename, math_expr, PA): 
+    input_data = np.loadtxt(pathdir+filename)
     def unsnap_recur(expr, param_dict, unsnapped_param_dict):
         """Recursively transform each numerical value into a learnable parameter."""
         import sympy
@@ -95,85 +98,80 @@ def add_snap_expr_on_pareto_polyfit(pathdir, filename, math_expr, PA):
     is_atomic_number = lambda expr:expr.is_Atom and expr.is_number
     eq_numbers = [subexpression for subexpression in preorder_traversal(expr) if is_atomic_number(subexpression)]
 
-    # Do integer snap one parameter at a time                                                                                                                                    
+    # Do integer snap one parameter at a time                                      
     integer_snapped_expr = []
     for w in range(len(eq_numbers)):
         try:
             param_dict = {}
             unsnapped_param_dict = {'p':1}
             eq = unsnap_recur(expr,param_dict,unsnapped_param_dict)
+            del unsnapped_param_dict["p"]
+            temp_unsnapped_param_dict = copy.deepcopy(unsnapped_param_dict)
             new_numbers = integerSnap(eq_numbers,w+1)
-            for kk in range(len(new_numbers)):
-                eq_numbers[new_numbers[kk][0]] = new_numbers[kk][1]
-            jj = 0
-            for parm in unsnapped_param_dict:
-                if parm!="p":
-                    eq = eq.subs(parm, eq_numbers[jj])
-                    jj = jj + 1
-            integer_snapped_expr = integer_snapped_expr + [eq]
+            new_numbers = {"p"+str(k): v for k, v in new_numbers.items()}
+            temp_unsnapped_param_dict.update(new_numbers) 
+            #for kk in range(len(new_numbers)):
+            #    eq_numbers[new_numbers[kk][0]] = new_numbers[kk][1]
+            new_eq = re.sub(r"(p\d*)",r"{\1}",str(eq))
+            new_eq = new_eq.format_map(temp_unsnapped_param_dict)
+            integer_snapped_expr = integer_snapped_expr + [parse_expr(new_eq)]
         except:
             continue
 
             # Get the numbers appearing in the expression                                                                                                            
     
-#    is_atomic_number = lambda expr: expr.is_Atom and expr.is_number
-#    eq_numbers = [subexpression for subexpression in preorder_traversal(expr) if is_atomic_number(subexpression)]
+    is_atomic_number = lambda expr: expr.is_Atom and expr.is_number
+    eq_numbers = [subexpression for subexpression in preorder_traversal(expr) if is_atomic_number(subexpression)]
 
-#    # Do rational snap one parameter at a time
-#    rational_snapped_expr = []
-#    for w in range(len(eq_numbers)):
-#        try:
-#            eq_numbers_snap = copy.deepcopy(eq_numbers)
-#            param_dict = {}
-#            unsnapped_param_dict = {'p':1}
-#            eq = unsnap_recur(expr,param_dict,unsnapped_param_dict)
-#            new_numbers = rationalSnap(eq_numbers,w+1)
-#            for kk in range(len(new_numbers)):
-#                eq_numbers_snap[new_numbers[kk][0]] = new_numbers[kk][1][1:3]
-#            jj = 0
-#            for parm in unsnapped_param_dict:
-#                if parm!="p":
-#
-#                    try:
-#                        eq = eq.subs(parm, Rational(eq_numbers_snap[jj][0],eq_numbers_snap[jj][1]))
-#                    except:
-#                        eq = eq.subs(parm, eq_numbers_snap[jj])
-#                    jj = jj + 1
-#            rational_snapped_expr = rational_snapped_expr + [eq]
-#        except:
-#            continue
+    # Do rational snap one parameter at a time
+    rational_snapped_expr = []
+    for w in range(len(eq_numbers)):
+        try:
+            param_dict = {}
+            unsnapped_param_dict = {'p':1}
+            eq = unsnap_recur(expr,param_dict,unsnapped_param_dict)
+            del unsnapped_param_dict["p"]
+            temp_unsnapped_param_dict = copy.deepcopy(unsnapped_param_dict)
+            new_numbers = rationalSnap(eq_numbers,w+1)
+            new_numbers = {"p"+str(k): v for k, v in new_numbers.items()}
+            temp_unsnapped_param_dict.update(new_numbers)
+            #for kk in range(len(new_numbers)):
+            #    eq_numbers_snap[new_numbers[kk][0]] = new_numbers[kk][1][1:3]
+            new_eq = re.sub(r"(p\d*)",r"{\1}",str(eq))
+            new_eq = new_eq.format_map(temp_unsnapped_param_dict)
+            rational_snapped_expr = rational_snapped_expr + [parse_expr(new_eq)]
+        except:
+            continue
 
-#    snapped_expr = np.append(integer_snapped_expr,zero_snapped_expr)
+    snapped_expr = np.append(integer_snapped_expr,rational_snapped_expr)
 #    snapped_expr = np.append(snapped_expr,rational_snapped_expr)
 
-    for i in range(len(integer_snapped_expr)):
+    integer_snapped_expr = snapped_expr
+
+    for i in range(len(snapped_expr)):
         try:
-        
             # Calculate the error of the new, snapped expression
-            snapped_error = get_symbolic_expr_error(pathdir,filename,str(integer_snapped_expr[i]))
+            snapped_error = get_symbolic_expr_error(input_data,str(snapped_expr[i]))
             # Calculate the complexity of the new, snapped expression
-            expr = simplify(powsimp(integer_snapped_expr[i]))
+            expr = snapped_expr[i]
             for s in (expr.free_symbols):
                 s = symbols(str(s), real = True)
-            expr =  simplify(parse_expr(str(integer_snapped_expr[i]),locals()))
+            expr =  parse_expr(str(snapped_expr[i]),locals())
             expr = intify(expr)
-
             is_atomic_number = lambda expr: expr.is_Atom and expr.is_number
             numbers_expr = [subexpression for subexpression in preorder_traversal(expr) if is_atomic_number(subexpression)]
-
             snapped_complexity = 0
             for j in numbers_expr:
                 snapped_complexity = snapped_complexity + get_number_DL_snapped(float(j))
-
             # Add the complexity due to symbols
             n_variables = len(expr.free_symbols)
             n_operations = len(count_ops(expr,visual=True).free_symbols)
             if n_operations!=0 or n_variables!=0:
                 snapped_complexity = snapped_complexity + (n_variables+n_operations)*np.log2((n_variables+n_operations))
-
             PA.add(Point(x=snapped_complexity, y=snapped_error, data=str(expr)))
         except:
             continue
+
     return(PA)
         
         

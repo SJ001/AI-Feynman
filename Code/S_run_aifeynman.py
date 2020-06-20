@@ -33,7 +33,8 @@ def run_AI_all(pathdir,filename,BF_try_time=60,BF_ops_file_type="14ops", polyfit
     
     # load the data for different checks
     data = np.loadtxt(pathdir+filename)
-
+    PA = get_atan(pathdir,"results/mystery_world_atan/",filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg)   
+    '''
     # Run bf and polyfit
     PA = run_bf_polyfit(pathdir,pathdir,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg)
 
@@ -49,7 +50,7 @@ def run_AI_all(pathdir,filename,BF_try_time=60,BF_ops_file_type="14ops", polyfit
     PA = get_sqrt(pathdir,"results/mystery_world_sqrt/",filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg)
     PA = get_squared(pathdir,"results/mystery_world_squared/",filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg)
     PA = get_tan(pathdir,"results/mystery_world_tan/",filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg)
-
+    '''
 #############################################################################################################################  
     # check if the NN is trained. If it is not, train it on the data.
     print("Checking for symmetry \n", filename)
@@ -120,7 +121,8 @@ def run_AI_all(pathdir,filename,BF_try_time=60,BF_ops_file_type="14ops", polyfit
         PA1 = run_AI_all(new_pathdir1,new_filename1,BF_try_time,BF_ops_file_type, polyfit_deg, NN_epochs, PA1_)
         PA2_ = ParetoSet()
         PA2 = run_AI_all(new_pathdir2,new_filename2,BF_try_time,BF_ops_file_type, polyfit_deg, NN_epochs, PA2_)
-        PA = combine_pareto(pathdir,filename,PA1,PA2,separability_plus_result[1],separability_plus_result[2],PA,"+")
+        combine_pareto_data = np.loadtxt(pathdir+filename)
+        PA = combine_pareto(combine_pareto_data,PA1,PA2,separability_plus_result[1],separability_plus_result[2],PA,"+")
         return PA 
     
     elif idx_min == 5:
@@ -129,7 +131,8 @@ def run_AI_all(pathdir,filename,BF_try_time=60,BF_ops_file_type="14ops", polyfit
         PA1 = run_AI_all(new_pathdir1,new_filename1,BF_try_time,BF_ops_file_type, polyfit_deg, NN_epochs, PA1_)
         PA2_ = ParetoSet()
         PA2 = run_AI_all(new_pathdir2,new_filename2,BF_try_time,BF_ops_file_type, polyfit_deg, NN_epochs, PA2_)
-        PA = combine_pareto(pathdir,filename,PA1,PA2,separability_multiply_result[1],separability_multiply_result[2],PA,"*")
+        combine_pareto_data = np.loadtxt(pathdir+filename)
+        PA = combine_pareto(combine_pareto_data,PA1,PA2,separability_multiply_result[1],separability_multiply_result[2],PA,"*")
         return PA 
     else:
         return PA
@@ -181,10 +184,11 @@ def run_aifeynman(pathdir,filename,BF_try_time,BF_ops_file_type, polyfit_deg=3, 
     PA_list = PA.get_pareto_points()
     np.savetxt("results/solution_first_snap_%s.txt" %filename,PA_list,fmt="%s")
     
-    # Run gradient descent on the data one more time                                                                                                                          
+    # Run gradient descent on the data one more time
+    final_gd_data = np.loadtxt(pathdir+filename)
     for i in range(len(PA_list)):
         try:
-            gd_update = final_gd(pathdir,filename,PA_list[i][-1])
+            gd_update = final_gd(final_gd_data,PA_list[i][-1])
             PA.add(Point(x=gd_update[1],y=gd_update[0],data=gd_update[2]))
         except:
             continue
@@ -206,8 +210,9 @@ def run_aifeynman(pathdir,filename,BF_try_time,BF_ops_file_type, polyfit_deg=3, 
     # Try the found expressions on the test data                                                                                                                                  
     if DR_file=="" and test_data.size != 0:
         test_errors = []
+        input_test_data = np.loadtxt(pathdir+filename+"_test")
         for i in range(len(list_dt)):
-            test_errors = test_errors + [get_symbolic_expr_error(pathdir,filename+"_test",str(list_dt[i][-1]))]
+            test_errors = test_errors + [get_symbolic_expr_error(input_test_data,str(list_dt[i][-1]))]
         test_errors = np.array(test_errors)
         # Save all the data to file                                                                                                                                               
         save_data = np.column_stack((test_errors,log_err,log_err_all,list_dt))
