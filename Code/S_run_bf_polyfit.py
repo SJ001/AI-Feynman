@@ -18,7 +18,7 @@ import os
 from os import path
 
 
-def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=4, output_type=""):
+def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=3, output_type=""):
     
 #############################################################################################################################
     

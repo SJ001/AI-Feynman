@@ -7,7 +7,7 @@ parser.add_argument("--pathdir", type=str, help="Path to the directory containin
 parser.add_argument("--filename", type=str, help="Name of the file containing the data")
 parser.add_argument("--BF_try_time", type=float, default=60, help="Time limit for each brute force code call")
 parser.add_argument("--BF_ops_file_type", type=str, default="14ops.txt", help="File containing the symbols to be used in the brute force code")
-parser.add_argument("--polyfit_deg", type=int, default=4, help="Maximum degree of the polynomial tried by the polynomial fit routine")
+parser.add_argument("--polyfit_deg", type=int, default=3, help="Maximum degree of the polynomial tried by the polynomial fit routine")
 parser.add_argument("--NN_epochs", type=int, default=2000, help="Number of epochs for the training")
 parser.add_argument("--vars_name", type=list, default=[], help="List with the names of the variables")
 parser.add_argument("--test_percentage", type=float, default=0, help="Percentage of the input data to be kept as the test set")
