@@ -109,6 +109,10 @@ def RPN_to_pytorch(pathdir,filename, math_expr, lr = 1e-2, N_epochs = 500):
                 trainable_parameters[j] -= lr * trainable_parameters[j].grad
                 trainable_parameters[j].grad.zero_()
 
+    for nan_i in range(len(trainable_parameters)):
+        if torch.isnan(trainable_parameters[nan_i])==True or abs(trainable_parameters[nan_i])>1e7:
+            return 1000000, 10000000, "1"
+
     ii = -1
     for parm in unsnapped_param_dict:
         if ii == -1:
