@@ -8,8 +8,7 @@ import os
 from os import path
 from sympy import Symbol, lambdify, N
 
-def get_symbolic_expr_error(pathdir,filename,expr):
-    data = np.loadtxt(pathdir+filename)
+def get_symbolic_expr_error(data,expr):
     N_vars = len(data[0])-1
     possible_vars = ["x%s" %i for i in np.arange(0,30,1)]
     variables = []
