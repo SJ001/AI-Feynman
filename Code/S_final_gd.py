@@ -101,6 +101,8 @@ def final_gd(data, math_expr, lr = 1e-2, N_epochs = 5000):
             for j in range(N_params-1):
                 trainable_parameters[j] -= lr * trainable_parameters[j].grad
                 trainable_parameters[j].grad.zero_()
+        if torch.isnan(loss):
+            break
                 
     for i in range(N_epochs):
         # this order is fixed i.e. first parameters
@@ -111,6 +113,8 @@ def final_gd(data, math_expr, lr = 1e-2, N_epochs = 5000):
             for j in range(N_params-1):
                 trainable_parameters[j] -= lr/10 * trainable_parameters[j].grad
                 trainable_parameters[j].grad.zero_()  
+        if torch.isnan(loss):
+                break
 
     for nan_i in range(len(trainable_parameters)):
         if torch.isnan(trainable_parameters[nan_i])==True or abs(trainable_parameters[nan_i])>1e7:
