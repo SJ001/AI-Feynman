@@ -12,7 +12,7 @@ from sympy import preorder_traversal, count_ops
 from S_polyfit import polyfit
 from S_get_symbolic_expr_error import get_symbolic_expr_error
 from S_add_sym_on_pareto import add_sym_on_pareto
-from S_add_snap_expr_on_pareto_polyfit import add_snap_expr_on_pareto_polyfit
+from S_add_snap_expr_on_pareto import add_snap_expr_on_pareto
 import os
 from os import path
 
@@ -229,7 +229,7 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
             #run zero snap on polyfit output
             PA_poly = ParetoSet()
             PA_poly.add(Point(x=complexity, y=polyfit_err, data=str(eqn)))
-            PA_poly = add_snap_expr_on_pareto_polyfit(pathdir, filename, str(eqn), PA_poly)
+            PA_poly = add_snap_expr_on_pareto(pathdir, filename, str(eqn), PA_poly)
 
             for l in range(len(PA_poly.get_pareto_points())):
                 PA.add(Point(PA_poly.get_pareto_points()[l][0],PA_poly.get_pareto_points()[l][1],PA_poly.get_pareto_points()[l][2]))
