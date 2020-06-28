@@ -23,6 +23,7 @@ from sympy import preorder_traversal, count_ops
 from sympy.abc import x,y
 from sympy.parsing.sympy_parser import parse_expr
 from sympy import Symbol, lambdify, N, simplify, powsimp, Rational, symbols, S,Float
+import re
 
 from S_get_number_DL_snapped import get_number_DL_snapped
 
