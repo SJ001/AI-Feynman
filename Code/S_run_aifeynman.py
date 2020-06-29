@@ -136,7 +136,7 @@ def run_AI_all(pathdir,filename,BF_try_time=60,BF_ops_file_type="14ops", polyfit
         return PA
 
 # this runs snap on the output of aifeynman
-def run_aifeynman(pathdir,filename,BF_try_time,BF_ops_file_type, polyfit_deg=3, NN_epochs=4000, vars_name=[],test_percentage=20):    
+def run_aifeynman(pathdir,filename,BF_try_time,BF_ops_file_type, polyfit_deg=3, NN_epochs=4000, vars_name=[],test_percentage=0):    
     # If the variable names are passed, do the dimensional analysis first
     filename_orig = filename
     try:
