@@ -70,6 +70,8 @@ def polyfit(maxdeg, filename):
             deg = res[2]
 
             eq = mk_sympy_function(parameters,n_variables,deg)
+            for i in range(len(x)):
+                eq = eq.subs(z[i],x[i])
             eq = simplify(eq)
 
     else:
@@ -84,6 +86,4 @@ def polyfit(maxdeg, filename):
             pass
 
     return (eq, params_error)
-
-
 
