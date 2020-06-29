@@ -74,7 +74,7 @@ def zeroSnap(p, top=1):
 def rationalSnap(p, top=1):
     """Snap to nearest rational number using continued fraction."""
     p = np.array(p)
-    snaps = np.array(list(bestApproximation(x,100) for x in p))
+    snaps = np.array(list(bestApproximation(x,10) for x in p))
     chosen = np.argsort(snaps[:, 3])[:top]    
     d = dict(list(zip(chosen, snaps[chosen, 1:3])))
     d = {k:  f"{val[0]}/{val[1]}" for k,val in d.items()}

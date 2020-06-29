@@ -79,7 +79,7 @@ def add_snap_expr_on_pareto(pathdir, filename, math_expr, PA, DR_file=""):
 #    for w in range(len(eq_numbers)):
 #        try:
 #            param_dict = {}
-#            unsnapped_param_dict = {'p':1}
+#            unsnapped_param_dict = {'pp':1}
 #            eq = unsnap_recur(expr,param_dict,unsnapped_param_dict)
 #            new_numbers = zeroSnap(eq_numbers,w+1)
 #            for kk in range(len(new_numbers)):
@@ -102,7 +102,7 @@ def add_snap_expr_on_pareto(pathdir, filename, math_expr, PA, DR_file=""):
     for w in range(len(eq_numbers)):
         try:
             param_dict = {}
-            unsnapped_param_dict = {'p':1}
+            unsnapped_param_dict = {'pp':1}
             eq = unsnap_recur(expr,param_dict,unsnapped_param_dict)
             del unsnapped_param_dict["pp"]
             temp_unsnapped_param_dict = copy.deepcopy(unsnapped_param_dict)
@@ -127,7 +127,7 @@ def add_snap_expr_on_pareto(pathdir, filename, math_expr, PA, DR_file=""):
     for w in range(len(eq_numbers)):
         try:
             param_dict = {}
-            unsnapped_param_dict = {'p':1}
+            unsnapped_param_dict = {'pp':1}
             eq = unsnap_recur(expr,param_dict,unsnapped_param_dict)
             del unsnapped_param_dict["pp"]
             temp_unsnapped_param_dict = copy.deepcopy(unsnapped_param_dict)
