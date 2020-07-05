@@ -2,212 +2,141 @@ import numpy as np
 import os
 from S_run_bf_polyfit import run_bf_polyfit
 
-def get_acos(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=4):
+def get_acos(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=3):
     try:
         os.mkdir(pathdir_write_to)
     except:
         pass
+    data = np.loadtxt(pathdir+filename)
     try:
-        n_variables = np.loadtxt(pathdir+"%s" %filename, dtype='str').shape[1]-1
-        variables = np.loadtxt(pathdir+"%s" %filename, usecols=(0,))
-        for j in range(1,n_variables):
-            v = np.loadtxt(pathdir+"%s" %filename, usecols=(j,))
-            variables = np.column_stack((variables,v))
-        f_dependent = np.loadtxt(pathdir+"%s" %filename, usecols=(n_variables,))
-
-        dt = np.column_stack((variables,np.arccos(f_dependent)))
-        np.savetxt(pathdir_write_to+filename,dt)     
-                
+        data[:,-1] = np.arccos(data[:,-1]) 
+        np.savetxt(pathdir_write_to+filename,data)     
         PA = run_bf_polyfit(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg, "acos")
-
     except:
         return PA
 
     return PA
 
-def get_asin(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=4):
+def get_asin(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=3):
     try:
         os.mkdir(pathdir_write_to)
     except:
         pass
+    data = np.loadtxt(pathdir+filename)
     try:
-        n_variables = np.loadtxt(pathdir+"%s" %filename, dtype='str').shape[1]-1
-        variables = np.loadtxt(pathdir+"%s" %filename, usecols=(0,))
-        for j in range(1,n_variables):
-            v = np.loadtxt(pathdir+"%s" %filename, usecols=(j,))
-            variables = np.column_stack((variables,v))
-        f_dependent = np.loadtxt(pathdir+"%s" %filename, usecols=(n_variables,))
-
-        dt = np.column_stack((variables,np.arcsin(f_dependent)))
-        np.savetxt(pathdir_write_to+filename,dt)       
-                
+        data[:,-1] = np.arcsin(data[:,-1])
+        np.savetxt(pathdir_write_to+filename,data)
         PA = run_bf_polyfit(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg, "asin")
-
     except:
         return PA
 
     return PA
 
-def get_atan(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=4):
+def get_atan(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=3):
     try:
         os.mkdir(pathdir_write_to)
     except:
         pass
+    data = np.loadtxt(pathdir+filename)
     try:
-        n_variables = np.loadtxt(pathdir+"%s" %filename, dtype='str').shape[1]-1
-        variables = np.loadtxt(pathdir+"%s" %filename, usecols=(0,))
-        for j in range(1,n_variables):
-            v = np.loadtxt(pathdir+"%s" %filename, usecols=(j,))
-            variables = np.column_stack((variables,v))
-        f_dependent = np.loadtxt(pathdir+"%s" %filename, usecols=(n_variables,))
-
-        dt = np.column_stack((variables,np.arctan(f_dependent)))
-        np.savetxt(pathdir_write_to+filename,dt) 
-                
+        data[:,-1] = np.arctan(data[:,-1])
+        np.savetxt(pathdir_write_to+filename,data)
         PA = run_bf_polyfit(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg, "atan")                
-
     except:
         return PA
 
     return PA
 
 
-def get_cos(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=4):
+def get_cos(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=3):
     try:
         os.mkdir(pathdir_write_to)
     except:
         pass
+    data = np.loadtxt(pathdir+filename)
     try:
-        n_variables = np.loadtxt(pathdir+"%s" %filename, dtype='str').shape[1]-1
-        variables = np.loadtxt(pathdir+"%s" %filename, usecols=(0,))
-        for j in range(1,n_variables):
-            v = np.loadtxt(pathdir+"%s" %filename, usecols=(j,))
-            variables = np.column_stack((variables,v))
-        f_dependent = np.loadtxt(pathdir+"%s" %filename, usecols=(n_variables,))
-
-        dt = np.column_stack((variables,np.cos(f_dependent)))
-        np.savetxt(pathdir_write_to+filename,dt)          
-
+        data[:,-1] = np.cos(data[:,-1])
+        np.savetxt(pathdir_write_to+filename,data)
         PA = run_bf_polyfit(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg, "cos")                
-                
     except:
         return PA
 
     return PA
 
 
-def get_exp(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=4):
+def get_exp(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=3):
     try:
         os.mkdir(pathdir_write_to)
     except:
         pass
+    data = np.loadtxt(pathdir+filename)
     try:
-        n_variables = np.loadtxt(pathdir+"%s" %filename, dtype='str').shape[1]-1
-        variables = np.loadtxt(pathdir+"%s" %filename, usecols=(0,))
-        for j in range(1,n_variables):
-            v = np.loadtxt(pathdir+"%s" %filename, usecols=(j,))
-            variables = np.column_stack((variables,v))
-        f_dependent = np.loadtxt(pathdir+"%s" %filename, usecols=(n_variables,))
-
-        dt = np.column_stack((variables,np.exp(f_dependent)))
-        np.savetxt(pathdir_write_to+filename,dt)       
-
-        PA = run_bf_polyfit(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg, "exp")                
-                
+        data[:,-1] = np.exp(data[:,-1])
+        np.savetxt(pathdir_write_to+filename,data)
+        PA = run_bf_polyfit(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg, "exp")                                
     except:
         return PA
 
     return PA
 
 
-def get_inverse(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=4):
+def get_inverse(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=3):
     try:
         os.mkdir(pathdir_write_to)
     except:
         pass
+    data = np.loadtxt(pathdir+filename)
     try:
-        n_variables = np.loadtxt(pathdir+"%s" %filename, dtype='str').shape[1]-1
-        variables = np.loadtxt(pathdir+"%s" %filename, usecols=(0,))
-        for j in range(1,n_variables):
-            v = np.loadtxt(pathdir+"%s" %filename, usecols=(j,))
-            variables = np.column_stack((variables,v))
-        f_dependent = np.loadtxt(pathdir+"%s" %filename, usecols=(n_variables,))
-
-        dt = np.column_stack((variables,1/f_dependent))
-        np.savetxt(pathdir_write_to+filename,dt)          
-
-        PA = run_bf_polyfit(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg, "inverse")                    
-                    
+        data[:,-1] = 1/data[:,-1]
+        np.savetxt(pathdir_write_to+filename,data)
+        PA = run_bf_polyfit(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg, "inverse")                                        
     except:
         return PA
 
     return PA
 
 
-def get_log(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=4):
+def get_log(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=3):
     try:
         os.mkdir(pathdir_write_to)
     except:
         pass
+    data = np.loadtxt(pathdir+filename)
     try:
-        n_variables = np.loadtxt(pathdir+"%s" %filename, dtype='str').shape[1]-1
-        variables = np.loadtxt(pathdir+"%s" %filename, usecols=(0,))
-        for j in range(1,n_variables):
-            v = np.loadtxt(pathdir+"%s" %filename, usecols=(j,))
-            variables = np.column_stack((variables,v))
-        f_dependent = np.loadtxt(pathdir+"%s" %filename, usecols=(n_variables,))
-
-        dt = np.column_stack((variables,np.log(f_dependent)))
-        np.savetxt(pathdir_write_to+filename,dt)         
-
-        PA = run_bf_polyfit(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg, "log")                    
-                    
+        data[:,-1] = np.log(data[:,-1])
+        np.savetxt(pathdir_write_to+filename,data)
+        PA = run_bf_polyfit(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg, "log")                                        
     except:
         return PA
 
     return PA
 
 
-def get_sin(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=4):
+def get_sin(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=3):
     try:
         os.mkdir(pathdir_write_to)
     except:
         pass
+    data = np.loadtxt(pathdir+filename)
     try:
-        n_variables = np.loadtxt(pathdir+"%s" %filename, dtype='str').shape[1]-1
-        variables = np.loadtxt(pathdir+"%s" %filename, usecols=(0,))
-        for j in range(1,n_variables):
-            v = np.loadtxt(pathdir+"%s" %filename, usecols=(j,))
-            variables = np.column_stack((variables,v))
-        f_dependent = np.loadtxt(pathdir+"%s" %filename, usecols=(n_variables,))
-
-        dt = np.column_stack((variables,np.sin(f_dependent)))
-        np.savetxt(pathdir_write_to+filename,dt)         
-
-        PA = run_bf_polyfit(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg, "sin")                
-                
+        data[:,-1] = np.sin(data[:,-1])
+        np.savetxt(pathdir_write_to+filename,data)
+        PA = run_bf_polyfit(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg, "sin")                                
     except:
         return PA
 
     return PA
 
 
-def get_sqrt(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=4):
+def get_sqrt(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=3):
     try:
         os.mkdir(pathdir_write_to)
     except:
         pass
+    data = np.loadtxt(pathdir+filename)
     try:
-        n_variables = np.loadtxt(pathdir+"%s" %filename, dtype='str').shape[1]-1
-        variables = np.loadtxt(pathdir+"%s" %filename, usecols=(0,))
-        for j in range(1,n_variables):
-            v = np.loadtxt(pathdir+"%s" %filename, usecols=(j,))
-            variables = np.column_stack((variables,v))
-        f_dependent = np.loadtxt(pathdir+"%s" %filename, usecols=(n_variables,))
-
-        dt = np.column_stack((variables,np.sqrt(f_dependent)))
-        np.savetxt(pathdir_write_to+filename,dt) 
-
+        data[:,-1] = np.sqrt(data[:,-1])
+        np.savetxt(pathdir_write_to+filename,data)
         PA = run_bf_polyfit(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg, "sqrt")                    
                     
     except:
@@ -216,22 +145,15 @@ def get_sqrt(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA,
     return PA
 
 
-def get_squared(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=4):
+def get_squared(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=3):
     try:
         os.mkdir(pathdir_write_to)
     except:
         pass
+    data = np.loadtxt(pathdir+filename)
     try:
-        n_variables = np.loadtxt(pathdir+"%s" %filename, dtype='str').shape[1]-1
-        variables = np.loadtxt(pathdir+"%s" %filename, usecols=(0,))
-        for j in range(1,n_variables):
-            v = np.loadtxt(pathdir+"%s" %filename, usecols=(j,))
-            variables = np.column_stack((variables,v))
-        f_dependent = np.loadtxt(pathdir+"%s" %filename, usecols=(n_variables,))
-   
-        dt = np.column_stack((variables,f_dependent**2))
-        np.savetxt(pathdir_write_to+filename,dt)
-
+        data[:,-1] = data[:,-1]**2
+        np.savetxt(pathdir_write_to+filename,data)
         PA = run_bf_polyfit(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg, "squared")  
                 
     except:
@@ -240,34 +162,21 @@ def get_squared(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, 
     return PA
 
 
-def get_tan(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=4):
+def get_tan(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=3):
     try:
         os.mkdir(pathdir_write_to)
     except:
         pass
+    data = np.loadtxt(pathdir+filename)
     try:
-        n_variables = np.loadtxt(pathdir+"%s" %filename, dtype='str').shape[1]-1
-        variables = np.loadtxt(pathdir+"%s" %filename, usecols=(0,))
-        for j in range(1,n_variables):
-            v = np.loadtxt(pathdir+"%s" %filename, usecols=(j,))
-            variables = np.column_stack((variables,v))
-        f_dependent = np.loadtxt(pathdir+"%s" %filename, usecols=(n_variables,))
-
-        dt = np.column_stack((variables,np.tan(f_dependent)))
-        np.savetxt(pathdir_write_to+filename,dt)        
-        
+        data[:,-1] = np.tan(data[:,-1])
+        np.savetxt(pathdir_write_to+filename,data)
         PA = run_bf_polyfit(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg, "tan")                
                 
     except:
         return PA
 
     return PA
-
-
-
-
-
-
 
 
 

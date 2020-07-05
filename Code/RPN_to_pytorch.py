@@ -22,8 +22,7 @@ from S_get_number_DL_snapped import get_number_DL_snapped
 from S_get_symbolic_expr_error import get_symbolic_expr_error
 
 # parameters: path to data, RPN expression (obtained from bf)
-def RPN_to_pytorch(pathdir,filename, math_expr, lr = 1e-2, N_epochs = 500):
-    data_file = pathdir + filename
+def RPN_to_pytorch(data, math_expr, lr = 1e-2, N_epochs = 500):
     param_dict = {}
     unsnapped_param_dict = {'p':1}
 
@@ -58,10 +57,6 @@ def RPN_to_pytorch(pathdir,filename, math_expr, lr = 1e-2, N_epochs = 500):
                 i += 1
             new_key = "{}{}{}{}{}".format(key, underscore, midfix, i, suffix)
             return new_key
-
-    # Load the actual data
-
-    data = np.loadtxt(data_file)
 
     # Turn BF expression to pytorch expression
     eq = parse_expr(math_expr)
@@ -108,6 +103,12 @@ def RPN_to_pytorch(pathdir,filename, math_expr, lr = 1e-2, N_epochs = 500):
             for j in range(N_params-1):
                 trainable_parameters[j] -= lr * trainable_parameters[j].grad
                 trainable_parameters[j].grad.zero_()
+        if torch.isnan(loss):
+            break
+                
+    for nan_i in range(len(trainable_parameters)):
+        if torch.isnan(trainable_parameters[nan_i])==True or abs(trainable_parameters[nan_i])>1e7:
+            return 1000000, 10000000, "1"
 
     ii = -1
     for parm in unsnapped_param_dict:
@@ -131,7 +132,7 @@ def RPN_to_pytorch(pathdir,filename, math_expr, lr = 1e-2, N_epochs = 500):
     if n_operations!=0 or n_variables!=0:
         complexity = complexity + (n_variables+n_operations)*np.log2((n_variables+n_operations))
 
-    error = get_symbolic_expr_error(pathdir,filename,str(eq))
+    error = get_symbolic_expr_error(data,str(eq))
     return error, complexity, eq
 
 

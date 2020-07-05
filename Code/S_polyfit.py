@@ -26,17 +26,16 @@ def polyfit(maxdeg, filename):
     n_variables = np.loadtxt(filename, dtype='str').shape[1]-1
     variables = np.loadtxt(filename, usecols=(0,))
     means = [np.mean(variables)]
-
+    
     for j in range(1,n_variables):
         v = np.loadtxt(filename, usecols=(j,))
         means = means + [np.mean(v)]
         variables = np.column_stack((variables,v))
-       
+
     f_dependent = np.loadtxt(filename, usecols=(n_variables,))
 
     if n_variables>1:
         C_1_2 = fractional_matrix_power(np.cov(variables.T),-1/2)
-        
         x = []
         z = []
         for ii in range(len(variables[0])):
@@ -44,25 +43,37 @@ def polyfit(maxdeg, filename):
             x = x + ["x"+str(ii)]
             z = z + ["z"+str(ii)]
 
-        variables = np.matmul(C_1_2,variables.T).T
-        res = getBest(variables,f_dependent,maxdeg)
-        parameters = res[0]
-        params_error = res[1]
-        deg = res[2]
+        if np.isnan(C_1_2).any()==False:
+            variables = np.matmul(C_1_2,variables.T).T
+            res = getBest(variables,f_dependent,maxdeg)
+            parameters = res[0]
+            params_error = res[1]
+            deg = res[2]
         
-        x = sympy.Matrix(x)
-        M = sympy.Matrix(C_1_2)
-        b = sympy.Matrix(means)
-        M_x = M*(x-b)
+            x = sympy.Matrix(x)
+            M = sympy.Matrix(C_1_2)
+            b = sympy.Matrix(means)
+            M_x = M*(x-b)
 
-        eq = mk_sympy_function(parameters,n_variables,deg)
-        symb = sympy.Matrix(z)
+            eq = mk_sympy_function(parameters,n_variables,deg)
+            symb = sympy.Matrix(z)
 
-        for i in range(len(symb)):
-            eq = eq.subs(symb[i],M_x[i])
+            for i in range(len(symb)):
+                eq = eq.subs(symb[i],M_x[i])
 
-        eq = simplify(eq)
+            eq = simplify(eq)
         
+        else:
+            res = getBest(variables,f_dependent,maxdeg)
+            parameters = res[0]
+            params_error = res[1]
+            deg = res[2]
+
+            eq = mk_sympy_function(parameters,n_variables,deg)
+            for i in range(len(x)):
+                eq = eq.subs(z[i],x[i])
+            eq = simplify(eq)
+
     else:
         res = getBest(variables,f_dependent,maxdeg)
         parameters = res[0]

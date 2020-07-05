@@ -22,8 +22,7 @@ from S_get_number_DL_snapped import get_number_DL_snapped
 from S_get_symbolic_expr_error import get_symbolic_expr_error
 
 # parameters: path to data, RPN expression (obtained from bf)
-def final_gd(pathdir,filename, math_expr, lr = 1e-2, N_epochs = 5000):
-    data_file = pathdir + filename
+def final_gd(data, math_expr, lr = 1e-2, N_epochs = 5000):
     param_dict = {}
     unsnapped_param_dict = {'p':1}
 
@@ -31,7 +30,7 @@ def final_gd(pathdir,filename, math_expr, lr = 1e-2, N_epochs = 5000):
         """Recursively transform each numerical value into a learnable parameter."""
         import sympy
         from sympy import Symbol
-        if isinstance(expr, sympy.numbers.Float):
+        if isinstance(expr, sympy.numbers.Float) or isinstance(expr, sympy.numbers.Integer) or isinstance(expr, sympy.numbers.Rational) or isinstance(expr, sympy.numbers.Pi):
             used_param_names = list(param_dict.keys()) + list(unsnapped_param_dict)
             unsnapped_param_name = get_next_available_key(used_param_names, "p", is_underscore=False)
             unsnapped_param_dict[unsnapped_param_name] = float(expr)
@@ -46,7 +45,6 @@ def final_gd(pathdir,filename, math_expr, lr = 1e-2, N_epochs = 5000):
                 unsnapped_sub_expr_list.append(unsnapped_sub_expr)
             return expr.func(*unsnapped_sub_expr_list)
 
-
     def get_next_available_key(iterable, key, midfix="", suffix="", is_underscore=True):
         """Get the next available key that does not collide with the keys in the dictionary."""
         if key + suffix not in iterable:
@@ -59,17 +57,12 @@ def final_gd(pathdir,filename, math_expr, lr = 1e-2, N_epochs = 5000):
             new_key = "{}{}{}{}{}".format(key, underscore, midfix, i, suffix)
             return new_key
 
-    # Load the actual data
-
-    data = np.loadtxt(data_file)
-
     # Turn BF expression to pytorch expression
     eq = parse_expr(math_expr)
     eq = unsnap_recur(eq,param_dict,unsnapped_param_dict)
-    
+
     N_vars = len(data[0])-1
     N_params = len(unsnapped_param_dict)
-
     possible_vars = ["x%s" %i for i in np.arange(0,30,1)]
     variables = []
     params = []
@@ -81,7 +74,6 @@ def final_gd(pathdir,filename, math_expr, lr = 1e-2, N_epochs = 5000):
     symbols = params + variables
     
     f = lambdify(symbols, N(eq), torch)
-
     # Set the trainable parameters in the expression
 
     trainable_parameters = []
@@ -109,6 +101,8 @@ def final_gd(pathdir,filename, math_expr, lr = 1e-2, N_epochs = 5000):
             for j in range(N_params-1):
                 trainable_parameters[j] -= lr * trainable_parameters[j].grad
                 trainable_parameters[j].grad.zero_()
+        if torch.isnan(loss):
+            break
                 
     for i in range(N_epochs):
         # this order is fixed i.e. first parameters
@@ -119,7 +113,13 @@ def final_gd(pathdir,filename, math_expr, lr = 1e-2, N_epochs = 5000):
             for j in range(N_params-1):
                 trainable_parameters[j] -= lr/10 * trainable_parameters[j].grad
                 trainable_parameters[j].grad.zero_()  
-                
+        if torch.isnan(loss):
+                break
+
+    for nan_i in range(len(trainable_parameters)):
+        if torch.isnan(trainable_parameters[nan_i])==True or abs(trainable_parameters[nan_i])>1e7:
+            return 1000000, 10000000, "1"
+
     # get the updated symbolic regression
     ii = -1
     for parm in unsnapped_param_dict:
@@ -142,7 +142,5 @@ def final_gd(pathdir,filename, math_expr, lr = 1e-2, N_epochs = 5000):
     if n_operations!=0 or n_variables!=0:
         complexity = complexity + (n_variables+n_operations)*np.log2((n_variables+n_operations))
 
-    error = get_symbolic_expr_error(pathdir,filename,str(eq))
+    error = get_symbolic_expr_error(data,str(eq))
     return error, complexity, eq
-
-

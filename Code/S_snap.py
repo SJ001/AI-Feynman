@@ -1,6 +1,7 @@
 # The following are snap functions for finding a best approximated integer or rational number for a real number:
 
 import numpy as np
+from sympy import Rational
 
 def bestApproximation(x,imax):
     # The input is a numpy parameter vector p.
@@ -60,19 +61,25 @@ def integerSnap(p, top=1):
     p = np.array(p)
     metric = np.abs(p - np.round(p.astype(np.double)))
     chosen = np.argsort(metric)[:top]
-    return list(zip(chosen, np.round(p.astype(np.double))[chosen]))
+    return dict(list(zip(chosen, np.round(p.astype(np.double))[chosen])))
 
 
 def zeroSnap(p, top=1):
     p = np.array(p)
     metric = np.abs(p)
     chosen = np.argsort(metric)[:top]
-    return list(zip(chosen, np.zeros(len(chosen))))
+    return dict(list(zip(chosen, np.zeros(len(chosen)))))
 
 
 def rationalSnap(p, top=1):
     """Snap to nearest rational number using continued fraction."""
     p = np.array(p)
-    snaps = np.array(list(bestApproximation(x,100) for x in p))
-    chosen = np.argsort(snaps[:, 3])[:top]
-    return list(zip(chosen, snaps[chosen, 0:3]))
+    snaps = np.array(list(bestApproximation(x,10) for x in p))
+    chosen = np.argsort(snaps[:, 3])[:top]    
+    d = dict(list(zip(chosen, snaps[chosen, 1:3])))
+    d = {k:  f"{val[0]}/{val[1]}" for k,val in d.items()}
+    
+    return d
+
+
+
