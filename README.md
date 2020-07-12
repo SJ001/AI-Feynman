@@ -1,8 +1,8 @@
 # AI-Feynman
 
-This code is an improved implementation of AI Feynman: a Physics-Inspired Method for Symbolic Regression, Silviu-Marian Udrescu and Max Tegmark (2019) [[arXiv](https://arxiv.org/abs/1905.11481)][[Science Advances](https://advances.sciencemag.org/content/6/16/eaay2631/tab-pdf)] and AI Feynman 2.0: Pareto-optimal symbolic regression exploiting graph modularity, Udrescu S.M. et al. (2020) [[arXiv](https://arxiv.org/abs/2006.10782)].
+This code is an improved implementation of AI Feynman: a Physics-Inspired Method for Symbolic Regression, Silviu-Marian Udrescu and Max Tegmark (2019) [[Science Advances](https://advances.sciencemag.org/content/6/16/eaay2631/tab-pdf)] and AI Feynman 2.0: Pareto-optimal symbolic regression exploiting graph modularity, Udrescu S.M. et al. (2020) [[arXiv](https://arxiv.org/abs/2006.10782)].
 
-Differently from the original paper (described in the mentioned paper), the new code doesn't output just one possible equation to describe the data, but a Pareto frontier of possible equations. Among other advantages, this approach allows the code to be more robust against noise and give good approximations to the actual equations, in case that one can't be found.
+Please check [this Medium article](https://towardsdatascience.com/ai-feynman-2-0-learning-regression-equations-from-data-3232151bd929) for a more detailed eplanation of how to get the code running.
 
 In order to get started, run compile.sh to compile the fortran files used for the brute force code.
 
