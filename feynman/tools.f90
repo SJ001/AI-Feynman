@@ -27,7 +27,7 @@
 	real*8 function f(n,arities,ops,x) ! n=number of ops, x=arg vector
 	implicit none
 	integer nmax, n, i, j, arities(n), arity, lnblnk
-	character*60 ops
+	character*256 ops
 	parameter(nmax=100)
 	real*8 x(nmax), y, stack(nmax)
 	character op
@@ -134,7 +134,7 @@
 	implicit none
 	integer nd,mmax,n,m,j
 	real*8 A(nd,mmax)
-	character*60 f
+	character*256 f
 	open(2,file=f,status='old')
 	m = 0
 555	m = m + 1
@@ -351,20 +351,19 @@
 
       ! Numerical Recipes random number generator:
       FUNCTION ran1(idum)
-      INTEGER idum,IA,IM,IQ,IR,NTAB,NDIV
+      INTEGER idum,IA,IM,IQ,IR,NDIV
       REAL*8 ran1,AM,EPS,RNMX
-      PARAMETER (IA=16807,IM=2147483647,AM=1./IM,IQ=127773,IR=2836,
-     *NTAB=32,NDIV=1+(IM-1)/NTAB,EPS=1.2e-7,RNMX=1.-EPS)
-      INTEGER j,k,iv(NTAB),iy
+      PARAMETER (IA=16807,IM=2147483647,AM=1./IM,IQ=127773,IR=2836,NDIV=1+(IM-1)/32,EPS=1.2e-7,RNMX=1.-EPS)
+      INTEGER j,k,iv(32),iy
       SAVE iv,iy
-      DATA iv /NTAB*0/, iy /0/
+      DATA iv /32*0/, iy /0/
       if (idum.le.0.or.iy.eq.0) then
         idum=max(-idum,1)
-        do 11 j=NTAB+8,1,-1
+        do 11 j=32+8,1,-1
           k=idum/IQ
           idum=IA*(idum-k*IQ)-IR*k
           if (idum.lt.0) idum=idum+IM
-          if (j.le.NTAB) iv(j)=idum
+          if (j.le.32) iv(j)=idum
 11      continue
         iy=iv(1)
       endif

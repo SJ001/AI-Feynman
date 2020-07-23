@@ -1,18 +1,18 @@
 # add a function to compte complexity
 
-from get_pareto import Point, ParetoSet
-from RPN_to_pytorch import RPN_to_pytorch
-from RPN_to_eq import RPN_to_eq
+from .get_pareto import Point, ParetoSet
+from .RPN_to_pytorch import RPN_to_pytorch
+from .RPN_to_eq import RPN_to_eq
 import numpy as np
 import matplotlib.pyplot as plt
-from S_brute_force import brute_force
-from S_get_number_DL_snapped import get_number_DL_snapped
+from .S_brute_force import brute_force
+from .S_get_number_DL_snapped import get_number_DL_snapped
 from sympy.parsing.sympy_parser import parse_expr
 from sympy import preorder_traversal, count_ops
-from S_polyfit import polyfit
-from S_get_symbolic_expr_error import get_symbolic_expr_error
-from S_add_sym_on_pareto import add_sym_on_pareto
-from S_add_snap_expr_on_pareto import add_snap_expr_on_pareto
+from .S_polyfit import polyfit
+from .S_get_symbolic_expr_error import get_symbolic_expr_error
+from .S_add_sym_on_pareto import add_sym_on_pareto
+from .S_add_snap_expr_on_pareto import add_snap_expr_on_pareto
 import os
 from os import path
 
@@ -24,14 +24,14 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
         # run BF on the data (+)
         print("Checking for brute force + \n")
         brute_force(pathdir_transformed,filename,BF_try_time,BF_ops_file_type,"+")
-        
+
         try:
             # load the BF output data
             bf_all_output = np.loadtxt("results.dat", dtype="str")
             express = bf_all_output[:,2]
             prefactors = bf_all_output[:,1]
             prefactors = [str(i) for i in prefactors]
-            
+
             # Calculate the complexity of the bf expression the same way as for gradient descent case
             complexity = []
             errors = []
@@ -62,7 +62,7 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
                         eqn = "sqrt(" + prefactors[i] + "+" + RPN_to_eq(express[i]) + ")"
                     elif output_type=="tan":
                         eqn = "atan(" + prefactors[i] + "+" + RPN_to_eq(express[i]) + ")"
-                    
+
                     eqns = eqns + [eqn]
                     errors = errors + [get_symbolic_expr_error(input_data,eqn)]
                     expr = parse_expr(eqn)
@@ -109,7 +109,7 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
             express = bf_all_output[:,2]
             prefactors = bf_all_output[:,1]
             prefactors = [str(i) for i in prefactors]
-            
+
             # Calculate the complexity of the bf expression the same way as for gradient descent case
             complexity = []
             errors = []
@@ -140,7 +140,7 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
                         eqn = "sqrt(" + prefactors[i] + "*" + RPN_to_eq(express[i]) + ")"
                     elif output_type=="tan":
                         eqn = "atan(" + prefactors[i] + "*" + RPN_to_eq(express[i]) + ")"
-                    
+
                     eqns = eqns + [eqn]
                     errors = errors + [get_symbolic_expr_error(input_data,eqn)]
                     expr = parse_expr(eqn)
@@ -176,14 +176,14 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
                     continue
         except:
             pass
-        
+
     #############################################################################################################################
         # run polyfit on the data
         print("Checking polyfit \n")
         try:
             polyfit_result = polyfit(polyfit_deg, pathdir_transformed+filename)
             eqn = str(polyfit_result[0])
-            
+
             # Calculate the complexity of the polyfit expression the same way as for gradient descent case
             if output_type=="":
                 eqn = eqn
@@ -209,7 +209,7 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
                 eqn = "sqrt(" + eqn + ")"
             elif output_type=="tan":
                 eqn = "atan(" + eqn + ")"
-            
+
             polyfit_err = get_symbolic_expr_error(input_data,eqn)
             expr = parse_expr(eqn)
             is_atomic_number = lambda expr: expr.is_Atom and expr.is_number
@@ -233,14 +233,14 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
 
             for l in range(len(PA_poly.get_pareto_points())):
                 PA.add(Point(PA_poly.get_pareto_points()[l][0],PA_poly.get_pareto_points()[l][1],PA_poly.get_pareto_points()[l][2]))
-        
+
         except:
             pass
 
         print("Complexity  RMSE  Expression")
         for pareto_i in range(len(PA.get_pareto_points())):
             print(PA.get_pareto_points()[pareto_i])
-        
+
         return PA
     else:
         return PA

@@ -1,7 +1,7 @@
 # Calculates the complexity of a number to be used for the Pareto frontier after snapping
 
-import numpy as np 
-from S_snap import bestApproximation
+import numpy as np
+from .S_snap import bestApproximation
 
 def get_number_DL_snapped(n):
     epsilon = 1e-10
@@ -18,6 +18,6 @@ def get_number_DL_snapped(n):
     else:
         PrecisionFloorLoss = 1e-14
         return np.log2(1 + (float(n) / PrecisionFloorLoss) ** 2) / 2
-    
-    
-    
+
+
+

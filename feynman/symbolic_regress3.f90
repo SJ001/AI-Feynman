@@ -38,7 +38,7 @@
 	
 	subroutine go
 	implicit none
-	character*60 opsfile, templatefile, mysteryfile, outfile, usedfuncs
+	character*256 opsfile, templatefile, mysteryfile, outfile, usedfuncs
 	character*60 comline, functions, ops, formula
 	integer arities(21), nvar, nvarmax, nmax, lnblnk
 	parameter(nvarmax=20, nmax=10000000)

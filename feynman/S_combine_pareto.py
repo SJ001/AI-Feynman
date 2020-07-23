@@ -1,20 +1,20 @@
 # Combines 2 pareto fromtier obtained from the separability test into a new one.
 
-from get_pareto import Point, ParetoSet
-from S_get_symbolic_expr_error import get_symbolic_expr_error
+from .get_pareto import Point, ParetoSet
+from .S_get_symbolic_expr_error import get_symbolic_expr_error
 from sympy.parsing.sympy_parser import parse_expr
 import numpy as np
 import matplotlib.pyplot as plt
 import os
 from os import path
 from sympy import Symbol, lambdify, N
-from get_pareto import Point, ParetoSet
-from S_get_expr_complexity import get_expr_complexity
+from .get_pareto import Point, ParetoSet
+from .S_get_expr_complexity import get_expr_complexity
 
 def combine_pareto(input_data,PA1,PA2,idx_list_1,idx_list_2,PA,sep_type = "+"):
     possible_vars = ["x%s" %i for i in np.arange(0,30,1)]
-    PA1 = np.array(PA1.get_pareto_points()).astype('str')    
-    PA2 = np.array(PA2.get_pareto_points()).astype('str')  
+    PA1 = np.array(PA1.get_pareto_points()).astype('str')
+    PA2 = np.array(PA2.get_pareto_points()).astype('str')
     for i in range(len(PA1)):
         for j in range(len(PA2)):
             try:
