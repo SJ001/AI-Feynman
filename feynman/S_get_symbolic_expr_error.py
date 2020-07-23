@@ -1,6 +1,6 @@
 # Calculates the error of a given symbolic expression applied to a dataset. The input should be a string of the mathematical expression
 
-from get_pareto import Point, ParetoSet
+from .get_pareto import Point, ParetoSet
 from sympy.parsing.sympy_parser import parse_expr
 import numpy as np
 import matplotlib.pyplot as plt
@@ -23,10 +23,10 @@ def get_symbolic_expr_error(data,expr):
             check_var = "x"+str(i)
             if check_var in np.array(variables).astype('str'):
                 real_variables = real_variables + [data[:,i]]
-        
+
         # Remove accidental nan's
         good_idx = np.where(np.isnan(f(*real_variables))==False)
-       
+
         # use this to get rid of cases where the loss gets complex because of transformations of the output variable
         if isinstance(np.mean((f(*real_variables)-data[:,-1])**2), complex):
             return 1000000

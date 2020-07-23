@@ -1,34 +1,34 @@
 # Adds on the pareto all the snapped versions of a given expression (all paramters are snapped in the end)
 
-import numpy as np 
+import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-import torch 
-import torch.nn as nn 
-import torch.nn.functional as F 
-import torch.optim as optim 
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import torch.optim as optim
 import torch.utils.data as utils
 from torch.autograd import Variable
 import copy
 import warnings
 warnings.filterwarnings("ignore")
 import sympy
-from S_snap import integerSnap
-from S_snap import zeroSnap
-from S_snap import rationalSnap
-from S_get_symbolic_expr_error import get_symbolic_expr_error
-from get_pareto import Point, ParetoSet
-from S_brute_force_number import brute_force_number
+from .S_snap import integerSnap
+from .S_snap import zeroSnap
+from .S_snap import rationalSnap
+from .S_get_symbolic_expr_error import get_symbolic_expr_error
+from .get_pareto import Point, ParetoSet
+from .S_brute_force_number import brute_force_number
 
 from sympy import preorder_traversal, count_ops
 from sympy.abc import x,y
 from sympy.parsing.sympy_parser import parse_expr
 from sympy import Symbol, lambdify, N, simplify, powsimp
-from RPN_to_eq import RPN_to_eq
+from .RPN_to_eq import RPN_to_eq
 
-from S_get_number_DL_snapped import get_number_DL_snapped
+from .S_get_number_DL_snapped import get_number_DL_snapped
 
-# parameters: path to data, math (not RPN) expression 
+# parameters: path to data, math (not RPN) expression
 def add_bf_on_numbers_on_pareto(pathdir, filename, PA, math_expr):
     input_data = np.loadtxt(pathdir+filename)
     def unsnap_recur(expr, param_dict, unsnapped_param_dict):
@@ -76,18 +76,18 @@ def add_bf_on_numbers_on_pareto(pathdir, filename, PA, math_expr):
             unsnapped_param_dict = {'p':1}
             eq_ = unsnap_recur(expr,param_dict,unsnapped_param_dict)
             eq = eq_
-            
+
             np.savetxt(pathdir+"number_for_bf_%s.txt" %w, [eq_numbers[w]])
             brute_force_number(pathdir,"number_for_bf_%s.txt" %w)
             # Load the predictions made by the bf code
             bf_numbers = np.loadtxt("results.dat",usecols=(1,),dtype="str")
             new_numbers = copy.deepcopy(eq_numbers)
-            
+
             # replace the number under consideration by all the proposed bf numbers
             for kk in range(len(bf_numbers)):
                 eq = eq_
                 new_numbers[w] = parse_expr(RPN_to_eq(bf_numbers[kk]))
-                
+
                 jj = 0
                 for parm in unsnapped_param_dict:
                     if parm!="p":
@@ -97,7 +97,7 @@ def add_bf_on_numbers_on_pareto(pathdir, filename, PA, math_expr):
                 bf_on_numbers_expr = bf_on_numbers_expr + [eq]
         except:
             continue
-                
+
     for i in range(len(bf_on_numbers_expr)):
         try:
             # Calculate the error of the new, snapped expression
@@ -119,6 +119,6 @@ def add_bf_on_numbers_on_pareto(pathdir, filename, PA, math_expr):
             PA.add(Point(x=snapped_complexity, y=snapped_error, data=str(expr)))
         except:
             continue
-            
+
     return(PA)
-        
+

@@ -1,18 +1,18 @@
 import numpy as np
-from RPN_to_eq import RPN_to_eq
+from .RPN_to_eq import RPN_to_eq
 from scipy.optimize import fsolve
 from sympy import lambdify, N
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from get_pareto import Point, ParetoSet
+from .get_pareto import Point, ParetoSet
 from test_points import TestPoints
-from S_get_expr_complexity import get_expr_complexity
+from .S_get_expr_complexity import get_expr_complexity
 import test_points
 import os
 import warnings
 warnings.filterwarnings("ignore")
-is_cuda = torch.cuda.is_available()  
+is_cuda = torch.cuda.is_available()
 
 
 def check_compositionality(pathdir,filename,model,express,mu,sigma,nu=10):
@@ -23,7 +23,7 @@ def check_compositionality(pathdir,filename,model,express,mu,sigma,nu=10):
     # Get the variables appearing in the equation
     possible_vars = ["x%s" %i for i in np.arange(0,30,1)]
     variables = []
-    
+
     N_vars = len(data[0])-1
     for i in range(N_vars):
         variables = variables + [possible_vars[i]]
@@ -35,7 +35,7 @@ def check_compositionality(pathdir,filename,model,express,mu,sigma,nu=10):
 
     bm = np.ones(len(data[0])-1,dtype=bool)
     obj = test_points.init_general_test_point(eq, data[:,:-1], data[:,-1], bm)
-    
+
     list_z = np.array([])
     z = 0
     i = 0
@@ -46,7 +46,7 @@ def check_compositionality(pathdir,filename,model,express,mu,sigma,nu=10):
         diff = abs(f(*fixed[i])-f(*dt))
         with torch.no_grad():
             if diff<1e-4:
-                if is_cuda: 
+                if is_cuda:
                     dt = torch.tensor(dt).float().cuda().view(1,len(dt))
                     dt = torch.cat((torch.tensor([np.zeros(len(dt[0]))]).float().cuda(),dt), 0)
                     error = torch.tensor(data[:,-1][i]).cuda()-model(dt)[1:]
@@ -63,9 +63,9 @@ def check_compositionality(pathdir,filename,model,express,mu,sigma,nu=10):
                 i = i + 1
             else:
                 i = i + 1
-        
+
     print(i)
-    
+
     if i==len(data[0:1000]):
         print("return 1!!!",1,express,np.mean(list_z),np.std(list_z))
         return (1,express,np.mean(list_z),np.std(list_z))
@@ -77,7 +77,7 @@ def check_compositionality(pathdir,filename,model,express,mu,sigma,nu=10):
 def do_compositionality(pathdir,filename,express):
     data = np.loadtxt(pathdir+filename)
     eq = RPN_to_eq(express)
-    # Get the variables appearing in the equation                                                                                                                                 
+    # Get the variables appearing in the equation
     possible_vars = ["x%s" %i for i in np.arange(0,30,1)]
     variables = []
 
@@ -90,7 +90,7 @@ def do_compositionality(pathdir,filename,express):
 
     new_data = f(*np.transpose(data[:,0:-1]))
     save_data = np.column_stack((new_data,data[:,-1]))
-    
+
     try:
         os.mkdir("results/compositionality")
     except:
@@ -101,7 +101,7 @@ def do_compositionality(pathdir,filename,express):
 
     return ("results/compositionality/", file_name)
 
-            
+
 def add_comp_on_pareto(PA1,PA,express):
     eq = RPN_to_eq(express)
     PA1 = np.array(PA1.get_pareto_points()).astype('str')
@@ -113,4 +113,4 @@ def add_comp_on_pareto(PA1,PA,express):
         PA.add(Point(x=compl,y=float(PA1[i][1]),data=str(exp1)))
 
     return PA
-    
+

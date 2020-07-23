@@ -1,6 +1,6 @@
 import numpy as np
-from S_snap import bestApproximation
-from S_get_number_DL_snapped import get_number_DL_snapped
+from .S_snap import bestApproximation
+from .S_get_number_DL_snapped import get_number_DL_snapped
 from sympy.parsing.sympy_parser import parse_expr
 from sympy import preorder_traversal, count_ops
 
