@@ -20,22 +20,18 @@ class SimpleNet(nn.Module):
     def __init__(self, ni):
         super().__init__()
         self.linear1 = nn.Linear(ni, 128)
-        self.bn1 = nn.BatchNorm1d(128)
         self.linear2 = nn.Linear(128, 128)
-        self.bn2 = nn.BatchNorm1d(128)
         self.linear3 = nn.Linear(128, 64)
-        self.bn3 = nn.BatchNorm1d(64)
         self.linear4 = nn.Linear(64,64)
-        self.bn4 = nn.BatchNorm1d(64)
         self.linear5 = nn.Linear(64,1)
-        
+
     def forward(self, x):
-        x = F.tanh(self.bn1(self.linear1(x)))
-        x = F.tanh(self.bn2(self.linear2(x)))
-        x = F.tanh(self.bn3(self.linear3(x)))
-        x = F.tanh(self.bn4(self.linear4(x)))
+        x = F.tanh(self.linear1(x))
+        x = F.tanh(self.linear2(x))
+        x = F.tanh(self.linear3(x))
+        x = F.tanh(self.linear4(x))
         x = self.linear5(x)
-        return x  
+        return x
 
 def rmse_loss(pred, targ):
     denom = targ**2
@@ -99,6 +95,8 @@ def check_separability_plus(pathdir, filename):
             min_error = 1000
             best_i = []
             best_j = []
+            best_mu = 0
+            best_sigma = 0
             for i in range(1,n_variables):
                 c = combinations(var_indices_list, i)
                 for j in c:
@@ -112,17 +110,22 @@ def check_separability_plus(pathdir, filename):
                     # check if the equation is separable
                     sm = model(fact_vary_one)+model(fact_vary_rest)
                     #error = torch.sqrt(torch.mean((product-sm+model(fact_vary))**2))/torch.sqrt(torch.mean(product**2))
-                    error = 2*torch.median(abs(product-sm+model(fact_vary)))
+                    list_errs = 2*abs(product-sm+model(fact_vary))
+                    error = torch.median(list_errs)
+                    mu = torch.mean(torch.log2(1+list_errs*2**30))
+                    sigma = torch.std(torch.log2(1+list_errs*2**30))
+                    #error = 2*torch.median(abs(product-sm+model(fact_vary)))
                     if error<min_error:
                         min_error = error
                         best_i = j
                         best_j = rest_indx
+                        best_mu = mu
+                        best_sigma = sigma
+        return min_error, best_i, best_j, best_mu, best_sigma
                         
-        return min_error, best_i, best_j
-                    
     except Exception as e:
         print(e)
-        return (-1,-1,-1)                    
+        return (-1,-1,-1,-1,-1)                    
                     
                                            
 def do_separability_plus(pathdir, filename, list_i,list_j):
@@ -206,10 +209,7 @@ def do_separability_plus(pathdir, filename, list_i,list_j):
         print(e)
         return (-1,-1)
 
-    
-
-
-    
+        
 def check_separability_multiply(pathdir, filename):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
@@ -273,6 +273,8 @@ def check_separability_multiply(pathdir, filename):
             min_error = 1000
             best_i = []
             best_j = []
+            best_mu = 0
+            best_sigma = 0
             for i in range(1,n_variables):
                 c = combinations(var_indices_list, i)
                 for j in c:
@@ -286,17 +288,21 @@ def check_separability_multiply(pathdir, filename):
                     # check if the equation is separable
                     pd = model(fact_vary_one)*model(fact_vary_rest)
                     #error = torch.sqrt(torch.mean((product-pd/model(fact_vary))**2))/torch.sqrt(torch.mean(product**2))
-                    error = 2*torch.median(abs(product-pd/model(fact_vary)))
+                    list_errs = 2*abs(product-pd/model(fact_vary))
+                    error = torch.median(list_errs)
+                    mu = torch.mean(torch.log2(1+list_errs*2**30))
+                    sigma = torch.std(torch.log2(1+list_errs*2**30))
                     if error<min_error:
                         min_error = error
                         best_i = j
                         best_j = rest_indx
-                        
-        return min_error, best_i, best_j
+                        best_mu = mu
+                        best_sigma = sigma
+        return min_error, best_i, best_j, best_mu, best_sigma
                     
     except Exception as e:
         print(e)
-        return (-1,-1,-1)                         
+        return (-1,-1,-1,-1,-1)                         
 
                     
                     

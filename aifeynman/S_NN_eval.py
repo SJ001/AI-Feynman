@@ -87,22 +87,18 @@ def NN_eval(pathdir,filename):
             def __init__(self, ni):
                 super().__init__()
                 self.linear1 = nn.Linear(ni, 128)
-                self.bn1 = nn.BatchNorm1d(128)
                 self.linear2 = nn.Linear(128, 128)
-                self.bn2 = nn.BatchNorm1d(128)
                 self.linear3 = nn.Linear(128, 64)
-                self.bn3 = nn.BatchNorm1d(64)
                 self.linear4 = nn.Linear(64,64)
-                self.bn4 = nn.BatchNorm1d(64)
                 self.linear5 = nn.Linear(64,1)
-            
+
             def forward(self, x):
-                x = F.tanh(self.bn1(self.linear1(x)))
-                x = F.tanh(self.bn2(self.linear2(x)))
-                x = F.tanh(self.bn3(self.linear3(x)))
-                x = F.tanh(self.bn4(self.linear4(x)))
+                x = F.tanh(self.linear1(x))
+                x = F.tanh(self.linear2(x))
+                x = F.tanh(self.linear3(x))
+                x = F.tanh(self.linear4(x))
                 x = self.linear5(x)
-                return x  
+                return x
 
         if is_cuda:
             model = SimpleNet(n_variables).cuda()
@@ -111,11 +107,12 @@ def NN_eval(pathdir,filename):
                     
         model.load_state_dict(torch.load("results/NN_trained_models/models/"+filename+".h5"))
         model.eval()
-        return(rmse_loss(model(factors_val),product_val))
+        return(rmse_loss(model(factors_val),product_val),model)
 
     except Exception as e:
         print(e)
-        return (100)
+        return (100,0)
+
 
 
 

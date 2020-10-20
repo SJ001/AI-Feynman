@@ -25,9 +25,3 @@ def get_expr_complexity(expr):
         compl = compl + (n_variables+n_operations)*np.log2((n_variables+n_operations))
 
     return compl
-
-'''
-expr2 = "x0**2*((((((x3+x2)*((x3*x2)-1)))-x1)*(((((x3+x2)*((x3*x2)-1)))*x1)+1))) - x0*((((((x3+x2)*((x3*x2)-1)))-x1)*(((((x3+x2)*((x3*x2)-1)))*x1)+1)))**2 + x0 - ((((((x3+x2)*((x3*x2)-1)))-x1)*(((((x3+x2)*((x3*x2)-1)))*x1)+1)))"
-
-print(get_expr_complexity(expr2))
-'''

@@ -6,9 +6,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from .get_pareto import Point, ParetoSet
-from test_points import TestPoints
 from .S_get_expr_complexity import get_expr_complexity
-import test_points
+from . import test_points
 import os
 import warnings
 warnings.filterwarnings("ignore")
@@ -66,7 +65,7 @@ def check_compositionality(pathdir,filename,model,express,mu,sigma,nu=10):
 
     print(i)
 
-    if i==len(data[0:1000]):
+    if i==len(data[0:1000]) and np.mean(list_z)<mu:
         print("return 1!!!",1,express,np.mean(list_z),np.std(list_z))
         return (1,express,np.mean(list_z),np.std(list_z))
     else:

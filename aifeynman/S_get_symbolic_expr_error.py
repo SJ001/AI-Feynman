@@ -32,11 +32,8 @@ def get_symbolic_expr_error(data,expr):
             return 1000000
         else:
             try:
-                #return np.sqrt(np.mean((f(*real_variables)[good_idx]-data[good_idx][:,-1])**2))/np.sqrt(np.mean(data[good_idx][:,-1]**2))
                 return np.mean(np.log2(1+abs(f(*real_variables)[good_idx]-data[good_idx][:,-1])*2**30))
             except:
-                # use this for the case in which the expression is just one number (i.e. not array)
-                #return np.sqrt(np.mean((f(*real_variables)-data[:,-1])**2))/np.sqrt(np.mean(data[:,-1]**2))
                 return np.mean(np.log2(1+abs(f(*real_variables)-data[:,-1])*2**30))
     except:
         return 1000000

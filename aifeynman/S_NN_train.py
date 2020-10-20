@@ -54,8 +54,9 @@ def NN_train(pathdir, filename, epochs=1000, lrs=1e-2, N_red_lr=4, pretrained_pa
         n_variables = np.loadtxt(pathdir+"%s" %filename, dtype='str').shape[1]-1
         variables = np.loadtxt(pathdir+"%s" %filename, usecols=(0,))
 
-        epochs = epochs//N_red_lr
-        epochs = int(epochs)
+        epochs = 200*n_variables
+        if len(variables)<5000:
+            epochs = epochs*3
 
         if n_variables==0 or n_variables==1:
             print("Solved!")#, variables[0])
@@ -87,20 +88,16 @@ def NN_train(pathdir, filename, epochs=1000, lrs=1e-2, N_red_lr=4, pretrained_pa
             def __init__(self, ni):
                 super().__init__()
                 self.linear1 = nn.Linear(ni, 128)
-                self.bn1 = nn.BatchNorm1d(128)
                 self.linear2 = nn.Linear(128, 128)
-                self.bn2 = nn.BatchNorm1d(128)
                 self.linear3 = nn.Linear(128, 64)
-                self.bn3 = nn.BatchNorm1d(64)
                 self.linear4 = nn.Linear(64,64)
-                self.bn4 = nn.BatchNorm1d(64)
                 self.linear5 = nn.Linear(64,1)
             
             def forward(self, x):
-                x = F.tanh(self.bn1(self.linear1(x)))
-                x = F.tanh(self.bn2(self.linear2(x)))
-                x = F.tanh(self.bn3(self.linear3(x)))
-                x = F.tanh(self.bn4(self.linear4(x)))
+                x = F.tanh(self.linear1(x))
+                x = F.tanh(self.linear2(x))
+                x = F.tanh(self.linear3(x))
+                x = F.tanh(self.linear4(x))
                 x = self.linear5(x)
                 return x
 
@@ -134,7 +131,8 @@ def NN_train(pathdir, filename, epochs=1000, lrs=1e-2, N_red_lr=4, pretrained_pa
                     loss = rmse_loss(model_feynman(fct),prd)
                     loss.backward()
                     optimizer_feynman.step()
-
+                
+                '''
                 # Early stopping
                 if epoch%20==0 and epoch>0:
                     if check_es_loss < loss:
@@ -146,16 +144,15 @@ def NN_train(pathdir, filename, epochs=1000, lrs=1e-2, N_red_lr=4, pretrained_pa
                     if check_es_loss < loss:
                         torch.save(model_feynman.state_dict(), "results/NN_trained_models/models/" + filename + ".h5")
                         check_es_loss = loss
-        
+                '''
+                torch.save(model_feynman.state_dict(), "results/NN_trained_models/models/" + filename + ".h5")   
             print(loss)
             lrs = lrs/10
 
-        return 1
+        return model_feynman
 
     except NameError:
         print("Error in file: %s" %filename)
         raise
-
-
 
 
