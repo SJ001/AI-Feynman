@@ -86,7 +86,6 @@ def dimensionalAnalysis(pathdir, filename, eq_symbols):
         # get the symbolic form of the unsolved part
         unsolved_powers = dimensional_analysis(input,output,units)[1]
 
-        #print(unsolved_powers,unsolved_powers[0])
         uns = symbols("uns")
         unsolved = []
         for i in range(len(unsolved_powers)):
@@ -124,6 +123,4 @@ def dimensionalAnalysis(pathdir, filename, eq_symbols):
 
     file_sym.close()
 
-
-#print(dimensionalAnalysis("../_noise_data/", "119_1.24.6", ["m","omega","omega_0","x","E_n"]))
 

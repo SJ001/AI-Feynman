@@ -59,7 +59,6 @@ def NN_train(pathdir, filename, epochs=1000, lrs=1e-2, N_red_lr=4, pretrained_pa
             epochs = epochs*3
 
         if n_variables==0 or n_variables==1:
-            print("Solved!")#, variables[0])
             return 0
 
         else:
@@ -146,7 +145,6 @@ def NN_train(pathdir, filename, epochs=1000, lrs=1e-2, N_red_lr=4, pretrained_pa
                         check_es_loss = loss
                 '''
                 torch.save(model_feynman.state_dict(), "results/NN_trained_models/models/" + filename + ".h5")   
-            print(loss)
             lrs = lrs/10
 
         return model_feynman

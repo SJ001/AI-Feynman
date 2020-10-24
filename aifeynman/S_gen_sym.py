@@ -23,7 +23,7 @@ def check_gen_sym(pathdir,filename,model,gen_sym_idx,express,mu,sigma,nu=10):
     data = np.loadtxt(pathdir+filename)[:,gen_sym_idx]
     # Turn the equation from RPN to normal mathematical expression
     eq = RPN_to_eq(express)
-    print(eq)
+    
     # Get the variables appearing in the equation
     possible_vars = ["x%s" %i for i in np.arange(0,30,1)]
     variables = []
@@ -72,23 +72,16 @@ def check_gen_sym(pathdir,filename,model,gen_sym_idx,express,mu,sigma,nu=10):
                     error = error.detach().numpy()
                     list_z = np.append(list_z,np.log2(1+abs(error)*2**30))
                     z = np.sqrt(len(list_z))*(np.mean(list_z)-mu)/sigma
-                    print(list_z)
-                    print(z)
-                    print("")
+                    
                 i = i + 1
             else:
                 i = i + 1
 
-    print(i)
-
+    
     if i==len(data[0:1000]) and np.mean(list_z)<mu:
         return (1,express,np.mean(list_z),np.std(list_z))
     else:
         return (0,express,100,100)
-
-
-#express = "bba*>/"
-#print(check_gen_sym("../","comp_data_2.txt_train",model,[0,1],express,100,1))#[0,1,-1]))
 
 
 def do_gen_sym(pathdir, filename, gen_sym_idx,express):
@@ -130,9 +123,6 @@ def do_gen_sym(pathdir, filename, gen_sym_idx,express):
 
     return ("results/gen_sym/", file_name)
 
-#print(do_gen_sym("../","comp_data_2.txt_train",[1,2,-1]))#[ True, True, False]))
-
-
 def add_gen_sym_on_pareto(PA1,PA, gen_sym_idx, express):
     # Turn the equation from RPN to normal mathematical expression
     possible_vars = ["x%s" %i for i in np.arange(0,100,1)]
@@ -144,12 +134,12 @@ def add_gen_sym_on_pareto(PA1,PA, gen_sym_idx, express):
         exp1 = PA1[i][2]
         temp_list = copy.deepcopy(gen_sym_idx)
         bf_eq = math_eq
-        print(exp1, bf_eq,gen_sym_idx)
+        
         while(len(temp_list)>1):
             for j in range(len(possible_vars)-len(temp_list),temp_list[-1]-len(temp_list)+1,-1):
                 exp1 = exp1.replace(possible_vars[j],possible_vars[j+1])
             temp_list = np.delete(temp_list,-1)
-            print("check: ",exp1, temp_list)
+        
         # replace variables in bf_eq
         arr_idx = np.flip(np.arange(0,len(gen_sym_idx),1), axis=0)
         actual_idx = np.flip(gen_sym_idx, axis=0)

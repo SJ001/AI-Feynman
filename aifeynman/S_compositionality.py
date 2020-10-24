@@ -18,7 +18,6 @@ def check_compositionality(pathdir,filename,model,express,mu,sigma,nu=10):
     data = np.loadtxt(pathdir+filename)
 
     eq = RPN_to_eq(express)
-    print(eq,express)
     # Get the variables appearing in the equation
     possible_vars = ["x%s" %i for i in np.arange(0,30,1)]
     variables = []
@@ -63,15 +62,12 @@ def check_compositionality(pathdir,filename,model,express,mu,sigma,nu=10):
             else:
                 i = i + 1
 
-    print(i)
-
+    
     if i==len(data[0:1000]) and np.mean(list_z)<mu:
-        print("return 1!!!",1,express,np.mean(list_z),np.std(list_z))
         return (1,express,np.mean(list_z),np.std(list_z))
     else:
         return (0,express,100,100)
 
-#print(check_compositionality("../","table_data_8.txt",model,"dbacd/+~+/",50,2))
 
 def do_compositionality(pathdir,filename,express):
     data = np.loadtxt(pathdir+filename)
@@ -106,7 +102,6 @@ def add_comp_on_pareto(PA1,PA,express):
     PA1 = np.array(PA1.get_pareto_points()).astype('str')
     for i in range(len(PA1)):
         exp1 = PA1[i][2]
-        print(exp1)
         exp1 = exp1.replace("x0",eq)
         compl = get_expr_complexity(exp1)
         PA.add(Point(x=compl,y=float(PA1[i][1]),data=str(exp1)))

@@ -237,9 +237,12 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
         except:
             pass
 
-        print("Complexity  RMSE  Expression")
+        print("Pareto frontier in the current branch:")
+        print("")
+        print("Complexity #  MDL Loss #  Expression")
         for pareto_i in range(len(PA.get_pareto_points())):
-            print(PA.get_pareto_points()[pareto_i])
+            print(np.round(PA.get_pareto_points()[pareto_i][0],2),np.round(PA.get_pareto_points()[pareto_i][1],2),PA.get_pareto_points()[pareto_i][2])
+        print("")
 
         return PA
     else:
