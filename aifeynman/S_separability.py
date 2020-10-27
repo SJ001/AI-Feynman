@@ -42,13 +42,13 @@ def check_separability_plus(pathdir, filename):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
 
-        # load the data
+        # Load the data
         n_variables = np.loadtxt(pathdir+filename, dtype='str').shape[1]-1
         variables = np.loadtxt(pathdir+filename, usecols=(0,))
 
         if n_variables==1:
             print(filename, "just one variable for ADD")
-            # if there is just one variable you have nothing to separate
+            # If there is just one variable you have nothing to separate
             return (-1,-1,-1)
         else:
             for j in range(1,n_variables):
@@ -73,7 +73,7 @@ def check_separability_plus(pathdir, filename):
             product = product
         product = product.float()
 
-        # load the trained model and put it in evaluation mode
+        # Load the trained model and put it in evaluation mode
         if is_cuda:
             model = SimpleNet(n_variables).cuda()
         else:
@@ -81,7 +81,7 @@ def check_separability_plus(pathdir, filename):
         model.load_state_dict(torch.load(pathdir_weights+filename+".h5"))
         model.eval()
 
-        # make some variables at the time equal to the median of factors
+        # Make some variables at the time equal to the median of factors
         models_one = []
         models_rest = []
 
@@ -90,7 +90,7 @@ def check_separability_plus(pathdir, filename):
             for k in range(len(factors[0])):
                 fact_vary[:,k] = torch.full((len(factors),),torch.median(factors[:,k]))
 
-            # loop through all indices combinations
+            # Loop through all indices combinations
             var_indices_list = np.arange(0,n_variables,1)
             min_error = 1000
             best_i = []
@@ -107,14 +107,14 @@ def check_separability_plus(pathdir, filename):
                         fact_vary_one[:,t1] = torch.full((len(factors),),torch.median(factors[:,t1]))
                     for t2 in j:
                         fact_vary_rest[:,t2] = torch.full((len(factors),),torch.median(factors[:,t2]))
-                    # check if the equation is separable
+                    # Check if the equation is separable
                     sm = model(fact_vary_one)+model(fact_vary_rest)
-                    #error = torch.sqrt(torch.mean((product-sm+model(fact_vary))**2))/torch.sqrt(torch.mean(product**2))
+                    # error = torch.sqrt(torch.mean((product-sm+model(fact_vary))**2))/torch.sqrt(torch.mean(product**2))
                     list_errs = 2*abs(product-sm+model(fact_vary))
                     error = torch.median(list_errs)
                     mu = torch.mean(torch.log2(1+list_errs*2**30))
                     sigma = torch.std(torch.log2(1+list_errs*2**30))
-                    #error = 2*torch.median(abs(product-sm+model(fact_vary)))
+                    # error = 2*torch.median(abs(product-sm+model(fact_vary)))
                     if error<min_error:
                         min_error = error
                         best_i = j
@@ -132,7 +132,7 @@ def do_separability_plus(pathdir, filename, list_i,list_j):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
 
-        # load the data
+        # Load the data
         n_variables = np.loadtxt(pathdir+filename, dtype='str').shape[1]-1
         variables = np.loadtxt(pathdir+filename, usecols=(0,))
 
@@ -202,7 +202,7 @@ def do_separability_plus(pathdir, filename, list_i,list_j):
                 pass
             np.savetxt("results/separable_add/"+str1,data_sep_1)
             np.savetxt("results/separable_add/"+str2,data_sep_2)
-            # if it is separable, return the 2 new files created and the index of the column with the separable variable
+            # If it is separable, return the 2 new files created and the index of the column with the separable variable
             return ("results/separable_add/",str1,"results/separable_add/",str2)
 
     except Exception as e:
@@ -214,13 +214,13 @@ def check_separability_multiply(pathdir, filename):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
 
-        # load the data
+        # Load the data
         n_variables = np.loadtxt(pathdir+filename, dtype='str').shape[1]-1
         variables = np.loadtxt(pathdir+filename, usecols=(0,))
 
         if n_variables==1:
             print(filename, "just one variable for ADD")
-            # if there is just one variable you have nothing to separate
+            # If there is just one variable you have nothing to separate
             return (-1,-1,-1)
         else:
             for j in range(1,n_variables):
@@ -251,7 +251,7 @@ def check_separability_multiply(pathdir, filename):
             product = product
         product = product.float()
 
-        # load the trained model and put it in evaluation mode
+        # Load the trained model and put it in evaluation mode
         if is_cuda:
             model = SimpleNet(n_variables).cuda()
         else:
@@ -259,7 +259,7 @@ def check_separability_multiply(pathdir, filename):
         model.load_state_dict(torch.load(pathdir_weights+filename+".h5"))
         model.eval()
 
-        # make some variables at the time equal to the median of factors
+        # Make some variables at the time equal to the median of factors
         models_one = []
         models_rest = []
 
@@ -268,7 +268,7 @@ def check_separability_multiply(pathdir, filename):
             for k in range(len(factors[0])):
                 fact_vary[:,k] = torch.full((len(factors),),torch.median(factors[:,k]))
 
-            # loop through all indices combinations
+            # Loop through all indices combinations
             var_indices_list = np.arange(0,n_variables,1)
             min_error = 1000
             best_i = []
@@ -285,9 +285,9 @@ def check_separability_multiply(pathdir, filename):
                         fact_vary_one[:,t1] = torch.full((len(factors),),torch.median(factors[:,t1]))
                     for t2 in j:
                         fact_vary_rest[:,t2] = torch.full((len(factors),),torch.median(factors[:,t2]))
-                    # check if the equation is separable
+                    # Check if the equation is separable
                     pd = model(fact_vary_one)*model(fact_vary_rest)
-                    #error = torch.sqrt(torch.mean((product-pd/model(fact_vary))**2))/torch.sqrt(torch.mean(product**2))
+                    # error = torch.sqrt(torch.mean((product-pd/model(fact_vary))**2))/torch.sqrt(torch.mean(product**2))
                     list_errs = 2*abs(product-pd/model(fact_vary))
                     error = torch.median(list_errs)
                     mu = torch.mean(torch.log2(1+list_errs*2**30))
@@ -310,13 +310,13 @@ def do_separability_multiply(pathdir, filename, list_i,list_j):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
 
-        # load the data
+        # Load the data
         n_variables = np.loadtxt(pathdir+filename, dtype='str').shape[1]-1
         variables = np.loadtxt(pathdir+filename, usecols=(0,))
 
         if n_variables==1:
             print(filename, "just one variable for ADD")
-            # if there is just one variable you have nothing to separate
+            # If there is just one variable you have nothing to separate
             return (-1,-1,-1)
         else:
             for j in range(1,n_variables):
@@ -341,7 +341,7 @@ def do_separability_multiply(pathdir, filename, list_i,list_j):
             product = product
         product = product.float()
 
-        # load the trained model and put it in evaluation mode
+        # Load the trained model and put it in evaluation mode
         if is_cuda:
             model = SimpleNet(n_variables).cuda()
         else:
@@ -349,7 +349,7 @@ def do_separability_multiply(pathdir, filename, list_i,list_j):
         model.load_state_dict(torch.load(pathdir_weights+filename+".h5"))
         model.eval()
 
-        # make some variables at the time equal to the median of factors
+        # Make some variables at the time equal to the median of factors
         models_one = []
         models_rest = []                    
 
@@ -366,11 +366,11 @@ def do_separability_multiply(pathdir, filename, list_i,list_j):
         with torch.no_grad():
             str1 = filename+"-mult_a"
             str2 = filename+"-mult_b"
-            # save the first half
+            # Save the first half
             data_sep_1 = variables
             data_sep_1 = np.delete(data_sep_1,list_j,axis=1)
             data_sep_1 = np.column_stack((data_sep_1,model(fact_vary_one).cpu()))
-            # save the second half  
+            # Save the second half  
             data_sep_2 = variables
             data_sep_2 = np.delete(data_sep_2,list_i,axis=1)
             data_sep_2 = np.column_stack((data_sep_2,model(fact_vary_rest).cpu()/model(fact_vary).cpu()))
@@ -380,7 +380,7 @@ def do_separability_multiply(pathdir, filename, list_i,list_j):
                 pass
             np.savetxt("results/separable_mult/"+str1,data_sep_1)
             np.savetxt("results/separable_mult/"+str2,data_sep_2)
-            # if it is separable, return the 2 new files created and the index of the column with the separable variable
+            # If it is separable, return the 2 new files created and the index of the column with the separable variable
             return ("results/separable_mult/",str1,"results/separable_mult/",str2)
 
     except Exception as e:

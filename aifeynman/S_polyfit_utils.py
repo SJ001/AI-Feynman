@@ -36,8 +36,8 @@ def multipolyfit(xs, y, deg):
 
     # Raise data to specified degree pattern, stack in order
     A = hstack(asarray([as_tall((xs**p).prod(1)) for p in powers]))
-    params = lsqr(A, y)[0] # get the best params of the fit
-    rms = lsqr(A, y)[4] # get the rms params of the fit
+    params = lsqr(A, y)[0] # Get the best params of the fit
+    rms = lsqr(A, y)[4] # Get the rms params of the fit
     
     return (params, rms)
 
@@ -47,7 +47,7 @@ def getBest(xs,y,max_deg):
     for i in range(0,max_deg+1):
         results = results + [multipolyfit(xs,y,i)]
     results = np.array(results)
-    # get the parameters and error of the fit with the lowest rms error
+    # Get the parameters and error of the fit with the lowest rms error
     params = results[np.argmin(results[:,1:])][0]
     error = results[np.argmin(results[:,1:])][1]
     deg = np.argmin(results[:,1:])

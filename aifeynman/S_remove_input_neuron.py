@@ -1,4 +1,4 @@
-# Remove on input neuron from a NN
+# Remove an input neuron from a NN
 
 from __future__ import print_function
 import torch

@@ -1,4 +1,4 @@
-# SAve a file with 2*(n-1) columns contaning the (n-1) independent variables and the (n-1) gradients of the trained NN with respect these variables
+# Save a file with 2*(n-1) columns containing the (n-1) independent variables and the (n-1) gradients of the trained NN with respect to these variables
 
 import matplotlib.pyplot as plt
 import numpy as np

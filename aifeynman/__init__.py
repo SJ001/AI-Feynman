@@ -1,5 +1,4 @@
-"""AI Feynman
-"""
+"""AI Feynman"""
 
 
 from .S_run_aifeynman import run_aifeynman

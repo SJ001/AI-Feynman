@@ -1,6 +1,8 @@
-# runs BF on data and saves the best RPN expressions in results.dat
-# all the .dat files are created after I run this script
-# the .scr are needed to run the fortran code
+"""
+Runs BF on data and saves the best RPN expressions in results.dat
+All the .dat files are created after this script is run
+The .scr are needed to run the fortran code
+"""
 
 import csv
 import os

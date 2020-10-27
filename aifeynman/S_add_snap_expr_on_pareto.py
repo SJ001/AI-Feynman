@@ -1,4 +1,4 @@
-# Adds on the pareto all the snapped versions of a given expression (all paramters are snapped in the end)
+# Adds on the pareto to all the snapped versions of a given expression (all paramters are snapped in the end)
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -32,13 +32,11 @@ def intify(expr):
     ints = [i for i in floats if int(i) == i]
     return expr.xreplace(dict(zip(ints, [int(i) for i in ints])))
 
-# parameters: path to data, math (not RPN) expression
+# Parameters: path to data, math (not RPN) expression
 def add_snap_expr_on_pareto(pathdir, filename, math_expr, PA, DR_file=""):
     input_data = np.loadtxt(pathdir+filename)
     def unsnap_recur(expr, param_dict, unsnapped_param_dict):
-        """Recursively transform each numerical value into a learnable parameter."""
-        import sympy
-        from sympy import Symbol
+        # Recursively transform each numerical value into a learnable parameter.
         if isinstance(expr, sympy.numbers.Float) or isinstance(expr, sympy.numbers.Integer) or isinstance(expr, sympy.numbers.Rational) or isinstance(expr, sympy.numbers.Pi):
             used_param_names = list(param_dict.keys()) + list(unsnapped_param_dict)
             unsnapped_param_name = get_next_available_key(used_param_names, "pp", is_underscore=False)
@@ -56,7 +54,7 @@ def add_snap_expr_on_pareto(pathdir, filename, math_expr, PA, DR_file=""):
 
 
     def get_next_available_key(iterable, key, midfix="", suffix="", is_underscore=True):
-        """Get the next available key that does not collide with the keys in the dictionary."""
+        # Get the next available key that does not collide with the keys in the dictionary.
         if key + suffix not in iterable:
             return key + suffix
         else:
@@ -85,8 +83,8 @@ def add_snap_expr_on_pareto(pathdir, filename, math_expr, PA, DR_file=""):
             new_numbers = integerSnap(eq_numbers,w+1)
             new_numbers = {"pp"+str(k): v for k, v in new_numbers.items()}
             temp_unsnapped_param_dict.update(new_numbers)
-            #for kk in range(len(new_numbers)):
-            #    eq_numbers[new_numbers[kk][0]] = new_numbers[kk][1]
+            # for kk in range(len(new_numbers)):
+            #     eq_numbers[new_numbers[kk][0]] = new_numbers[kk][1]
             new_eq = re.sub(r"(pp\d*)",r"{\1}",str(eq))
             new_eq = new_eq.format_map(temp_unsnapped_param_dict)
             integer_snapped_expr = integer_snapped_expr + [parse_expr(new_eq)]
@@ -110,8 +108,8 @@ def add_snap_expr_on_pareto(pathdir, filename, math_expr, PA, DR_file=""):
             new_numbers = rationalSnap(eq_numbers,w+1)
             new_numbers = {"pp"+str(k): v for k, v in new_numbers.items()}
             temp_unsnapped_param_dict.update(new_numbers)
-            #for kk in range(len(new_numbers)):
-            #    eq_numbers_snap[new_numbers[kk][0]] = new_numbers[kk][1][1:3]
+            # for kk in range(len(new_numbers)):
+            #     eq_numbers_snap[new_numbers[kk][0]] = new_numbers[kk][1][1:3]
             new_eq = re.sub(r"(pp\d*)",r"{\1}",str(eq))
             new_eq = new_eq.format_map(temp_unsnapped_param_dict)
             rational_snapped_expr = rational_snapped_expr + [parse_expr(new_eq)]
@@ -125,7 +123,7 @@ def add_snap_expr_on_pareto(pathdir, filename, math_expr, PA, DR_file=""):
             # Calculate the error of the new, snapped expression
             snapped_error = get_symbolic_expr_error(input_data,str(snapped_expr[i]))
             # Calculate the complexity of the new, snapped expression
-            #expr = simplify(powsimp(snapped_expr[i]))
+            # expr = simplify(powsimp(snapped_expr[i]))
             expr = snapped_expr[i]
             for s in (expr.free_symbols):
                 s = symbols(str(s), real = True)
@@ -144,7 +142,7 @@ def add_snap_expr_on_pareto(pathdir, filename, math_expr, PA, DR_file=""):
                 if n_operations!=0 or n_variables!=0:
                     snapped_complexity = snapped_complexity + (n_variables+n_operations)*np.log2((n_variables+n_operations))
 
-            # If a da file is provided, replace the variables with the actual ones before calculating the complexity
+            # If a .dat file is provided, replace the variables with the actual ones before calculating the complexity
             else:
                 dr_data = np.loadtxt(DR_file,dtype="str",delimiter=",")
 
@@ -157,7 +155,7 @@ def add_snap_expr_on_pareto(pathdir, filename, math_expr, PA, DR_file=""):
                 expr = parse_expr(expr)
                 for s in (expr.free_symbols):
                     s = symbols(str(s), real = True)
-                #expr =  simplify(parse_expr(str(expr),locals()))
+                # expr =  simplify(parse_expr(str(expr),locals()))
                 expr =  parse_expr(str(expr),locals())
                 snapped_complexity = 0
                 for j in numbers_expr:

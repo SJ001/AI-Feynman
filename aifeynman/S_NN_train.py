@@ -100,8 +100,8 @@ def NN_train(pathdir, filename, epochs=1000, lrs=1e-2, N_red_lr=4, pretrained_pa
                 x = self.linear5(x)
                 return x
 
-        my_dataset = utils.TensorDataset(factors,product) # create your datset
-        my_dataloader = utils.DataLoader(my_dataset, batch_size=bs, shuffle=True) # create your dataloader
+        my_dataset = utils.TensorDataset(factors,product) # Create your datset
+        my_dataloader = utils.DataLoader(my_dataset, batch_size=bs, shuffle=True) # Create your dataloader
 
         if is_cuda:
             model_feynman = SimpleNet(n_variables).cuda()

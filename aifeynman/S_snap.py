@@ -4,9 +4,11 @@ import numpy as np
 from sympy import Rational
 
 def bestApproximation(x,imax):
-    # The input is a numpy parameter vector p.
-    # The output is an integer specifying which parameter to change,
-    # and a float specifying the new value.
+    """
+    The input is a numpy parameter vector p.
+    The output is an integer specifying which parameter to change,
+    and a float specifying the new value.
+    """
     def float2contfrac(x,nmax):
         x = float(x)
         c = [np.floor(x)];
@@ -21,9 +23,7 @@ def bestApproximation(x,imax):
         return c
     
     def contfrac2frac(seq):
-        ''' Convert the simple continued fraction in `seq`
-            into a fraction, num / den
-            '''
+        # Convert the simple continued fraction in `seq` into a fraction, num / den
         num, den = 1, 0
         for u in reversed(seq):
             num, den = den + num*u, num
@@ -72,7 +72,7 @@ def zeroSnap(p, top=1):
 
 
 def rationalSnap(p, top=1):
-    """Snap to nearest rational number using continued fraction."""
+    # Snap to nearest rational number using continued fraction.
     p = np.array(p)
     snaps = np.array(list(bestApproximation(x,10) for x in p))
     chosen = np.argsort(snaps[:, 3])[:top]    

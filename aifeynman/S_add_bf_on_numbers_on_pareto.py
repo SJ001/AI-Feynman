@@ -1,4 +1,4 @@
-# Adds on the pareto all the snapped versions of a given expression (all paramters are snapped in the end)
+# Adds on the pareto to all the snapped versions of a given expression (all parameters are snapped in the end)
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -28,13 +28,11 @@ from .RPN_to_eq import RPN_to_eq
 
 from .S_get_number_DL_snapped import get_number_DL_snapped
 
-# parameters: path to data, math (not RPN) expression
+# Parameters: path to data, math (not RPN) expression
 def add_bf_on_numbers_on_pareto(pathdir, filename, PA, math_expr):
     input_data = np.loadtxt(pathdir+filename)
     def unsnap_recur(expr, param_dict, unsnapped_param_dict):
-        """Recursively transform each numerical value into a learnable parameter."""
-        import sympy
-        from sympy import Symbol
+        # Recursively transform each numerical value into a learnable parameter.
         if isinstance(expr, sympy.numbers.Float) or isinstance(expr, sympy.numbers.Integer) or isinstance(expr, sympy.numbers.Rational) or isinstance(expr, sympy.numbers.Pi):
             used_param_names = list(param_dict.keys()) + list(unsnapped_param_dict)
             unsnapped_param_name = get_next_available_key(used_param_names, "p", is_underscore=False)
@@ -52,7 +50,7 @@ def add_bf_on_numbers_on_pareto(pathdir, filename, PA, math_expr):
 
 
     def get_next_available_key(iterable, key, midfix="", suffix="", is_underscore=True):
-        """Get the next available key that does not collide with the keys in the dictionary."""
+        # Get the next available key that does not collide with the keys in the dictionary.
         if key + suffix not in iterable:
             return key + suffix
         else:
@@ -83,7 +81,7 @@ def add_bf_on_numbers_on_pareto(pathdir, filename, PA, math_expr):
             bf_numbers = np.loadtxt("results.dat",usecols=(1,),dtype="str")
             new_numbers = copy.deepcopy(eq_numbers)
 
-            # replace the number under consideration by all the proposed bf numbers
+            # Replace the number under consideration by all the proposed bf numbers
             for kk in range(len(bf_numbers)):
                 eq = eq_
                 new_numbers[w] = parse_expr(RPN_to_eq(bf_numbers[kk]))

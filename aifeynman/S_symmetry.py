@@ -1,4 +1,4 @@
-# checks for symmetries in the data
+# Checks for symmetries in the data
 
 from __future__ import print_function
 import torch
@@ -40,18 +40,18 @@ def rmse_loss(pred, targ):
     denom = torch.sqrt(denom.sum()/len(denom))
     return torch.sqrt(F.mse_loss(pred, targ))/denom
 
-# checks if f(x,y)=f(x-y)
+# Checks if f(x,y)=f(x-y)
 def check_translational_symmetry_minus(pathdir, filename):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
 
-        # load the data
+        # Load the data
         n_variables = np.loadtxt(pathdir+"/%s" %filename, dtype='str').shape[1]-1
         variables = np.loadtxt(pathdir+"/%s" %filename, usecols=(0,))
 
         if n_variables==1:
             print(filename, "just one variable for ADD \n")
-            # if there is just one variable you have nothing to separate
+            # If there is just one variable you have nothing to separate
             return (-1,-1,-1)
         else:
             for j in range(1,n_variables):
@@ -76,7 +76,7 @@ def check_translational_symmetry_minus(pathdir, filename):
             product = product
         product = product.float()
 
-        # load the trained model and put it in evaluation mode
+        # Load the trained model and put it in evaluation mode
         if is_cuda:
             model = SimpleNet(n_variables).cuda()
         else:
@@ -88,7 +88,7 @@ def check_translational_symmetry_minus(pathdir, filename):
         models_rest = []
 
         with torch.no_grad():            
-            # make the shift x->x+a for 2 variables at a time (different variables)
+            # Make the shift x->x+a for 2 variables at a time (different variables)
             min_error = 1000
             best_i = -1
             best_j = -1
@@ -121,7 +121,7 @@ def do_translational_symmetry_minus(pathdir, filename, i,j):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
 
-        # load the data
+        # Load the data
         n_variables = np.loadtxt(pathdir+"/%s" %filename, dtype='str').shape[1]-1
         variables = np.loadtxt(pathdir+"/%s" %filename, usecols=(0,))
 
@@ -146,7 +146,7 @@ def do_translational_symmetry_minus(pathdir, filename, i,j):
             product = product
         product = product.float()
 
-        # load the trained model and put it in evaluation mode
+        # Load the trained model and put it in evaluation mode
         if is_cuda:
             model = SimpleNet(n_variables).cuda()
         else:
@@ -177,18 +177,18 @@ def do_translational_symmetry_minus(pathdir, filename, i,j):
         return (-1,-1)
         
 
-# checks if f(x,y)=f(x/y)
+# Checks if f(x,y)=f(x/y)
 def check_translational_symmetry_divide(pathdir, filename):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
 
-        # load the data
+        # Load the data
         n_variables = np.loadtxt(pathdir+"/%s" %filename, dtype='str').shape[1]-1
         variables = np.loadtxt(pathdir+"/%s" %filename, usecols=(0,))
 
         if n_variables==1:
             print(filename, "just one variable for ADD \n")
-            # if there is just one variable you have nothing to separate
+            # If there is just one variable you have nothing to separate
             return (-1,-1,-1)
         else:
             for j in range(1,n_variables):
@@ -213,7 +213,7 @@ def check_translational_symmetry_divide(pathdir, filename):
             product = product
         product = product.float()
 
-        # load the trained model and put it in evaluation mode
+        # Load the trained model and put it in evaluation mode
         if is_cuda:
             model = SimpleNet(n_variables).cuda()
         else:
@@ -231,7 +231,7 @@ def check_translational_symmetry_divide(pathdir, filename):
             best_j = -1
             best_mu = 0
             best_sigma = 0
-            # make the shift x->x*a and y->y*a for 2 variables at a time (different variables)
+            # Make the shift x->x*a and y->y*a for 2 variables at a time (different variables)
             for i in range(0,n_variables,1):
                 for j in range(0,n_variables,1):
                     if i<j:
@@ -259,7 +259,7 @@ def do_translational_symmetry_divide(pathdir, filename, i,j):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
 
-        # load the data
+        # Load the data
         n_variables = np.loadtxt(pathdir+"/%s" %filename, dtype='str').shape[1]-1
         variables = np.loadtxt(pathdir+"/%s" %filename, usecols=(0,))
 
@@ -284,7 +284,7 @@ def do_translational_symmetry_divide(pathdir, filename, i,j):
             product = product
         product = product.float()
 
-        # load the trained model and put it in evaluation mode
+        # Load the trained model and put it in evaluation mode
         if is_cuda:
             model = SimpleNet(n_variables).cuda()
         else:
@@ -314,18 +314,18 @@ def do_translational_symmetry_divide(pathdir, filename, i,j):
         print(e)
         return (-1,1)
 
-# checks if f(x,y)=f(x*y)
+# Checks if f(x,y)=f(x*y)
 def check_translational_symmetry_multiply(pathdir, filename):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
 
-        # load the data
+        # Load the data
         n_variables = np.loadtxt(pathdir+"/%s" %filename, dtype='str').shape[1]-1
         variables = np.loadtxt(pathdir+"/%s" %filename, usecols=(0,))
 
         if n_variables==1:
             print(filename, "just one variable for ADD \n")
-            # if there is just one variable you have nothing to separate
+            # If there is just one variable you have nothing to separate
             return (-1,-1,-1)
         else:
             for j in range(1,n_variables):
@@ -350,7 +350,7 @@ def check_translational_symmetry_multiply(pathdir, filename):
             product = product
         product = product.float()
 
-        # load the trained model and put it in evaluation mode
+        # Load the trained model and put it in evaluation mode
         if is_cuda:
             model = SimpleNet(n_variables).cuda()
         else:
@@ -368,7 +368,7 @@ def check_translational_symmetry_multiply(pathdir, filename):
             best_j = -1
             best_mu = 0
             best_sigma = 0
-            # make the shift x->x*a and y->y/a for 2 variables at a time (different variables)
+            # Make the shift x->x*a and y->y/a for 2 variables at a time (different variables)
             for i in range(0,n_variables,1):
                 for j in range(0,n_variables,1):
                     if i<j:
@@ -420,7 +420,7 @@ def do_translational_symmetry_multiply(pathdir, filename, i,j):
             product = product
         product = product.float()
 
-        # load the trained model and put it in evaluation mode
+        # Load the trained model and put it in evaluation mode
         if is_cuda:
             model = SimpleNet(n_variables).cuda()
         else:
@@ -450,18 +450,18 @@ def do_translational_symmetry_multiply(pathdir, filename, i,j):
         print(e)
         return (-1,1)
 
-# checks if f(x,y)=f(x+y)
+# Checks if f(x,y)=f(x+y)
 def check_translational_symmetry_plus(pathdir, filename):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
 
-        # load the data
+        # Load the data
         n_variables = np.loadtxt(pathdir+"/%s" %filename, dtype='str').shape[1]-1
         variables = np.loadtxt(pathdir+"/%s" %filename, usecols=(0,))
 
         if n_variables==1:
             print(filename, "just one variable for ADD \n")
-            # if there is just one variable you have nothing to separate
+            # If there is just one variable you have nothing to separate
             return (-1,-1,-1)
         else:
             for j in range(1,n_variables):
@@ -486,7 +486,7 @@ def check_translational_symmetry_plus(pathdir, filename):
             product = product
         product = product.float()
 
-        # load the trained model and put it in evaluation mode
+        # Load the trained model and put it in evaluation mode
         if is_cuda:
             model = SimpleNet(n_variables).cuda()
         else:
@@ -530,7 +530,7 @@ def do_translational_symmetry_plus(pathdir, filename, i,j):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
 
-        # load the data
+        # Load the data
         n_variables = np.loadtxt(pathdir+"/%s" %filename, dtype='str').shape[1]-1
         variables = np.loadtxt(pathdir+"/%s" %filename, usecols=(0,))
 
@@ -555,7 +555,7 @@ def do_translational_symmetry_plus(pathdir, filename, i,j):
             product = product
         product = product.float()
 
-        # load the trained model and put it in evaluation mode
+        # Load the trained model and put it in evaluation mode
         if is_cuda:
             model = SimpleNet(n_variables).cuda()
         else:

@@ -27,7 +27,7 @@ def get_symbolic_expr_error(data,expr):
         # Remove accidental nan's
         good_idx = np.where(np.isnan(f(*real_variables))==False)
 
-        # use this to get rid of cases where the loss gets complex because of transformations of the output variable
+        # Use this to get rid of cases where the loss gets complex because of transformations of the output variable
         if isinstance(np.mean((f(*real_variables)-data[:,-1])**2), complex):
             return 1000000
         else:

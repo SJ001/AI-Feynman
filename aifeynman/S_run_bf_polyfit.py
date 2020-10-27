@@ -1,4 +1,4 @@
-# add a function to compte complexity
+# Add a function to compute complexity
 
 from .get_pareto import Point, ParetoSet
 from .RPN_to_pytorch import RPN_to_pytorch
@@ -21,12 +21,12 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
     input_data = np.loadtxt(pathdir_transformed+filename)
 #############################################################################################################################
     if np.isnan(input_data).any()==False:
-        # run BF on the data (+)
+        # Run BF on the data (+)
         print("Checking for brute force + \n")
         brute_force(pathdir_transformed,filename,BF_try_time,BF_ops_file_type,"+")
 
         try:
-            # load the BF output data
+            # Load the BF output data
             bf_all_output = np.loadtxt("results.dat", dtype="str")
             express = bf_all_output[:,2]
             prefactors = bf_all_output[:,1]
@@ -88,7 +88,7 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
             for i in range(len(complexity)):
                 PA.add(Point(x=complexity[i], y=errors[i], data=eqns[i]))
 
-            # run gradient descent of BF output parameters and add the results to the Pareto plot
+            # Run gradient descent of BF output parameters and add the results to the Pareto plot
             for i in range(len(express)):
                 try:
                     bf_gd_update = RPN_to_pytorch(input_data,eqns[i])
@@ -99,12 +99,12 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
             pass
 
     #############################################################################################################################
-        # run BF on the data (*)
+        # Run BF on the data (*)
         print("Checking for brute force * \n")
         brute_force(pathdir_transformed,filename,BF_try_time,BF_ops_file_type,"*")
 
         try:
-            # load the BF output data
+            # Load the BF output data
             bf_all_output = np.loadtxt("results.dat", dtype="str")
             express = bf_all_output[:,2]
             prefactors = bf_all_output[:,1]
@@ -163,11 +163,11 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
                 except:
                     continue
 
-            # add the BF output to the Pareto plot
+            # Add the BF output to the Pareto plot
             for i in range(len(complexity)):
                 PA.add(Point(x=complexity[i], y=errors[i], data=eqns[i]))
 
-            # run gradient descent of BF output parameters and add the results to the Pareto plot
+            # Run gradient descent of BF output parameters and add the results to the Pareto plot
             for i in range(len(express)):
                 try:
                     bf_gd_update = RPN_to_pytorch(input_data,eqns[i])
@@ -178,7 +178,7 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
             pass
 
     #############################################################################################################################
-        # run polyfit on the data
+        # Run polyfit on the data
         print("Checking polyfit \n")
         try:
             polyfit_result = polyfit(polyfit_deg, pathdir_transformed+filename)
@@ -226,7 +226,7 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
             except:
                 pass
 
-            #run zero snap on polyfit output
+            # Run zero snap on polyfit output
             PA_poly = ParetoSet()
             PA_poly.add(Point(x=complexity, y=polyfit_err, data=str(eqn)))
             PA_poly = add_snap_expr_on_pareto(pathdir, filename, str(eqn), PA_poly)

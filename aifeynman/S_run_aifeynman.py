@@ -36,7 +36,7 @@ def run_AI_all(pathdir,filename,BF_try_time=60,BF_ops_file_type="14ops", polyfit
     except:
         pass
 
-    # load the data for different checks
+    # Load the data for different checks
     data = np.loadtxt(pathdir+filename)
 
     # Run bf and polyfit
@@ -58,7 +58,7 @@ def run_AI_all(pathdir,filename,BF_try_time=60,BF_ops_file_type="14ops", polyfit
     PA = get_tan(pathdir,"results/mystery_world_tan/",filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg)
 
 #############################################################################################################################
-    # check if the NN is trained. If it is not, train it on the data.
+    # Check if the NN is trained. If it is not, train it on the data.
     if len(data[0])<3:
         print("Just one variable!")
         pass
@@ -119,7 +119,7 @@ def run_AI_all(pathdir,filename,BF_try_time=60,BF_ops_file_type="14ops", polyfit
 
     idx_comp = 0
     if succ_grad == 1:
-        #try:
+        # try:
         for qqqq in range(1):
             brute_force_comp("results/","gradients_comp_%s.txt" %filename,600,"14ops.txt")
             bf_all_output = np.loadtxt("results_comp.dat", dtype="str")
@@ -135,8 +135,8 @@ def run_AI_all(pathdir,filename,BF_try_time=60,BF_ops_file_type="14ops", polyfit
                         sigma = new_sigma
                 except:
                     continue
-        #except:
-        #    idx_comp = 0
+        # except:
+        #     idx_comp = 0
     else:
         idx_comp = 0
     print("")
@@ -150,7 +150,7 @@ def run_AI_all(pathdir,filename,BF_try_time=60,BF_ops_file_type="14ops", polyfit
     idx_gen_sym = 0
     for kiiii in range(1):
         if len(data[0])>3:
-            # find the best separability indices
+            # Find the best separability indices
             decomp_idx = identify_decompositions(pathdir,filename, model_feynman)
             brute_force_gen_sym("results/","gradients_gen_sym_%s" %filename,600,"14ops.txt")
             bf_all_output = np.loadtxt("results_gen_sym.dat", dtype="str")
@@ -244,7 +244,7 @@ def run_AI_all(pathdir,filename,BF_try_time=60,BF_ops_file_type="14ops", polyfit
         return PA
     else:
         return PA
-# this runs snap on the output of aifeynman
+# This runs snap on the output of aifeynman
 def run_aifeynman(pathdir,filename,BF_try_time,BF_ops_file_type, polyfit_deg=4, NN_epochs=4000, vars_name=[],test_percentage=20):
     # If the variable names are passed, do the dimensional analysis first
     filename_orig = filename
@@ -270,7 +270,7 @@ def run_aifeynman(pathdir,filename,BF_try_time,BF_ops_file_type, polyfit_deg=4, 
         np.savetxt(pathdir+filename+"_test",test_data)
 
     PA = ParetoSet()
-    # Run the code on the train data
+    # Run the code on the trained data
     PA = run_AI_all(pathdir,filename+"_train",BF_try_time,BF_ops_file_type, polyfit_deg, NN_epochs, PA=PA)
     PA_list = PA.get_pareto_points()
 
