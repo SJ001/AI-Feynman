@@ -32,9 +32,7 @@ from .S_get_number_DL_snapped import get_number_DL_snapped
 def add_bf_on_numbers_on_pareto(pathdir, filename, PA, math_expr):
     input_data = np.loadtxt(pathdir+filename)
     def unsnap_recur(expr, param_dict, unsnapped_param_dict):
-        """Recursively transform each numerical value into a learnable parameter."""
-        import sympy
-        from sympy import Symbol
+        # Recursively transform each numerical value into a learnable parameter.
         if isinstance(expr, sympy.numbers.Float) or isinstance(expr, sympy.numbers.Integer) or isinstance(expr, sympy.numbers.Rational) or isinstance(expr, sympy.numbers.Pi):
             used_param_names = list(param_dict.keys()) + list(unsnapped_param_dict)
             unsnapped_param_name = get_next_available_key(used_param_names, "p", is_underscore=False)
@@ -52,7 +50,7 @@ def add_bf_on_numbers_on_pareto(pathdir, filename, PA, math_expr):
 
 
     def get_next_available_key(iterable, key, midfix="", suffix="", is_underscore=True):
-        """Get the next available key that does not collide with the keys in the dictionary."""
+        # Get the next available key that does not collide with the keys in the dictionary.
         if key + suffix not in iterable:
             return key + suffix
         else:

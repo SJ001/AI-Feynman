@@ -37,8 +37,6 @@ def add_snap_expr_on_pareto(pathdir, filename, math_expr, PA, DR_file=""):
     input_data = np.loadtxt(pathdir+filename)
     def unsnap_recur(expr, param_dict, unsnapped_param_dict):
         # Recursively transform each numerical value into a learnable parameter.
-        import sympy
-        from sympy import Symbol
         if isinstance(expr, sympy.numbers.Float) or isinstance(expr, sympy.numbers.Integer) or isinstance(expr, sympy.numbers.Rational) or isinstance(expr, sympy.numbers.Pi):
             used_param_names = list(param_dict.keys()) + list(unsnapped_param_dict)
             unsnapped_param_name = get_next_available_key(used_param_names, "pp", is_underscore=False)
