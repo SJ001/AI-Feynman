@@ -55,7 +55,7 @@ def getPowers(N,a):
             sol = sol + [params[0]]
             params = np.delete(params,0)
 
-    # this is the solution:
+    # This is the solution:
     sol = np.array(sol)
     return(sol)
 

@@ -111,7 +111,7 @@ def score_consistency(grads_tensor):
     evals, evecs = np.linalg.eig(D)
     nv = evals.shape[0]
     assert(nv == A.shape[1])
-    # evecs should be d x (num eigenvectors - probably also d)
+    # evecs should be D x (num eigenvectors - probably also D)
     dots = np.einsum('ij,jk->ik', A, evecs)
     scores = np.einsum('ij,ij->j', dots, dots)
     overall_score = np.max(scores)/n_pts
@@ -130,8 +130,8 @@ def visualize_distribution(hypot, bench):
     X_plot = np.linspace(-8, 0, 1000)[:, np.newaxis]
     log_dens = kde.score_samples(X_plot)
     log_dens2= kde2.score_samples(X_plot)
-    plt.plot(X_plot[:, 0], np.exp(log_dens), color='#FFAA00', label='Hypothesis') #hypot is orange
-    plt.plot(X_plot[:, 0], np.exp(log_dens2), color='#00AAFF', label='Benchmark')#blue is bench
+    plt.plot(X_plot[:, 0], np.exp(log_dens), color='#FFAA00', label='Hypothesis') # Hypot is orange
+    plt.plot(X_plot[:, 0], np.exp(log_dens2), color='#00AAFF', label='Benchmark') # Bench is blue
     plt.legend()
     plt.savefig(f'plot_{plot_counter}.pdf')
     plot_counter += 1
@@ -204,7 +204,7 @@ def filter_decompositions_relative_scoring(X, y, model, max_subset_size=None, vi
             score, _ = score_consistency(evaluate_derivatives_andrew(model, s, samples))
             bench_scores.append(score)
         snr = signal_to_noise(hypot_scores, bench_scores)
-        # penalizes larger decompositions
+        # Penalizes larger decompositions
         snr -= np.log10(2)*len(s) 
         results.append((snr, s))
         print((snr, s))
@@ -238,7 +238,7 @@ def extract_gradients(X, y, model, s, num_points):
     for i in range(num_points):
         samples = draw_samples(X, y, model, s, 50, point=idx[i])
         _, gradients[i, :] = score_consistency(evaluate_derivatives_andrew(model, s, samples))
-        # normalize first dimension
+        # Normalize first dimension
         if(gradients[i, 0] < 0):
              gradients[i,:] *= -1
     return np.concatenate((X[idx, :][:, s].cpu().data.numpy(), gradients),axis=1)

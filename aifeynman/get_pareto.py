@@ -14,7 +14,7 @@ class Point(object):
 
 
     def __getitem__(self, index):
-        """Indexing: get item according to index."""
+        # Indexing: get item according to index.
         if index == 0:
             return self.x
         elif index == 1:
@@ -28,7 +28,7 @@ class Point(object):
 
 
     def __setitem__(self, index, value):
-        """Indexing: set item according to index."""
+        # Indexing: set item according to index.
         if index == 0:
             self.x = value
         elif index == 1:
@@ -45,14 +45,15 @@ class Point(object):
 
 
 class ParetoSet(SortedKeyList):
-    """Maintained maximal set with efficient insertion. Note that we use the convention of smaller the better."""
+    # Maintained maximal set with efficient insertion. Note that we use the convention of smaller the better.
 
     def __init__(self):
         super().__init__(key=lambda p: p.x)
 
 
     def _input_check(self, p):
-        """Check that input is in the correct format.
+        """
+        Check that input is in the correct format.
 
         Args:
             p: input
@@ -80,7 +81,8 @@ class ParetoSet(SortedKeyList):
 
     
     def add(self, p):
-        """Insert Point into set if minimal in first two indices.
+        """
+        Insert Point into set if minimal in first two indices.
 
         Args:
             p (Point): Point to insert
@@ -92,20 +94,20 @@ class ParetoSet(SortedKeyList):
         p = self._input_check(p)
 
         is_pareto = False
-        # check right for dominated points:
+        # Check right for dominated points:
         right = self.bisect_left(p)
 
         while len(self) > right and self[right].y >= p.y and not (self[right].x == p.x and self[right].y == p.y):
             self.pop(right)
             is_pareto = True
 
-        # check left for dominating points:
+        # Check left for dominating points:
         left = self.bisect_right(p) - 1
 
         if left == -1 or self[left][1] > p[1]:
             is_pareto = True
 
-        # if it's the only point it's maximal
+        # If it's the only point it's maximal
         if len(self) == 0:
             is_pareto = True
 
@@ -130,7 +132,8 @@ class ParetoSet(SortedKeyList):
 
 
     def __add__(self, other):
-        """Merge another pareto set into self.
+        """
+        Merge another pareto set into self.
 
         Args:
             other (ParetoSet): set to merge into self
@@ -147,7 +150,8 @@ class ParetoSet(SortedKeyList):
 
 
     def distance(self, p):
-        """Given a Point, calculate the minimum Euclidean distance to pareto
+        """
+        Given a Point, calculate the minimum Euclidean distance to pareto
         frontier (in first two indices).
 
         Args:
@@ -162,16 +166,16 @@ class ParetoSet(SortedKeyList):
         point = np.array((p.x, p.y))
         dom = self.dominant_array(p)
 
-        # distance is zero if pareto optimal
+        # Distance is zero if pareto optimal
         if dom.shape[0] == 0:
             return 0.
 
-        # add corners of all adjacent pairs
+        # Add corners of all adjacent pairs
         candidates = np.zeros((dom.shape[0] + 1, 2))
         for i in range(dom.shape[0] - 1):
             candidates[i, :] = np.max(dom[[i, i+1], :], axis=0)
 
-        # add top and right bounds
+        # Add top and right bounds
         candidates[-1, :] = (p.x, np.min(dom[:, 1]))
         candidates[-2, :] = (np.min(dom[:, 0]), p.y)
 
@@ -179,7 +183,8 @@ class ParetoSet(SortedKeyList):
 
 
     def dominant_array(self, p):
-        """Given a Point, return the set of dominating points in the set (in
+        """
+        Given a Point, return the set of dominating points in the set (in
         the first two indices).
 
         Args:
@@ -203,7 +208,8 @@ class ParetoSet(SortedKeyList):
 
 
     def to_array(self):
-        """Convert first two indices to numpy.ndarray
+        """
+        Convert first two indices to numpy.ndarray
 
         Args:
             None
@@ -219,8 +225,8 @@ class ParetoSet(SortedKeyList):
         return A
 
     def get_pareto_points(self):
-        """Returns the x, y and data for each point in the pareto frontier
-        
+        """
+        Returns the x, y and data for each point in the pareto frontier
         """
         pareto_points = []
         for i, p in enumerate(self):
@@ -230,7 +236,8 @@ class ParetoSet(SortedKeyList):
         
 
     def from_list(self, A):
-        """Convert iterable of Points into ParetoSet.
+        """
+        Convert iterable of Points into ParetoSet.
 
         Args:
             A (iterator): iterator of Points
@@ -244,7 +251,9 @@ class ParetoSet(SortedKeyList):
     
     
     def plot(self):
-        """Plotting the Pareto frontier."""
+        """
+        Plotting the Pareto frontier. 
+        """
         array = self.to_array()
         plt.figure(figsize=(8, 6))
         plt.plot(array[:, 0], array[:, 1], 'r.')

@@ -1,4 +1,4 @@
-# Adds on the pareto all the snapped versions of a given expression (all paramters are snapped in the end)
+# Adds on the pareto to all the snapped versions of a given expression (all parameters are snapped in the end)
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -28,7 +28,7 @@ from .RPN_to_eq import RPN_to_eq
 
 from .S_get_number_DL_snapped import get_number_DL_snapped
 
-# parameters: path to data, math (not RPN) expression
+# Parameters: path to data, math (not RPN) expression
 def add_bf_on_numbers_on_pareto(pathdir, filename, PA, math_expr):
     input_data = np.loadtxt(pathdir+filename)
     def unsnap_recur(expr, param_dict, unsnapped_param_dict):
@@ -83,7 +83,7 @@ def add_bf_on_numbers_on_pareto(pathdir, filename, PA, math_expr):
             bf_numbers = np.loadtxt("results.dat",usecols=(1,),dtype="str")
             new_numbers = copy.deepcopy(eq_numbers)
 
-            # replace the number under consideration by all the proposed bf numbers
+            # Replace the number under consideration by all the proposed bf numbers
             for kk in range(len(bf_numbers)):
                 eq = eq_
                 new_numbers[w] = parse_expr(RPN_to_eq(bf_numbers[kk]))

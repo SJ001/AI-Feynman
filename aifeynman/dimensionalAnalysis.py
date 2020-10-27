@@ -18,7 +18,7 @@ def dimensional_analysis(input,output,units):
     B = M.nullspace()
     return (params, B)
 
-# load the data from a file
+# Load the data from a file
 def load_data(pathdir, filename):
     n_variables = np.loadtxt(pathdir+filename, dtype='str').shape[1]-1
     variables = np.loadtxt(pathdir+filename, usecols=(0,))
@@ -43,11 +43,11 @@ def dimensionalAnalysis(pathdir, filename, eq_symbols):
     file_sym.write(filename)
     file_sym.write(", ")
 
-    # load the data corresponding to the first line (from mystery_world)
+    # Load the data corresponding to the first line (from mystery_world)
     varibs = load_data(pathdir,filename)[0]
     deps = load_data(pathdir,filename)[1]
 
-    # get the data in symbolic form and associate the corresponding values to it
+    # Get the data in symbolic form and associate the corresponding values to it
     input = []
     for i in range(len(eq_symbols)-1):
         input = input + [eq_symbols[i]]
@@ -73,7 +73,7 @@ def dimensionalAnalysis(pathdir, filename, eq_symbols):
             file_sym.write(", ")
         file_sym.write("\n")
     else:
-        # get the symbolic form of the solved part
+        # Get the symbolic form of the solved part
         solved_powers = dimensional_analysis(input,output,units)[0]
         input_sym = symbols(input)
         sol = symbols("sol")
@@ -83,7 +83,7 @@ def dimensionalAnalysis(pathdir, filename, eq_symbols):
         file_sym.write(str(sol))
         file_sym.write(", ")
 
-        # get the symbolic form of the unsolved part
+        # Get the symbolic form of the unsolved part
         unsolved_powers = dimensional_analysis(input,output,units)[1]
 
         uns = symbols("uns")
@@ -97,13 +97,13 @@ def dimensionalAnalysis(pathdir, filename, eq_symbols):
             unsolved = unsolved + [uns]
         file_sym.write("\n")
 
-        # get the discovered part of the function
+        # Get the discovered part of the function
         func = 1
         for j in range(len(input)):
             func = func * vars()[input[j]]**dimensional_analysis(input,output,units)[0][j]
         func = np.array(func)
 
-        # get the new variables needed
+        # Get the new variables needed
         new_vars = []
         for i in range(len(dimensional_analysis(input,output,units)[1])):
             nv = 1
@@ -117,7 +117,7 @@ def dimensionalAnalysis(pathdir, filename, eq_symbols):
         if new_vars.size==0:
             np.savetxt(pathdir + filename + "_dim_red", new_dependent)
 
-        # save this to file
+        # Save this to file
         all_variables = np.vstack((new_vars, new_dependent)).T
         np.savetxt(pathdir + filename + "_dim_red", all_variables)
 

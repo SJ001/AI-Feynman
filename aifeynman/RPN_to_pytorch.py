@@ -21,13 +21,13 @@ from sympy import Symbol, lambdify, N
 from .S_get_number_DL_snapped import get_number_DL_snapped
 from .S_get_symbolic_expr_error import get_symbolic_expr_error
 
-# parameters: path to data, RPN expression (obtained from bf)
+# Parameters: path to data, RPN expression (obtained from bf)
 def RPN_to_pytorch(data, math_expr, lr = 1e-2, N_epochs = 500):
     param_dict = {}
     unsnapped_param_dict = {'p':1}
 
     def unsnap_recur(expr, param_dict, unsnapped_param_dict):
-        """Recursively transform each numerical value into a learnable parameter."""
+        # Recursively transform each numerical value into a learnable parameter.
         import sympy
         from sympy import Symbol
         if isinstance(expr, sympy.numbers.Float) or isinstance(expr, sympy.numbers.Integer) or isinstance(expr, sympy.numbers.Rational) or isinstance(expr, sympy.numbers.Pi):
@@ -47,7 +47,7 @@ def RPN_to_pytorch(data, math_expr, lr = 1e-2, N_epochs = 500):
 
 
     def get_next_available_key(iterable, key, midfix="", suffix="", is_underscore=True):
-        """Get the next available key that does not collide with the keys in the dictionary."""
+        # Get the next available key that does not collide with the keys in the dictionary.
         if key + suffix not in iterable:
             return key + suffix
         else:
@@ -95,7 +95,7 @@ def RPN_to_pytorch(data, math_expr, lr = 1e-2, N_epochs = 500):
     y = torch.from_numpy(data[:,-1]).float()
 
     for i in range(N_epochs):
-        # this order is fixed i.e. first parameters
+        # This order is fixed i.e. first parameters
         yy = f(*input)
         loss = torch.mean((yy-y)**2)
         loss.backward()

@@ -15,7 +15,7 @@ warnings.filterwarnings("ignore")
 is_cuda = torch.cuda.is_available()
 
 
-# fix this to work with the other variables constant
+# TODO: Fix this to work with the other variables constant
 def check_gen_sym(pathdir,filename,model,gen_sym_idx,express,mu,sigma,nu=10):
     gen_sym_idx = np.append(gen_sym_idx,-1)
     data_all = np.loadtxt(pathdir+filename)
@@ -110,7 +110,7 @@ def do_gen_sym(pathdir, filename, gen_sym_idx,express):
 
     new_data = f(*np.transpose(data[:,0:-1]))
     data_all[:,gen_sym_idx[0]]=new_data
-    #save_data = np.column_stack((new_data,data_all))
+    # save_data = np.column_stack((new_data,data_all))
     save_data = data_all
 
     try:
@@ -140,7 +140,7 @@ def add_gen_sym_on_pareto(PA1,PA, gen_sym_idx, express):
                 exp1 = exp1.replace(possible_vars[j],possible_vars[j+1])
             temp_list = np.delete(temp_list,-1)
         
-        # replace variables in bf_eq
+        # Replace variables in bf_eq
         arr_idx = np.flip(np.arange(0,len(gen_sym_idx),1), axis=0)
         actual_idx = np.flip(gen_sym_idx, axis=0)
         for k in range(len(gen_sym_idx)):

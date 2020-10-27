@@ -1,4 +1,4 @@
-# Combines 2 pareto fromtier obtained from the separability test into a new one.
+# Combines 2 pareto frontier expressions obtained from the separability test into a new one.
 
 from .get_pareto import Point, ParetoSet
 from sympy.parsing.sympy_parser import parse_expr

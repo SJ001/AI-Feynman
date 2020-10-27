@@ -154,8 +154,8 @@ class TestPoints:
         max_distance = np.linalg.norm(self.high_range - self.low_range)
         reference_point_rel_distance = reference_point_distance / max_distance
         self.log.append((reference_point_rel_error, reference_point_rel_distance))
-#        if disp:
-#            print(f'{pt} : found {opt}, err: {reference_point_rel_error}, distance: {reference_point_rel_distance}')
+        # if disp:
+        #     print(f'{pt} : found {opt}, err: {reference_point_rel_error}, distance: {reference_point_rel_distance}')
 
     def score_pt(self, model, full_pt, disp=False, log=False):
         pt = full_pt[self.bitmask]

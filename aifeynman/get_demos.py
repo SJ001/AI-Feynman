@@ -9,7 +9,7 @@ def get_demos(dataset="example_data"):
     with urllib.request.urlopen(base) as base_response:
         string = base_response.read().decode('utf-8')
 
-        # the pattern actually creates duplicates in the list
+        # The pattern actually creates duplicates in the list
         pattern = re.compile('>.*\.txt<')
         filelist = map(lambda x: x[1:-1], pattern.findall(string))
 

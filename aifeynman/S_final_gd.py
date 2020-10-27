@@ -21,15 +21,13 @@ from sympy import Symbol, lambdify, N
 from .S_get_number_DL_snapped import get_number_DL_snapped
 from .S_get_symbolic_expr_error import get_symbolic_expr_error
 
-# parameters: path to data, RPN expression (obtained from bf)
+# Parameters: path to data, RPN expression (obtained from bf)
 def final_gd(data, math_expr, lr = 1e-2, N_epochs = 5000):
     param_dict = {}
     unsnapped_param_dict = {'p':1}
 
     def unsnap_recur(expr, param_dict, unsnapped_param_dict):
-        """Recursively transform each numerical value into a learnable parameter."""
-        import sympy
-        from sympy import Symbol
+        # Recursively transform each numerical value into a learnable parameter.
         if isinstance(expr, sympy.numbers.Float) or isinstance(expr, sympy.numbers.Integer) or isinstance(expr, sympy.numbers.Rational) or isinstance(expr, sympy.numbers.Pi):
             used_param_names = list(param_dict.keys()) + list(unsnapped_param_dict)
             unsnapped_param_name = get_next_available_key(used_param_names, "p", is_underscore=False)
@@ -93,7 +91,7 @@ def final_gd(data, math_expr, lr = 1e-2, N_epochs = 5000):
 
 
     for i in range(N_epochs):
-        # this order is fixed i.e. first parameters
+        # This order is fixed i.e. first parameters
         yy = f(*input)
         loss = torch.mean((yy-y)**2)
         loss.backward()
@@ -105,7 +103,7 @@ def final_gd(data, math_expr, lr = 1e-2, N_epochs = 5000):
             break
 
     for i in range(N_epochs):
-        # this order is fixed i.e. first parameters
+        # This order is fixed i.e. first parameters
         yy = f(*input)
         loss = torch.mean((yy-y)**2)
         loss.backward()
@@ -120,7 +118,7 @@ def final_gd(data, math_expr, lr = 1e-2, N_epochs = 5000):
         if torch.isnan(trainable_parameters[nan_i])==True or abs(trainable_parameters[nan_i])>1e7:
             return 1000000, 10000000, "1"
 
-    # get the updated symbolic regression
+    # Get the updated symbolic regression
     ii = -1
     for parm in unsnapped_param_dict:
         if ii == -1:
