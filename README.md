@@ -20,7 +20,7 @@ Move into a clean directory and run the following Python commands:
     
 This example will get solved in about 10-30 minutes depending on what computer you have and whether you have a GPU.
 
-Here ‘example.txt’ contains the data table to perform symbolic regression on, with columns separated by spaces, commas or tabs. The other parameters control the search: here the brute-force modules tries combinations of the 14 basic operations in ‘14ops.txt’ for up to 30 seconds, polynomial fits are tried up to degree 3, and the interpolating neural network is trained for up to 500 epochs.
+Here ‘example.txt’ contains the data table to perform symbolic regression on, with columns separated by spaces, commas or tabs. The other parameters control the search: here the brute-force modules tries combinations of the 14 basic operations in ‘14ops.txt’ for up to 60 seconds, polynomial fits are tried up to degree 3, and the interpolating neural network is trained for up to 500 epochs.
 
 # AI-Feynman
 
