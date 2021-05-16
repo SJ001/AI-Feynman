@@ -72,3 +72,12 @@ If you compare with, build on, or use aspects of the AI Feynman work, please cit
   publisher={American Association for the Advancement of Science}
 }
 ```
+
+```
+@article{udrescu2020ai,
+  title={AI Feynman 2.0: Pareto-optimal symbolic regression exploiting graph modularity},
+  author={Udrescu, Silviu-Marian and Tan, Andrew and Feng, Jiahai and Neto, Orisvaldo and Wu, Tailin and Tegmark, Max},
+  journal={arXiv preprint arXiv:2006.10782},
+  year={2020}
+}
+```
