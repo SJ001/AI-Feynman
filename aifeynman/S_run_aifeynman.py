@@ -297,7 +297,8 @@ def run_aifeynman(pathdir,filename,BF_try_time,BF_ops_file_type, polyfit_deg=4, 
     # Run gradient descent on the data one more time
     for i in range(len(PA_list)):
         try:
-            gd_update = final_gd(pathdir,filename,PA_list[i][-1])
+            dt = np.loadtxt(pathdir+filename)
+            gd_update = final_gd(dt,PA_list[i][-1])
             PA.add(Point(x=gd_update[1],y=gd_update[0],data=gd_update[2]))
         except:
             continue
