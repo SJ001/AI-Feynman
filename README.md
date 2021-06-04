@@ -1,3 +1,27 @@
+# Quick Start
+## Installation
+It's strongly recommended to setup a fresh virtual environment by typing
+
+    virtualenv -p python3 feyn
+    source feyn/bin/activate
+    
+First install numpy with `pip install numpy`.
+The 'aifeynman' package is available on PyPI and can be installed with `pip install aifeynman`.
+
+Note that for now, AI Feynman is supported only for Linux and Mac environments.
+
+## First example
+Move into a clean directory and run the following Python commands:
+
+    import aifeynman
+
+    aifeynman.get_demos("example_data") # Download examples from server
+    aifeynman.run_aifeynman("./example_data/", "example1.txt", 60, "14ops.txt", polyfit_deg=3, NN_epochs=500)
+    
+This example will get solved in about 10-30 minutes depending on what computer you have and whether you have a GPU.
+
+Here ‘example.txt’ contains the data table to perform symbolic regression on, with columns separated by spaces, commas or tabs. The other parameters control the search: here the brute-force modules tries combinations of the 14 basic operations in ‘14ops.txt’ for up to 60 seconds, polynomial fits are tried up to degree 3, and the interpolating neural network is trained for up to 500 epochs.
+
 # AI-Feynman
 
 This code is an improved implementation of AI Feynman: a Physics-Inspired Method for Symbolic Regression, Silviu-Marian Udrescu and Max Tegmark (2019) [[Science Advances](https://advances.sciencemag.org/content/6/16/eaay2631/tab-pdf)] and AI Feynman 2.0: Pareto-optimal symbolic regression exploiting graph modularity, Udrescu S.M. et al. (2020) [[arXiv](https://arxiv.org/abs/2006.10782)].
@@ -46,5 +70,14 @@ If you compare with, build on, or use aspects of the AI Feynman work, please cit
   pages={eaay2631},
   year={2020},
   publisher={American Association for the Advancement of Science}
+}
+```
+
+```
+@article{udrescu2020ai,
+  title={AI Feynman 2.0: Pareto-optimal symbolic regression exploiting graph modularity},
+  author={Udrescu, Silviu-Marian and Tan, Andrew and Feng, Jiahai and Neto, Orisvaldo and Wu, Tailin and Tegmark, Max},
+  journal={arXiv preprint arXiv:2006.10782},
+  year={2020}
 }
 ```
