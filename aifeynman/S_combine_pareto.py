@@ -28,7 +28,8 @@ def combine_pareto(input_data,PA1,PA2,idx_list_1,idx_list_2,PA,sep_type = "+"):
                 new_eq = "(" + exp1 + ")" + sep_type + "(" + exp2 + ")"
                 compl = get_expr_complexity(new_eq)
                 PA.add(Point(x=compl,y=get_symbolic_expr_error(input_data,new_eq),data=new_eq))
-            except:
+            except Exception as e:
+                print("Non-fatal error occurred in method combine_pareto():\n{}\nContinuing.".format(e))
                 continue
     return PA
 

@@ -82,7 +82,7 @@ def polyfit(maxdeg, filename):
         eq = mk_sympy_function(parameters,n_variables,deg)
         try:
             eq = eq.subs("z0","x0")
-        except:
+        except ValueError:
             pass
 
     return (eq, params_error)

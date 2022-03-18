@@ -58,7 +58,8 @@ def brute_force_comp(pathdir, filename, BF_try_time, BF_ops_file_type, sigma=10,
 
     try:
         subprocess.call(["feynman_sr_mdl4"], timeout=try_time)
-    except:
+    except Exception as e:
+        print("Non-fatal error occurred while running brute force process:\n{}\nContinuing.".format(e))
         pass
 
     return 1

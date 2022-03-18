@@ -1,8 +1,11 @@
-python >= 3.6
 torch >= 1.4.0
 matplotlib
-sympy = 1.4
+sympy == 1.4
 pandas
 scipy
 sortedcontainers
-gfortran
+tqdm >= 4.60.0
+
+# Additional requirements:
+# python >= 3.6
+# gofortran

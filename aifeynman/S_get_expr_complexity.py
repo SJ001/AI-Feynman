@@ -13,10 +13,7 @@ def get_expr_complexity(expr):
     numbers_expr = [subexpression for subexpression in preorder_traversal(expr) if is_atomic_number(subexpression)]
 
     for j in numbers_expr:
-        try:
-            compl = compl + get_number_DL_snapped(float(j))
-        except:
-            compl = compl + 1000000
+        compl = compl + get_number_DL_snapped(float(j))
 
     n_variables = len(expr.free_symbols)
     n_operations = len(count_ops(expr,visual=True).free_symbols)

@@ -33,7 +33,8 @@ def get_symbolic_expr_error(data,expr):
         else:
             try:
                 return np.mean(np.log2(1+abs(f(*real_variables)[good_idx]-data[good_idx][:,-1])*2**30))
-            except:
+            except IndexError:
                 return np.mean(np.log2(1+abs(f(*real_variables)-data[:,-1])*2**30))
-    except:
+    except Exception as e:
+        print("Non-fatal error occurred while calculating symbolic expression error:\n{}\nContinuing.".format(e))
         return 1000000

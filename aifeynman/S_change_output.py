@@ -1,182 +1,43 @@
 import numpy as np
 import os
+import traceback
 from .S_run_bf_polyfit import run_bf_polyfit
 
-def get_acos(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=3):
+
+def get_transform(pathdir, filename, BF_try_time, BF_ops_file_type, PA, basis_func, polyfit_deg=3, logger=None):
+    pathdir_write_to = "results/mystery_world_{}/".format(basis_func)
     try:
         os.mkdir(pathdir_write_to)
-    except:
+    except OSError:
         pass
-    data = np.loadtxt(pathdir+filename)
+    basis_func_definition = {
+        "asin": lambda d: np.arcsin(d),
+        "acos": lambda d: np.arccos(d),
+        "atan": lambda d: np.arctan(d),
+        "sin": lambda d: np.sin(d),
+        "cos": lambda d: np.cos(d),
+        "tan": lambda d: np.tan(d),
+        "exp": lambda d: np.exp(d),
+        "log": lambda d: np.log(d),
+        "inverse": lambda d: 1/d,
+        "sqrt": lambda d: np.sqrt(d),
+        "squared": lambda d: d**2,
+        "": lambda d: d
+    }
+
+    data = np.loadtxt(pathdir + filename)
     try:
-        data[:,-1] = np.arccos(data[:,-1])
-        np.savetxt(pathdir_write_to+filename,data)
-        PA = run_bf_polyfit(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg, "acos")
-    except:
+        f = basis_func_definition[basis_func]
+    except KeyError:
+        logger.warning(f"No definition for basis function {basis_func} was given. Skipping.")
+        logger.debug(traceback.format_exc())
         return PA
-
-    return PA
-
-def get_asin(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=3):
     try:
-        os.mkdir(pathdir_write_to)
-    except:
-        pass
-    data = np.loadtxt(pathdir+filename)
-    try:
-        data[:,-1] = np.arcsin(data[:,-1])
-        np.savetxt(pathdir_write_to+filename,data)
-        PA = run_bf_polyfit(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg, "asin")
-    except:
+        data[:,-1] = f(data[:,-1])
+        np.savetxt(pathdir_write_to + filename, data)
+        PA = run_bf_polyfit(pathdir, pathdir_write_to, filename, BF_try_time, BF_ops_file_type, PA, polyfit_deg, basis_func, logger)
+    except Exception as e:
+        logger.info(f"Exception raised:\n{e}\nContinuing without this round of BF.")
+        logger.debug(traceback.format_exc())
         return PA
-
     return PA
-
-def get_atan(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=3):
-    try:
-        os.mkdir(pathdir_write_to)
-    except:
-        pass
-    data = np.loadtxt(pathdir+filename)
-    try:
-        data[:,-1] = np.arctan(data[:,-1])
-        np.savetxt(pathdir_write_to+filename,data)
-        PA = run_bf_polyfit(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg, "atan")
-    except:
-        return PA
-
-    return PA
-
-
-def get_cos(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=3):
-    try:
-        os.mkdir(pathdir_write_to)
-    except:
-        pass
-    data = np.loadtxt(pathdir+filename)
-    try:
-        data[:,-1] = np.cos(data[:,-1])
-        np.savetxt(pathdir_write_to+filename,data)
-        PA = run_bf_polyfit(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg, "cos")
-    except:
-        return PA
-
-    return PA
-
-
-def get_exp(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=3):
-    try:
-        os.mkdir(pathdir_write_to)
-    except:
-        pass
-    data = np.loadtxt(pathdir+filename)
-    try:
-        data[:,-1] = np.exp(data[:,-1])
-        np.savetxt(pathdir_write_to+filename,data)
-        PA = run_bf_polyfit(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg, "exp")
-    except:
-        return PA
-
-    return PA
-
-
-def get_inverse(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=3):
-    try:
-        os.mkdir(pathdir_write_to)
-    except:
-        pass
-    data = np.loadtxt(pathdir+filename)
-    try:
-        data[:,-1] = 1/data[:,-1]
-        np.savetxt(pathdir_write_to+filename,data)
-        PA = run_bf_polyfit(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg, "inverse")
-    except:
-        return PA
-
-    return PA
-
-
-def get_log(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=3):
-    try:
-        os.mkdir(pathdir_write_to)
-    except:
-        pass
-    data = np.loadtxt(pathdir+filename)
-    try:
-        data[:,-1] = np.log(data[:,-1])
-        np.savetxt(pathdir_write_to+filename,data)
-        PA = run_bf_polyfit(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg, "log")
-    except:
-        return PA
-
-    return PA
-
-
-def get_sin(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=3):
-    try:
-        os.mkdir(pathdir_write_to)
-    except:
-        pass
-    data = np.loadtxt(pathdir+filename)
-    try:
-        data[:,-1] = np.sin(data[:,-1])
-        np.savetxt(pathdir_write_to+filename,data)
-        PA = run_bf_polyfit(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg, "sin")
-    except:
-        return PA
-
-    return PA
-
-
-def get_sqrt(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=3):
-    try:
-        os.mkdir(pathdir_write_to)
-    except:
-        pass
-    data = np.loadtxt(pathdir+filename)
-    try:
-        data[:,-1] = np.sqrt(data[:,-1])
-        np.savetxt(pathdir_write_to+filename,data)
-        PA = run_bf_polyfit(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg, "sqrt")
-
-    except:
-        return PA
-
-    return PA
-
-
-def get_squared(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=3):
-    try:
-        os.mkdir(pathdir_write_to)
-    except:
-        pass
-    data = np.loadtxt(pathdir+filename)
-    try:
-        data[:,-1] = data[:,-1]**2
-        np.savetxt(pathdir_write_to+filename,data)
-        PA = run_bf_polyfit(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg, "squared")
-
-    except:
-        return PA
-
-    return PA
-
-
-def get_tan(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=3):
-    try:
-        os.mkdir(pathdir_write_to)
-    except:
-        pass
-    data = np.loadtxt(pathdir+filename)
-    try:
-        data[:,-1] = np.tan(data[:,-1])
-        np.savetxt(pathdir_write_to+filename,data)
-        PA = run_bf_polyfit(pathdir,pathdir_write_to,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg, "tan")
-
-    except:
-        return PA
-
-    return PA
-
-
-

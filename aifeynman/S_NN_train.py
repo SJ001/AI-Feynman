@@ -12,6 +12,7 @@ from matplotlib import pyplot as plt
 import torch.utils.data as utils
 import time
 import os
+from tqdm import tqdm
 
 bs = 2048
 wd = 1e-2
@@ -40,7 +41,7 @@ def rmse_loss(pred, targ):
     denom = torch.sqrt(denom.sum()/len(denom))
     return torch.sqrt(F.mse_loss(pred, targ))/denom
 
-def NN_train(pathdir, filename, epochs=1000, lrs=1e-2, N_red_lr=4, pretrained_path=""):
+def NN_train(pathdir, filename, epochs=1000, lrs=1e-2, N_red_lr=1, pretrained_path=""):
     try:
         os.mkdir("results/NN_trained_models/")
     except:
@@ -116,7 +117,7 @@ def NN_train(pathdir, filename, epochs=1000, lrs=1e-2, N_red_lr=4, pretrained_pa
 
         for i_i in range(N_red_lr):
             optimizer_feynman = optim.Adam(model_feynman.parameters(), lr = lrs)
-            for epoch in range(epochs):
+            for epoch in tqdm(range(epochs)):
                 model_feynman.train()
                 for i, data in enumerate(my_dataloader):
                     optimizer_feynman.zero_grad()

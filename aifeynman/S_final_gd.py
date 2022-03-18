@@ -133,10 +133,8 @@ def final_gd(data, math_expr, lr = 1e-2, N_epochs = 5000):
     numbers_expr = [subexpression for subexpression in preorder_traversal(eq) if is_atomic_number(subexpression)]
     complexity = 0
     for j in numbers_expr:
-        try:
-            complexity = complexity + get_number_DL_snapped(float(j))
-        except:
-            complexity = complexity + 1000000
+        complexity = complexity + get_number_DL_snapped(float(j))
+
     n_variables = len(eq.free_symbols)
     n_operations = len(count_ops(eq,visual=True).free_symbols)
     if n_operations!=0 or n_variables!=0:

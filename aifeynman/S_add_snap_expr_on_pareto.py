@@ -90,7 +90,8 @@ def add_snap_expr_on_pareto(pathdir, filename, math_expr, PA, DR_file=""):
             new_eq = re.sub(r"(pp\d*)",r"{\1}",str(eq))
             new_eq = new_eq.format_map(temp_unsnapped_param_dict)
             integer_snapped_expr = integer_snapped_expr + [parse_expr(new_eq)]
-        except:
+        except Exception as e:
+            print("Non-fatal error occurred while running integer snap:\n{}\nContinuing.".format(e))
             continue
 
 
@@ -115,7 +116,8 @@ def add_snap_expr_on_pareto(pathdir, filename, math_expr, PA, DR_file=""):
             new_eq = re.sub(r"(pp\d*)",r"{\1}",str(eq))
             new_eq = new_eq.format_map(temp_unsnapped_param_dict)
             rational_snapped_expr = rational_snapped_expr + [parse_expr(new_eq)]
-        except:
+        except Exception as e:
+            print("Non-fatal error occurred while running rational snap:\n{}\nContinuing.".format(e))
             continue
 
     snapped_expr = np.append(integer_snapped_expr,rational_snapped_expr)
@@ -169,7 +171,8 @@ def add_snap_expr_on_pareto(pathdir, filename, math_expr, PA, DR_file=""):
                     snapped_complexity = snapped_complexity + (n_variables+n_operations)*np.log2((n_variables+n_operations))
 
             PA.add(Point(x=snapped_complexity, y=snapped_error, data=str(expr)))
-        except:
+        except Exception as e:
+            print("Non-fatal error occurred while calculating complexity of expression:\n{}\nContinuing.".format(e))
             continue
     return(PA)
 

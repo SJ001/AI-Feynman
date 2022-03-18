@@ -1,4 +1,5 @@
 # add a function to compte complexity
+import traceback
 
 from .get_pareto import Point, ParetoSet
 from .RPN_to_pytorch import RPN_to_pytorch
@@ -17,12 +18,12 @@ import os
 from os import path
 
 
-def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=3, output_type=""):
+def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg=3, output_type="", logger=None):
     input_data = np.loadtxt(pathdir_transformed+filename)
 #############################################################################################################################
     if np.isnan(input_data).any()==False:
         # run BF on the data (+)
-        print("Checking for brute force + \n")
+        print("Checking for brute force + and output_type {}\n".format(output_type))
         brute_force(pathdir_transformed,filename,BF_try_time,BF_ops_file_type,"+")
 
         try:
@@ -70,10 +71,8 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
                     numbers_expr = [subexpression for subexpression in preorder_traversal(expr) if is_atomic_number(subexpression)]
                     compl = 0
                     for j in numbers_expr:
-                        try:
-                            compl = compl + get_number_DL_snapped(float(j))
-                        except:
-                            compl = compl + 1000000
+                        compl = compl + get_number_DL_snapped(float(j))
+
 
                     # Add the complexity due to symbols
                     n_variables = len(expr.free_symbols)
@@ -82,7 +81,10 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
                         compl = compl + (n_variables+n_operations)*np.log2((n_variables+n_operations))
 
                     complexity = complexity + [compl]
-                except:
+                except Exception as e:
+                    if logger is not None:
+                        logger.info("Non-fatal error occurred while reading results from brute force:\n{}\nContinuing.".format(e))
+                        logger.debug(traceback.format_exc())
                     continue
 
             for i in range(len(complexity)):
@@ -93,10 +95,15 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
                 try:
                     bf_gd_update = RPN_to_pytorch(input_data,eqns[i])
                     PA.add(Point(x=bf_gd_update[1],y=bf_gd_update[0],data=bf_gd_update[2]))
-                except:
+                except Exception as e:
+                    if logger is not None:
+                        logger.info("Non-fatal error occurred while evaluating gradient descent on BF result:\n{}\nContinuing.".format(e))
+                        logger.debug(traceback.format_exc())
                     continue
-        except:
-            pass
+        except Exception as e:
+            if logger is not None:
+                logger.info("Non-fatal error occurred while reading result from BF:\n{}\nContinuing.".format(e))
+                logger.debug(traceback.format_exc())
 
     #############################################################################################################################
         # run BF on the data (*)
@@ -148,10 +155,8 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
                     numbers_expr = [subexpression for subexpression in preorder_traversal(expr) if is_atomic_number(subexpression)]
                     compl = 0
                     for j in numbers_expr:
-                        try:
-                            compl = compl + get_number_DL_snapped(float(j))
-                        except:
-                            compl = compl + 1000000
+                        compl = compl + get_number_DL_snapped(float(j))
+
 
                     # Add the complexity due to symbols
                     n_variables = len(expr.free_symbols)
@@ -160,8 +165,10 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
                         compl = compl + (n_variables+n_operations)*np.log2((n_variables+n_operations))
 
                     complexity = complexity + [compl]
-                except:
-                    continue
+                except Exception as e:
+                    if logger is not None:
+                        logger.info("Non-fatal error occurred while reading results from brute force:\n{}\nContinuing.".format(e))
+                        logger.debug(traceback.format_exc())
 
             # add the BF output to the Pareto plot
             for i in range(len(complexity)):
@@ -172,10 +179,16 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
                 try:
                     bf_gd_update = RPN_to_pytorch(input_data,eqns[i])
                     PA.add(Point(x=bf_gd_update[1],y=bf_gd_update[0],data=bf_gd_update[2]))
-                except:
+                except Exception as e:
+                    if logger is not None:
+                        logger.info("Non-fatal error occurred while evaluating gradient descent on BF result:\n{}\nContinuing.".format(e))
+                        logger.debug(traceback.format_exc())
                     continue
-        except:
-            pass
+        except Exception as e:
+            if logger is not None:
+                logger.info("Non-fatal error occurred while reading result from BF:\n{}\nContinuing.".format(e))
+                logger.debug(traceback.format_exc())
+
 
     #############################################################################################################################
         # run polyfit on the data
@@ -223,7 +236,10 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
                 n_operations = len(count_ops(polyfit_result[0],visual=True).free_symbols)
                 if n_operations!=0 or n_variables!=0:
                     complexity = complexity + (n_variables+n_operations)*np.log2((n_variables+n_operations))
-            except:
+            except Exception as e:
+                if logger is not None:
+                    logger.info("Non-fatal error occurred while evaluating complexity due to symbols:\n{}\nContinuing.".format(e))
+                    logger.debug(traceback.format_exc())
                 pass
 
             #run zero snap on polyfit output
@@ -234,8 +250,10 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
             for l in range(len(PA_poly.get_pareto_points())):
                 PA.add(Point(PA_poly.get_pareto_points()[l][0],PA_poly.get_pareto_points()[l][1],PA_poly.get_pareto_points()[l][2]))
 
-        except:
-            pass
+        except Exception as e:
+            if logger is not None:
+                logger.info("Non-fatal error occurred while running polyfit:\n{}\nContinuing.".format(e))
+                logger.debug(traceback.format_exc())
 
         print("Pareto frontier in the current branch:")
         print("")
@@ -246,4 +264,5 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
 
         return PA
     else:
+        logger.info(f"Basis function {output_type} was skipped because when applied to input data it produces NaNs.")
         return PA

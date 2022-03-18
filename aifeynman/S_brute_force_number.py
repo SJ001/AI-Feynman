@@ -40,7 +40,8 @@ def brute_force_number(pathdir, filename):
 
     try:
         subprocess.call(["feynman_sr1"], timeout=try_time)
-    except:
+    except Exception as e:
+        print("Non-fatal error occurred while running brute force process:\n{}\nContinuing.".format(e))
         pass
 
     return 1

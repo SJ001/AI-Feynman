@@ -95,7 +95,8 @@ def add_bf_on_numbers_on_pareto(pathdir, filename, PA, math_expr):
                         jj = jj + 1
 
                 bf_on_numbers_expr = bf_on_numbers_expr + [eq]
-        except:
+        except Exception as e:
+            print("Non-fatal error occurred while running number brute force:\n{}\nContinuing.".format(e))
             continue
 
     for i in range(len(bf_on_numbers_expr)):
@@ -117,7 +118,8 @@ def add_bf_on_numbers_on_pareto(pathdir, filename, PA, math_expr):
                 snapped_complexity = snapped_complexity + (n_variables+n_operations)*np.log2((n_variables+n_operations))
 
             PA.add(Point(x=snapped_complexity, y=snapped_error, data=str(expr)))
-        except:
+        except Exception as e:
+            print("Non-fatal error occurred while calculating expression complexity:\n{}\nContinuing.".format(e))
             continue
 
     return(PA)

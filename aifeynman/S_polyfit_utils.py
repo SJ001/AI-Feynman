@@ -23,7 +23,8 @@ def multipolyfit(xs, y, deg):
     xs = asarray(xs)
     try:
         num_covariates = xs.shape[1]
-    except:
+    except Exception as e:
+        print("Non-fatal error occurred in method multipolyfit():\n{}\nContinuing.".format(e))
         num_covariates = 1
         xs = np.reshape(xs,(len(xs),1))
 

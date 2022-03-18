@@ -30,5 +30,6 @@ def evaluate_derivatives(pathdir,filename,model):
         save_data = np.column_stack((data,save_grads))
         np.savetxt("results/gradients_comp_%s.txt" %filename,save_data)
         return 1
-    except:
+    except Exception as e:
+        print("Non-fatal error occurred while evaluating derivatives:\n{}\nContinuing.".format(e))
         return 0

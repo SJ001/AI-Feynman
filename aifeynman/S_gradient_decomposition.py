@@ -33,10 +33,7 @@ def powerset_atleast_2(iterable, max_subset_size):
 def evaluate_derivatives(model, s,  pts):
     
     pts = pts.clone().detach()
-    try:
-        device = 'cuda' if model.is_cuda else 'cpu'
-    except:
-        device = 'cpu'
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
     pts = pts.to(device=device)
 
     pts.requires_grad_(True)

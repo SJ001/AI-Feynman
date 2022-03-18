@@ -6,6 +6,8 @@ import csv
 import os
 import shutil
 import subprocess
+from tqdm import tqdm
+from time import time
 import sys
 from subprocess import call
 
@@ -59,13 +61,39 @@ def brute_force(pathdir, filename, BF_try_time, BF_ops_file_type, sep_type="*", 
 
     if sep_type == "*":
         try:
+            # this might be what i need for redirecting the stdout
+            # https://eli.thegreenplace.net/2015/redirecting-all-kinds-of-stdout-in-python/
+            # Reference:
+            # https://fabianlee.org/2019/09/15/python-getting-live-output-from-subprocess-using-poll/
             # subprocess.call(["feynman_sr2"], timeout=try_time)
-            subprocess.call(["feynman_sr_mdl_mult"], timeout=try_time)
-        except:
-            pass
+
+            with tqdm(total=try_time, desc="Running BF with operator *", position=2, leave=False) as bf_bar:
+                start_time = time()
+                proc = subprocess.Popen(["timeout", str(try_time), "feynman_sr_mdl_mult"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                while True:
+                    bf_bar.update(n=time()-start_time)
+                    output = proc.stdout.readline()
+                    if proc.poll() is not None:
+                        break
+                    if output:
+                        print(output.strip().decode())
+            #subprocess.call(["feynman_sr_mdl_mult"], timeout=try_time)
+        except Exception as e:
+            print("Non-fatal error occurred while running brute force process:\n{}\nContinuing.".format(e))
     if sep_type == "+":
         try:
+            with tqdm(total=try_time, desc="Running BF with operator +", position=2, leave=False) as bf_bar:
+                start_time = time()
+                proc = subprocess.Popen(["timeout", str(try_time), "feynman_sr_mdl_plus"], stdout=subprocess.PIPE,
+                                        stderr=subprocess.PIPE)
+                while True:
+                    bf_bar.update(n=time() - start_time)
+                    output = proc.stdout.readline()
+                    if proc.poll() is not None:
+                        break
+                    if output:
+                        print(output.strip().decode())
             # subprocess.call(["feynman_sr3"], timeout=try_time)
-            subprocess.call(["feynman_sr_mdl_plus"], timeout=try_time)
-        except:
-            pass
+            #subprocess.call(["feynman_sr_mdl_plus"], timeout=try_time)
+        except Exception as e:
+            print("Non-fatal error occurred while running brute force process:\n{}\nContinuing.".format(e))
