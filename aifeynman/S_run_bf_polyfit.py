@@ -107,7 +107,7 @@ def run_bf_polyfit(pathdir,pathdir_transformed,filename,BF_try_time,BF_ops_file_
 
         try:
             # load the BF output data
-            bf_all_output = np.loadtxt("results.dat", dtype="str")
+            bf_all_output = np.loadtxt(pathdir + "results.dat", dtype="str")
             express = bf_all_output[:,2]
             prefactors = bf_all_output[:,1]
             prefactors = [str(i) for i in prefactors]
