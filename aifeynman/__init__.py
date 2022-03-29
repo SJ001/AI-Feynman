@@ -4,6 +4,7 @@
 
 from .S_run_aifeynman import run_aifeynman
 from .get_demos import get_demos
+from .symbolicregressor_class import SymbolicRegressor
 
 __title__ = "aifeynman"
 __version__ = "2.0.0"
