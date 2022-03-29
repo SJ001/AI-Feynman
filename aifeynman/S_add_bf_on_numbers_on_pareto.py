@@ -81,7 +81,7 @@ def add_bf_on_numbers_on_pareto(pathdir, filename, PA, math_expr, logger=None):
             np.savetxt(pathdir+"number_for_bf_%s.txt" %w, [eq_numbers[w]])
             brute_force_number(pathdir,"number_for_bf_%s.txt" %w, logger=logger)
             # Load the predictions made by the bf code
-            bf_numbers = np.loadtxt("results.dat",usecols=(1,),dtype="str")
+            bf_numbers = np.loadtxt(pathdir + "results.dat",usecols=(1,),dtype="str")
             new_numbers = copy.deepcopy(eq_numbers)
 
             # replace the number under consideration by all the proposed bf numbers

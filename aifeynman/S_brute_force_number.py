@@ -22,7 +22,7 @@ def brute_force_number(pathdir, filename, logger=None):
     file_type = "10ops.txt"
 
     try:
-        os.remove("results.dat")
+        os.remove(pathdir + "results.dat")
         os.remove("brute_solutions.dat")
         os.remove("brute_formulas.dat")
     except:
@@ -31,10 +31,12 @@ def brute_force_number(pathdir, filename, logger=None):
     print("Trying to solve mysteries with brute force...")
     print("Trying to solve {}".format(pathdir+filename))
 
-    shutil.copy2(pathdir+filename, "mystery.dat")
+    shutil.copy2(pathdir+filename, pathdir + "mystery.dat")
 
-    data = "'{}' '{}' mystery.dat results.dat".format(_get_resource(file_type),
-                                                      _get_resource("arity2templates.txt"))
+    data = "'{}' '{}' {} {}".format(_get_resource(file_type),
+                                                      _get_resource("arity2templates.txt"),
+                                                      pathdir + "mystery.dat",
+                                                      pathdir + "results.dat")
 
     with open("args.dat", 'w') as f:
         f.write(data)

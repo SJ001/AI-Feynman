@@ -6,7 +6,7 @@ from .logging import log_exception
 
 
 def get_transform(pathdir, filename, BF_try_time, BF_ops_file_type, PA, basis_func, polyfit_deg=3, logger=None):
-    pathdir_write_to = "results/mystery_world_{}/".format(basis_func)
+    pathdir_write_to = pathdir + "results/mystery_world_{}/".format(basis_func)
     try:
         os.mkdir(pathdir_write_to)
     except OSError:

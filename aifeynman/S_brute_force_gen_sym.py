@@ -24,7 +24,7 @@ def brute_force_gen_sym(pathdir, filename, BF_try_time, BF_ops_file_type, sigma=
     file_type = BF_ops_file_type
 
     try:
-        os.remove("results_gen_sym.dat")
+        os.remove(pathdir + "results_gen_sym.dat")
     except:
         pass
 
@@ -46,11 +46,13 @@ def brute_force_gen_sym(pathdir, filename, BF_try_time, BF_ops_file_type, sigma=
     print("Trying to solve mysteries with brute force...")
     print("Trying to solve {}".format(pathdir+filename))
 
-    shutil.copy2(pathdir+filename, "mystery.dat")
+    shutil.copy2(pathdir+filename, pathdir + "mystery.dat")
 
-    data = "'{}' '{}' mystery.dat results_gen_sym.dat {:f} {:f}".format(_get_resource(file_type),
+    data = "'{}' '{}' {} {} {:f} {:f}".format(_get_resource(file_type),
                                                                         _get_resource(
         "arity2templates.txt"),
+        pathdir + "mystery.dat",
+        pathdir + "results_gen_sym.dat",
         sigma,
         band)
 

@@ -24,7 +24,7 @@ def brute_force_comp(pathdir, filename, BF_try_time, BF_ops_file_type, sigma=10,
     file_type = BF_ops_file_type
 
     try:
-        os.remove("results_comp.dat")
+        os.remove(pathdir + "results_comp.dat")
     except:
         pass
 
@@ -46,11 +46,13 @@ def brute_force_comp(pathdir, filename, BF_try_time, BF_ops_file_type, sigma=10,
     print("Trying to solve mysteries with brute force...")
     print("Trying to solve {}".format(pathdir+filename))
 
-    shutil.copy2(pathdir+filename, "mystery.dat")
+    shutil.copy2(pathdir+filename, pathdir + "mystery.dat")
 
-    data = "'{}' '{}' mystery.dat results_comp.dat {:f} {:f}".format(_get_resource(file_type),
+    data = "'{}' '{}' {} {} {:f} {:f}".format(_get_resource(file_type),
                                                                      _get_resource(
         "arity2templates.txt"),
+        pathdir + "mystery.dat",
+        pathdir + "results_comp.dat",
         sigma,
         band)
 
