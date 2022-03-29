@@ -2,6 +2,7 @@ import numpy as np
 import os
 import traceback
 from .S_run_bf_polyfit import run_bf_polyfit
+from .logging import log_exception
 
 
 def get_transform(pathdir, filename, BF_try_time, BF_ops_file_type, PA, basis_func, polyfit_deg=3, logger=None):
@@ -37,7 +38,6 @@ def get_transform(pathdir, filename, BF_try_time, BF_ops_file_type, PA, basis_fu
         np.savetxt(pathdir_write_to + filename, data)
         PA = run_bf_polyfit(pathdir, pathdir_write_to, filename, BF_try_time, BF_ops_file_type, PA, polyfit_deg, basis_func, logger)
     except Exception as e:
-        logger.info(f"Exception raised:\n{e}\nContinuing without this round of BF.")
-        logger.debug(traceback.format_exc())
+        log_exception(logger, e)
         return PA
     return PA

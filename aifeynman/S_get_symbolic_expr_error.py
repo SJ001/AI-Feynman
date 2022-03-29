@@ -7,8 +7,9 @@ import matplotlib.pyplot as plt
 import os
 from os import path
 from sympy import Symbol, lambdify, N
+from .logging import log_exception
 
-def get_symbolic_expr_error(data,expr):
+def get_symbolic_expr_error(data,expr, logger=None):
     try:
         N_vars = len(data[0])-1
         possible_vars = ["x%s" %i for i in np.arange(0,30,1)]
@@ -36,5 +37,5 @@ def get_symbolic_expr_error(data,expr):
             except IndexError:
                 return np.mean(np.log2(1+abs(f(*real_variables)-data[:,-1])*2**30))
     except Exception as e:
-        print("Non-fatal error occurred while calculating symbolic expression error:\n{}\nContinuing.".format(e))
+        log_exception(logger, e)
         return 1000000

@@ -5,7 +5,7 @@ from matplotlib import pyplot as plt
 from scipy.sparse.linalg import lsqr
 import os
 from sympy import symbols, Add, Mul, S
-
+from .logging import log_exception
 
 def basis_vector(n, i):
     x = zeros(n, dtype=int)
@@ -16,7 +16,7 @@ def as_tall(x):
     return x.reshape(x.shape + (1,))
 
 
-def multipolyfit(xs, y, deg):
+def multipolyfit(xs, y, deg, logger=None):
     
     y = asarray(y).squeeze()
     rows = y.shape[0]
@@ -24,7 +24,7 @@ def multipolyfit(xs, y, deg):
     try:
         num_covariates = xs.shape[1]
     except Exception as e:
-        print("Non-fatal error occurred in method multipolyfit():\n{}\nContinuing.".format(e))
+        log_exception(logger, e)
         num_covariates = 1
         xs = np.reshape(xs,(len(xs),1))
 
@@ -43,10 +43,10 @@ def multipolyfit(xs, y, deg):
     return (params, rms)
 
 
-def getBest(xs,y,max_deg):
+def getBest(xs,y,max_deg, logger=None):
     results = []
     for i in range(0,max_deg+1):
-        results = results + [multipolyfit(xs,y,i)]
+        results = results + [multipolyfit(xs,y,i, logger=logger)]
     results = np.array(results)
     # get the parameters and error of the fit with the lowest rms error
     params = results[np.argmin(results[:,1:])][0]

@@ -14,9 +14,10 @@ import sympy as sp
 from sympy.parsing.sympy_parser import parse_expr
 
 from .resources import _get_resource
+from .logging import log_exception
 
 
-def brute_force_number(pathdir, filename):
+def brute_force_number(pathdir, filename, logger=None):
     try_time = 2
     file_type = "10ops.txt"
 
@@ -41,7 +42,7 @@ def brute_force_number(pathdir, filename):
     try:
         subprocess.call(["feynman_sr1"], timeout=try_time)
     except Exception as e:
-        print("Non-fatal error occurred while running brute force process:\n{}\nContinuing.".format(e))
+        log_exception(logger, e)
         pass
 
     return 1

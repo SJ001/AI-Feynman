@@ -22,7 +22,7 @@ def mk_sympy_function(coeffs, num_covariates, deg):
     else:
         return coeffs[0]
 
-def polyfit(maxdeg, filename):
+def polyfit(maxdeg, filename, logger=None):
     n_variables = np.loadtxt(filename, dtype='str').shape[1]-1
     variables = np.loadtxt(filename, usecols=(0,))
     means = [np.mean(variables)]
@@ -45,7 +45,7 @@ def polyfit(maxdeg, filename):
 
         if np.isnan(C_1_2).any()==False:
             variables = np.matmul(C_1_2,variables.T).T
-            res = getBest(variables,f_dependent,maxdeg)
+            res = getBest(variables,f_dependent,maxdeg, logger=logger)
             parameters = res[0]
             params_error = res[1]
             deg = res[2]
@@ -64,7 +64,7 @@ def polyfit(maxdeg, filename):
             eq = simplify(eq)
 
         else:
-            res = getBest(variables,f_dependent,maxdeg)
+            res = getBest(variables,f_dependent,maxdeg, logger=logger)
             parameters = res[0]
             params_error = res[1]
             deg = res[2]
@@ -75,7 +75,7 @@ def polyfit(maxdeg, filename):
             eq = simplify(eq)
 
     else:
-        res = getBest(variables,f_dependent,maxdeg)
+        res = getBest(variables,f_dependent,maxdeg, logger=logger)
         parameters = res[0]
         params_error = res[1]
         deg = res[2]

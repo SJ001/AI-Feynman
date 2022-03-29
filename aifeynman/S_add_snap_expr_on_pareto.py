@@ -26,6 +26,7 @@ from sympy import Symbol, lambdify, N, simplify, powsimp, Rational, symbols, S,F
 import re
 
 from .S_get_number_DL_snapped import get_number_DL_snapped
+from .logging import log_exception
 
 def intify(expr):
     floats = S(expr).atoms(Float)
@@ -33,7 +34,7 @@ def intify(expr):
     return expr.xreplace(dict(zip(ints, [int(i) for i in ints])))
 
 # parameters: path to data, math (not RPN) expression
-def add_snap_expr_on_pareto(pathdir, filename, math_expr, PA, DR_file=""):
+def add_snap_expr_on_pareto(pathdir, filename, math_expr, PA, DR_file="", logger=None):
     input_data = np.loadtxt(pathdir+filename)
     def unsnap_recur(expr, param_dict, unsnapped_param_dict):
         """Recursively transform each numerical value into a learnable parameter."""
@@ -91,7 +92,7 @@ def add_snap_expr_on_pareto(pathdir, filename, math_expr, PA, DR_file=""):
             new_eq = new_eq.format_map(temp_unsnapped_param_dict)
             integer_snapped_expr = integer_snapped_expr + [parse_expr(new_eq)]
         except Exception as e:
-            print("Non-fatal error occurred while running integer snap:\n{}\nContinuing.".format(e))
+            log_exception(logger, e)
             continue
 
 
@@ -117,7 +118,7 @@ def add_snap_expr_on_pareto(pathdir, filename, math_expr, PA, DR_file=""):
             new_eq = new_eq.format_map(temp_unsnapped_param_dict)
             rational_snapped_expr = rational_snapped_expr + [parse_expr(new_eq)]
         except Exception as e:
-            print("Non-fatal error occurred while running rational snap:\n{}\nContinuing.".format(e))
+            log_exception(logger, e)
             continue
 
     snapped_expr = np.append(integer_snapped_expr,rational_snapped_expr)
@@ -125,7 +126,7 @@ def add_snap_expr_on_pareto(pathdir, filename, math_expr, PA, DR_file=""):
     for i in range(len(snapped_expr)):
         try:
             # Calculate the error of the new, snapped expression
-            snapped_error = get_symbolic_expr_error(input_data,str(snapped_expr[i]))
+            snapped_error = get_symbolic_expr_error(input_data,str(snapped_expr[i]), logger=logger)
             # Calculate the complexity of the new, snapped expression
             #expr = simplify(powsimp(snapped_expr[i]))
             expr = snapped_expr[i]
@@ -172,7 +173,7 @@ def add_snap_expr_on_pareto(pathdir, filename, math_expr, PA, DR_file=""):
 
             PA.add(Point(x=snapped_complexity, y=snapped_error, data=str(expr)))
         except Exception as e:
-            print("Non-fatal error occurred while calculating complexity of expression:\n{}\nContinuing.".format(e))
+            log_exception(logger, e)
             continue
     return(PA)
 

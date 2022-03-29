@@ -13,6 +13,7 @@ from torch.optim.lr_scheduler import CosineAnnealingLR
 from matplotlib import pyplot as plt
 from itertools import combinations
 import time
+from .logging import log_exception
 
 is_cuda = torch.cuda.is_available()
 
@@ -38,7 +39,7 @@ def rmse_loss(pred, targ):
     denom = torch.sqrt(denom.sum()/len(denom))
     return torch.sqrt(F.mse_loss(pred, targ))/denom
 
-def check_separability_plus(pathdir, filename):
+def check_separability_plus(pathdir, filename, logger=None):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
 
@@ -124,11 +125,11 @@ def check_separability_plus(pathdir, filename):
         return min_error, best_i, best_j, best_mu, best_sigma
                         
     except Exception as e:
-        print(e)
-        return (-1,-1,-1,-1,-1)                    
+        log_exception(logger, e)
+        return (-1,-1,-1,-1,-1)
                     
                                            
-def do_separability_plus(pathdir, filename, list_i,list_j):
+def do_separability_plus(pathdir, filename, list_i,list_j, logger=None):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
 
@@ -206,11 +207,11 @@ def do_separability_plus(pathdir, filename, list_i,list_j):
             return ("results/separable_add/",str1,"results/separable_add/",str2)
 
     except Exception as e:
-        print(e)
+        log_exception(logger, e)
         return (-1,-1)
 
         
-def check_separability_multiply(pathdir, filename):
+def check_separability_multiply(pathdir, filename, logger=None):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
 
@@ -301,12 +302,12 @@ def check_separability_multiply(pathdir, filename):
         return min_error, best_i, best_j, best_mu, best_sigma
                     
     except Exception as e:
-        print(e)
+        log_exception(logger, e)
         return (-1,-1,-1,-1,-1)                         
 
                     
                     
-def do_separability_multiply(pathdir, filename, list_i,list_j):
+def do_separability_multiply(pathdir, filename, list_i,list_j, logger=None):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
 
@@ -384,7 +385,7 @@ def do_separability_multiply(pathdir, filename, list_i,list_j):
             return ("results/separable_mult/",str1,"results/separable_mult/",str2)
 
     except Exception as e:
-        print(e)
+        log_exception(logger, e)
         return (-1,-1)
 
         

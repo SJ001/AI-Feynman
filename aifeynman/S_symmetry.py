@@ -15,6 +15,7 @@ from torch.optim.lr_scheduler import CosineAnnealingLR
 from matplotlib import pyplot as plt
 from .S_remove_input_neuron import remove_input_neuron
 import time
+from .logging import log_exception
 
 is_cuda = torch.cuda.is_available()
 
@@ -41,7 +42,7 @@ def rmse_loss(pred, targ):
     return torch.sqrt(F.mse_loss(pred, targ))/denom
 
 # checks if f(x,y)=f(x-y)
-def check_translational_symmetry_minus(pathdir, filename):
+def check_translational_symmetry_minus(pathdir, filename, logger=None):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
 
@@ -114,10 +115,10 @@ def check_translational_symmetry_minus(pathdir, filename):
         return min_error, best_i, best_j, best_mu, best_sigma
 
     except Exception as e:
-        print(e)
+        log_exception(logger, e)
         return (-1,-1,-1,-1,-1)
     
-def do_translational_symmetry_minus(pathdir, filename, i,j):
+def do_translational_symmetry_minus(pathdir, filename, i,j, logger=None):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
 
@@ -173,12 +174,12 @@ def do_translational_symmetry_minus(pathdir, filename, i,j):
             return ("results/translated_data_minus/",file_name)
 
     except Exception as e:
-        print(e)
+        log_exception(logger, e)
         return (-1,-1)
         
 
 # checks if f(x,y)=f(x/y)
-def check_translational_symmetry_divide(pathdir, filename):
+def check_translational_symmetry_divide(pathdir, filename, logger=None):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
 
@@ -251,11 +252,11 @@ def check_translational_symmetry_divide(pathdir, filename):
         return min_error, best_i, best_j, best_mu, best_sigma
 
     except Exception as e:
-        print(e)
+        log_exception(logger, e)
         return (-1,-1,-1,-1,-1)
     
     
-def do_translational_symmetry_divide(pathdir, filename, i,j):
+def do_translational_symmetry_divide(pathdir, filename, i,j, logger=None):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
 
@@ -311,11 +312,11 @@ def do_translational_symmetry_divide(pathdir, filename, i,j):
             return ("results/translated_data_divide/",file_name)
 
     except Exception as e:
-        print(e)
+        log_exception(logger, e)
         return (-1,1)
 
 # checks if f(x,y)=f(x*y)
-def check_translational_symmetry_multiply(pathdir, filename):
+def check_translational_symmetry_multiply(pathdir, filename, logger=None):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
 
@@ -388,10 +389,10 @@ def check_translational_symmetry_multiply(pathdir, filename):
         return min_error, best_i, best_j, best_mu, best_sigma
 
     except Exception as e:
-        print(e)
+        log_exception(logger, e)
         return (-1,-1,-1,-1,-1)
 
-def do_translational_symmetry_multiply(pathdir, filename, i,j):
+def do_translational_symmetry_multiply(pathdir, filename, i,j, logger=None):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
 
@@ -447,11 +448,11 @@ def do_translational_symmetry_multiply(pathdir, filename, i,j):
             return ("results/translated_data_multiply/",file_name)
 
     except Exception as e:
-        print(e)
+        log_exception(logger, e)
         return (-1,1)
 
 # checks if f(x,y)=f(x+y)
-def check_translational_symmetry_plus(pathdir, filename):
+def check_translational_symmetry_plus(pathdir, filename, logger=None):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
 
@@ -523,10 +524,10 @@ def check_translational_symmetry_plus(pathdir, filename):
         return min_error, best_i, best_j, best_mu, best_sigma
 
     except Exception as e:
-        print(e)
+        log_exception(logger, e)
         return (-1,-1,-1,-1,-1)
     
-def do_translational_symmetry_plus(pathdir, filename, i,j):
+def do_translational_symmetry_plus(pathdir, filename, i,j, logger=None):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
 
@@ -582,5 +583,5 @@ def do_translational_symmetry_plus(pathdir, filename, i,j):
             return ("results/translated_data_plus/", file_name)
         
     except Exception as e:
-        print(e)
+        log_exception(logger, e)
         return (-1,-1)

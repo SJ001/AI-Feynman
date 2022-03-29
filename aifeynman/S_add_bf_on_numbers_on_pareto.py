@@ -27,9 +27,10 @@ from sympy import Symbol, lambdify, N, simplify, powsimp
 from .RPN_to_eq import RPN_to_eq
 
 from .S_get_number_DL_snapped import get_number_DL_snapped
+from .logging import log_exception
 
 # parameters: path to data, math (not RPN) expression
-def add_bf_on_numbers_on_pareto(pathdir, filename, PA, math_expr):
+def add_bf_on_numbers_on_pareto(pathdir, filename, PA, math_expr, logger=None):
     input_data = np.loadtxt(pathdir+filename)
     def unsnap_recur(expr, param_dict, unsnapped_param_dict):
         """Recursively transform each numerical value into a learnable parameter."""
@@ -78,7 +79,7 @@ def add_bf_on_numbers_on_pareto(pathdir, filename, PA, math_expr):
             eq = eq_
 
             np.savetxt(pathdir+"number_for_bf_%s.txt" %w, [eq_numbers[w]])
-            brute_force_number(pathdir,"number_for_bf_%s.txt" %w)
+            brute_force_number(pathdir,"number_for_bf_%s.txt" %w, logger=logger)
             # Load the predictions made by the bf code
             bf_numbers = np.loadtxt("results.dat",usecols=(1,),dtype="str")
             new_numbers = copy.deepcopy(eq_numbers)
@@ -96,13 +97,13 @@ def add_bf_on_numbers_on_pareto(pathdir, filename, PA, math_expr):
 
                 bf_on_numbers_expr = bf_on_numbers_expr + [eq]
         except Exception as e:
-            print("Non-fatal error occurred while running number brute force:\n{}\nContinuing.".format(e))
+            log_exception(logger, e)
             continue
 
     for i in range(len(bf_on_numbers_expr)):
         try:
             # Calculate the error of the new, snapped expression
-            snapped_error = get_symbolic_expr_error(input_data,str(bf_on_numbers_expr[i]))
+            snapped_error = get_symbolic_expr_error(input_data,str(bf_on_numbers_expr[i]), logger=logger)
             # Calculate the complexity of the new, snapped expression
             expr = simplify(powsimp(bf_on_numbers_expr[i]))
             is_atomic_number = lambda expr: expr.is_Atom and expr.is_number
@@ -119,7 +120,7 @@ def add_bf_on_numbers_on_pareto(pathdir, filename, PA, math_expr):
 
             PA.add(Point(x=snapped_complexity, y=snapped_error, data=str(expr)))
         except Exception as e:
-            print("Non-fatal error occurred while calculating expression complexity:\n{}\nContinuing.".format(e))
+            log_exception(logger, e)
             continue
 
     return(PA)

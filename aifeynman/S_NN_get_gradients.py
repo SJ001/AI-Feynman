@@ -8,9 +8,11 @@ import sys
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from .logging import log_exception
+
 is_cuda = torch.cuda.is_available()
 
-def evaluate_derivatives(pathdir,filename,model):
+def evaluate_derivatives(pathdir,filename,model, logger=None):
     try:
         data = np.loadtxt(pathdir+filename)[:,0:-1]
         pts = np.loadtxt(pathdir+filename)[:,0:-1]
@@ -31,5 +33,5 @@ def evaluate_derivatives(pathdir,filename,model):
         np.savetxt("results/gradients_comp_%s.txt" %filename,save_data)
         return 1
     except Exception as e:
-        print("Non-fatal error occurred while evaluating derivatives:\n{}\nContinuing.".format(e))
+        log_exception(logger, e)
         return 0

@@ -10,8 +10,9 @@ from os import path
 from sympy import Symbol, lambdify, N
 from .get_pareto import Point, ParetoSet
 from .S_get_expr_complexity import get_expr_complexity
+from .logging import log_exception
 
-def combine_pareto(input_data,PA1,PA2,idx_list_1,idx_list_2,PA,sep_type = "+"):
+def combine_pareto(input_data,PA1,PA2,idx_list_1,idx_list_2,PA,sep_type = "+", logger=None):
     possible_vars = ["x%s" %i for i in np.arange(0,30,1)]
     PA1 = np.array(PA1.get_pareto_points()).astype('str')
     PA2 = np.array(PA2.get_pareto_points()).astype('str')
@@ -27,9 +28,9 @@ def combine_pareto(input_data,PA1,PA2,idx_list_1,idx_list_2,PA,sep_type = "+"):
                     exp2 = exp2.replace(possible_vars[k],possible_vars[idx_list_2[k]])
                 new_eq = "(" + exp1 + ")" + sep_type + "(" + exp2 + ")"
                 compl = get_expr_complexity(new_eq)
-                PA.add(Point(x=compl,y=get_symbolic_expr_error(input_data,new_eq),data=new_eq))
+                PA.add(Point(x=compl,y=get_symbolic_expr_error(input_data,new_eq, logger=logger),data=new_eq))
             except Exception as e:
-                print("Non-fatal error occurred in method combine_pareto():\n{}\nContinuing.".format(e))
+                log_exception(logger, e)
                 continue
     return PA
 

@@ -14,9 +14,10 @@ import sympy as sp
 from sympy.parsing.sympy_parser import parse_expr
 
 from .resources import _get_resource
+from .logging import log_exception
 
 
-def brute_force_comp(pathdir, filename, BF_try_time, BF_ops_file_type, sigma=10, band=0):
+def brute_force_comp(pathdir, filename, BF_try_time, BF_ops_file_type, sigma=10, band=0, logger=None):
 
     try_time = BF_try_time
     try_time_prefactor = BF_try_time
@@ -59,7 +60,7 @@ def brute_force_comp(pathdir, filename, BF_try_time, BF_ops_file_type, sigma=10,
     try:
         subprocess.call(["feynman_sr_mdl4"], timeout=try_time)
     except Exception as e:
-        print("Non-fatal error occurred while running brute force process:\n{}\nContinuing.".format(e))
+        log_exception(logger, e)
         pass
 
     return 1

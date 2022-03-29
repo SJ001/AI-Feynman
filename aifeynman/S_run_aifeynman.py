@@ -33,9 +33,13 @@ from .S_brute_force_gen_sym import brute_force_gen_sym
 from .S_compositionality import *
 from .S_gen_sym import *
 from .S_gradient_decomposition import identify_decompositions
+from .logging import log_exception
 
 PA = ParetoSet()
-def run_AI_all(pathdir,filename,BF_try_time=60,BF_ops_file_type="14ops", polyfit_deg=4, NN_epochs=4000, PA=PA, logger=None):
+def run_AI_all(pathdir,filename,BF_try_time=60,BF_ops_file_type="14ops", polyfit_deg=4, NN_epochs=4000, PA=PA, logger=None,
+               bases=None):
+    if bases is None:
+        bases = ["", "acos", "asin", "atan", "cos", "exp", "inverse", "log", "sin", "sqrt", "squared", "tan"]
     try:
         os.mkdir("results/")
     except:
@@ -44,7 +48,6 @@ def run_AI_all(pathdir,filename,BF_try_time=60,BF_ops_file_type="14ops", polyfit
     # load the data for different checks
     data = np.loadtxt(pathdir+filename)
 
-    bases = ["", "acos", "asin", "atan", "cos", "exp", "inverse", "log", "sin", "sqrt", "squared", "tan"]
     print(f"Starting brute force with functions {bases} and duration {BF_try_time} seconds per subprocess.")
 
     # the following with statements are used to redirect logging, stdout and stderr through tqdm.write() such that the
@@ -70,31 +73,31 @@ def run_AI_all(pathdir,filename,BF_try_time=60,BF_ops_file_type="14ops", polyfit
         pass
     elif path.exists("results/NN_trained_models/models/" + filename + ".h5"):# or len(data[0])<3:
         print("NN already trained \n")
-        print("NN loss: ", NN_eval(pathdir,filename)[0], "\n")
-        model_feynman = NN_eval(pathdir,filename)[1]
+        model_loss, model_feynman = NN_eval(pathdir, filename, logger=logger)
+        print("NN loss: ", model_loss, "\n")
     elif path.exists("results/NN_trained_models/models/" + filename + "_pretrained.h5"):
         print("Found pretrained NN \n")
         model_feynman = NN_train(pathdir,filename,NN_epochs/2,lrs=1e-3,N_red_lr=3,pretrained_path="results/NN_trained_models/models/" + filename + "_pretrained.h5")
-        print("NN loss after training: ", NN_eval(pathdir,filename), "\n")
+        print("NN loss after training: ", NN_eval(pathdir,filename, logger=logger), "\n")
     else:
         print("Training a NN on the data... \n")
         model_feynman = NN_train(pathdir,filename,NN_epochs)
-        print("NN loss: ", NN_eval(pathdir,filename), "\n")
+        print("NN loss: ", NN_eval(pathdir,filename, logger=logger), "\n")
 
-    
+
     # Check which symmetry/separability is the best
     # Symmetries
     print("Checking for symmetries...")
-    symmetry_minus_result = check_translational_symmetry_minus(pathdir,filename)
-    symmetry_divide_result = check_translational_symmetry_divide(pathdir,filename)
-    symmetry_multiply_result = check_translational_symmetry_multiply(pathdir,filename)
-    symmetry_plus_result = check_translational_symmetry_plus(pathdir,filename)
+    symmetry_minus_result = check_translational_symmetry_minus(pathdir,filename, logger=logger)
+    symmetry_divide_result = check_translational_symmetry_divide(pathdir,filename, logger=logger)
+    symmetry_multiply_result = check_translational_symmetry_multiply(pathdir,filename, logger=logger)
+    symmetry_plus_result = check_translational_symmetry_plus(pathdir,filename, logger=logger)
     print("")
 
     print("Checking for separabilities...")
     # Separabilities
     separability_plus_result = check_separability_plus(pathdir,filename)
-    separability_multiply_result = check_separability_multiply(pathdir,filename)
+    separability_multiply_result = check_separability_multiply(pathdir,filename, logger=logger)
 
     if symmetry_plus_result[0]==-1:
         idx_min = -1
@@ -119,18 +122,17 @@ def run_AI_all(pathdir,filename,BF_try_time=60,BF_ops_file_type="14ops", polyfit
     print("Checking for compositionality...")
     # Save the gradients for compositionality
     try:
-        succ_grad = evaluate_derivatives(pathdir,filename,model_feynman)
+        succ_grad = evaluate_derivatives(pathdir,filename,model_feynman, logger=logger)
     except Exception as e:
-        logger.info(f"Non-fatal error occurred while evaluating compositionality:\n{e}\nContinuing.")
-        logger.debug(traceback.format_exc())
+        log_exception(logger, e)
         succ_grad = 0
 
     idx_comp = 0
     if succ_grad == 1:
         #try:
         for qqqq in range(1):
-            brute_force_comp("results/","gradients_comp_%s.txt" %filename,600,"14ops.txt")
-            bf_all_output = np.loadtxt("results_comp.dat", dtype="str")
+            brute_force_comp("results/","gradients_comp_%s.txt" %filename,600,"14ops.txt", logger=logger)
+            bf_all_output = np.loadtxt(pathdir + "results_comp.dat", dtype="str")
             for bf_i in range(len(bf_all_output)):
                 idx_comp_temp = 0
                 try:
@@ -142,8 +144,7 @@ def run_AI_all(pathdir,filename,BF_try_time=60,BF_ops_file_type="14ops", polyfit
                         mu = new_mu
                         sigma = new_sigma
                 except Exception as e:
-                    logger.info(f"Non-fatal error occurred while checking for compositionality:\n{e}\nContinuing.")
-                    logger.debug(traceback.format_exc())
+                    log_exception(logger, e)
                     continue
         #except:
         #    idx_comp = 0
@@ -161,8 +162,8 @@ def run_AI_all(pathdir,filename,BF_try_time=60,BF_ops_file_type="14ops", polyfit
         if len(data[0])>3:
             # find the best separability indices
             decomp_idx = identify_decompositions(pathdir,filename, model_feynman)
-            brute_force_gen_sym("results/","gradients_gen_sym_%s" %filename,600,"14ops.txt")
-            bf_all_output = np.loadtxt("results_gen_sym.dat", dtype="str")
+            brute_force_gen_sym("results/","gradients_gen_sym_%s" %filename,600,"14ops.txt", logger=logger)
+            bf_all_output = np.loadtxt(pathdir + "results_gen_sym.dat", dtype="str")
             
             for bf_i in range(len(bf_all_output)):
                 idx_gen_sym_temp = 0
@@ -175,8 +176,7 @@ def run_AI_all(pathdir,filename,BF_try_time=60,BF_ops_file_type="14ops", polyfit
                         mu = new_mu
                         sigma = new_sigma
                 except Exception as e:
-                    logger.info(f"Non-fatal error occurred while checking for generalized symmetry:\n{e}\nContinuing.")
-                    logger.debug(traceback.format_exc())
+                    log_exception(logger, e)
                     continue
 
     if idx_gen_sym==1:
@@ -186,63 +186,63 @@ def run_AI_all(pathdir,filename,BF_try_time=60,BF_ops_file_type="14ops", polyfit
     # Apply the best symmetry/separability and rerun the main function on this new file
     if idx_min == 0:
         print("Translational symmetry found for variables:", symmetry_plus_result[1],symmetry_plus_result[2])
-        new_pathdir, new_filename = do_translational_symmetry_plus(pathdir,filename,symmetry_plus_result[1],symmetry_plus_result[2])
+        new_pathdir, new_filename = do_translational_symmetry_plus(pathdir,filename,symmetry_plus_result[1],symmetry_plus_result[2], logger=logger)
         PA1_ = ParetoSet()
-        PA1 = run_AI_all(new_pathdir,new_filename,BF_try_time,BF_ops_file_type, polyfit_deg, NN_epochs, PA1_, logger=logger)
+        PA1 = run_AI_all(new_pathdir,new_filename,BF_try_time,BF_ops_file_type, polyfit_deg, NN_epochs, PA1_, logger=logger, bases=bases)
         PA = add_sym_on_pareto(pathdir,filename,PA1,symmetry_plus_result[1],symmetry_plus_result[2],PA,"+")
         return PA
 
     elif idx_min == 1:
         print("Translational symmetry found for variables:", symmetry_minus_result[1],symmetry_minus_result[2])
-        new_pathdir, new_filename = do_translational_symmetry_minus(pathdir,filename,symmetry_minus_result[1],symmetry_minus_result[2])
+        new_pathdir, new_filename = do_translational_symmetry_minus(pathdir,filename,symmetry_minus_result[1],symmetry_minus_result[2], logger=logger)
         PA1_ = ParetoSet()
-        PA1 = run_AI_all(new_pathdir,new_filename,BF_try_time,BF_ops_file_type, polyfit_deg, NN_epochs, PA1_, logger=logger)
+        PA1 = run_AI_all(new_pathdir,new_filename,BF_try_time,BF_ops_file_type, polyfit_deg, NN_epochs, PA1_, logger=logger, bases=bases)
         PA = add_sym_on_pareto(pathdir,filename,PA1,symmetry_minus_result[1],symmetry_minus_result[2],PA,"-")
         return PA
 
     elif idx_min == 2:
         print("Translational symmetry found for variables:", symmetry_multiply_result[1],symmetry_multiply_result[2])
-        new_pathdir, new_filename = do_translational_symmetry_multiply(pathdir,filename,symmetry_multiply_result[1],symmetry_multiply_result[2])
+        new_pathdir, new_filename = do_translational_symmetry_multiply(pathdir,filename,symmetry_multiply_result[1],symmetry_multiply_result[2], logger=logger)
         PA1_ = ParetoSet()
-        PA1 = run_AI_all(new_pathdir,new_filename,BF_try_time,BF_ops_file_type, polyfit_deg, NN_epochs, PA1_, logger=logger)
+        PA1 = run_AI_all(new_pathdir,new_filename,BF_try_time,BF_ops_file_type, polyfit_deg, NN_epochs, PA1_, logger=logger, bases=bases)
         PA = add_sym_on_pareto(pathdir,filename,PA1,symmetry_multiply_result[1],symmetry_multiply_result[2],PA,"*")
         return PA
 
     elif idx_min == 3:
         print("Translational symmetry found for variables:", symmetry_divide_result[1],symmetry_divide_result[2])
-        new_pathdir, new_filename = do_translational_symmetry_divide(pathdir,filename,symmetry_divide_result[1],symmetry_divide_result[2])
+        new_pathdir, new_filename = do_translational_symmetry_divide(pathdir,filename,symmetry_divide_result[1],symmetry_divide_result[2], logger=logger)
         PA1_ = ParetoSet()
-        PA1 = run_AI_all(new_pathdir,new_filename,BF_try_time,BF_ops_file_type, polyfit_deg, NN_epochs, PA1_, logger=logger)
+        PA1 = run_AI_all(new_pathdir,new_filename,BF_try_time,BF_ops_file_type, polyfit_deg, NN_epochs, PA1_, logger=logger, bases=bases)
         PA = add_sym_on_pareto(pathdir,filename,PA1,symmetry_divide_result[1],symmetry_divide_result[2],PA,"/")
         return PA
 
     elif idx_min == 4:
         print("Additive separability found for variables:", separability_plus_result[1],separability_plus_result[2])
-        new_pathdir1, new_filename1, new_pathdir2, new_filename2,  = do_separability_plus(pathdir,filename,separability_plus_result[1],separability_plus_result[2])
+        new_pathdir1, new_filename1, new_pathdir2, new_filename2,  = do_separability_plus(pathdir,filename,separability_plus_result[1],separability_plus_result[2], logger=logger)
         PA1_ = ParetoSet()
-        PA1 = run_AI_all(new_pathdir1,new_filename1,BF_try_time,BF_ops_file_type, polyfit_deg, NN_epochs, PA1_, logger=logger)
+        PA1 = run_AI_all(new_pathdir1,new_filename1,BF_try_time,BF_ops_file_type, polyfit_deg, NN_epochs, PA1_, logger=logger, bases=bases)
         PA2_ = ParetoSet()
-        PA2 = run_AI_all(new_pathdir2,new_filename2,BF_try_time,BF_ops_file_type, polyfit_deg, NN_epochs, PA2_, logger=logger)
+        PA2 = run_AI_all(new_pathdir2,new_filename2,BF_try_time,BF_ops_file_type, polyfit_deg, NN_epochs, PA2_, logger=logger, bases=bases)
         combine_pareto_data = np.loadtxt(pathdir+filename)
-        PA = combine_pareto(combine_pareto_data,PA1,PA2,separability_plus_result[1],separability_plus_result[2],PA,"+")
+        PA = combine_pareto(combine_pareto_data,PA1,PA2,separability_plus_result[1],separability_plus_result[2],PA,"+", logger=logger)
         return PA
 
     elif idx_min == 5:
         print("Multiplicative separability found for variables:", separability_multiply_result[1],separability_multiply_result[2])
-        new_pathdir1, new_filename1, new_pathdir2, new_filename2,  = do_separability_multiply(pathdir,filename,separability_multiply_result[1],separability_multiply_result[2])
+        new_pathdir1, new_filename1, new_pathdir2, new_filename2,  = do_separability_multiply(pathdir,filename,separability_multiply_result[1],separability_multiply_result[2], logger=logger)
         PA1_ = ParetoSet()
-        PA1 = run_AI_all(new_pathdir1,new_filename1,BF_try_time,BF_ops_file_type, polyfit_deg, NN_epochs, PA1_, logger=logger)
+        PA1 = run_AI_all(new_pathdir1,new_filename1,BF_try_time,BF_ops_file_type, polyfit_deg, NN_epochs, PA1_, logger=logger, bases=bases)
         PA2_ = ParetoSet()
-        PA2 = run_AI_all(new_pathdir2,new_filename2,BF_try_time,BF_ops_file_type, polyfit_deg, NN_epochs, PA2_, logger=logger)
+        PA2 = run_AI_all(new_pathdir2,new_filename2,BF_try_time,BF_ops_file_type, polyfit_deg, NN_epochs, PA2_, logger=logger, bases=bases)
         combine_pareto_data = np.loadtxt(pathdir+filename)
-        PA = combine_pareto(combine_pareto_data,PA1,PA2,separability_multiply_result[1],separability_multiply_result[2],PA,"*")
+        PA = combine_pareto(combine_pareto_data,PA1,PA2,separability_multiply_result[1],separability_multiply_result[2],PA,"*", logger=logger)
         return PA
 
     elif idx_min == 6:
         print("Compositionality found")
         new_pathdir, new_filename = do_compositionality(pathdir,filename,math_eq_comp)
         PA1_ = ParetoSet()
-        PA1 = run_AI_all(new_pathdir,new_filename,BF_try_time,BF_ops_file_type, polyfit_deg, NN_epochs, PA1_, logger=logger)
+        PA1 = run_AI_all(new_pathdir,new_filename,BF_try_time,BF_ops_file_type, polyfit_deg, NN_epochs, PA1_, logger=logger, bases=bases)
         PA = add_comp_on_pareto(PA1,PA,math_eq_comp)
         return PA
 
@@ -250,19 +250,22 @@ def run_AI_all(pathdir,filename,BF_try_time=60,BF_ops_file_type="14ops", polyfit
         print("Generalized symmetry found")
         new_pathdir, new_filename = do_gen_sym(pathdir,filename,decomp_idx,math_eq_gen_sym)
         PA1_ = ParetoSet()
-        PA1 = run_AI_all(new_pathdir,new_filename,BF_try_time,BF_ops_file_type, polyfit_deg, NN_epochs, PA1_, logger=logger)
+        PA1 = run_AI_all(new_pathdir,new_filename,BF_try_time,BF_ops_file_type, polyfit_deg, NN_epochs, PA1_, logger=logger, bases=bases)
         PA = add_gen_sym_on_pareto(PA1,PA, decomp_idx, math_eq_gen_sym)
         return PA
     else:
         return PA
 # this runs snap on the output of aifeynman
-def run_aifeynman(pathdir,filename,BF_try_time,BF_ops_file_type, polyfit_deg=4, NN_epochs=4000, vars_name=[],test_percentage=20, debug=False):
+def run_aifeynman(pathdir,filename,BF_try_time,BF_ops_file_type, polyfit_deg=4, NN_epochs=4000, vars_name=[],test_percentage=20, debug=False, bases=None):
     if debug:
         logging.basicConfig(level=logging.DEBUG)
     else:
         logging.basicConfig(level=logging.WARNING)  # change to logging.INFO to see reduced debug logging
 
     logger = logging.getLogger(__name__)
+
+    if not bases:
+        bases = ["", "acos", "asin", "atan", "cos", "exp", "inverse", "log", "sin", "sqrt", "squared", "tan"]
 
     # If the variable names are passed, do the dimensional analysis first
     filename_orig = filename
@@ -276,8 +279,7 @@ def run_aifeynman(pathdir,filename,BF_try_time,BF_ops_file_type, polyfit_deg=4, 
             print("No vars_name was given. Running without dimensional analysis.")
             DR_file = ""
     except Exception as e:
-        logger.info(f"Error occurred while running dimensional analysis:\n{e}\nContinuing without DA.")
-        logger.debug(traceback.format_exc())
+        log_exception(logger, e)
         DR_file = ""
 
     # Split the data into train and test set
@@ -293,7 +295,7 @@ def run_aifeynman(pathdir,filename,BF_try_time,BF_ops_file_type, polyfit_deg=4, 
 
     PA = ParetoSet()
     # Run the code on the train data
-    PA = run_AI_all(pathdir,filename+"_train",BF_try_time,BF_ops_file_type, polyfit_deg, NN_epochs, PA=PA, logger=logger)
+    PA = run_AI_all(pathdir,filename+"_train",BF_try_time,BF_ops_file_type, polyfit_deg, NN_epochs, PA=PA, logger=logger, bases=bases)
     PA_list = PA.get_pareto_points()
 
     '''
@@ -311,7 +313,7 @@ def run_aifeynman(pathdir,filename,BF_try_time,BF_ops_file_type, polyfit_deg=4, 
 
     # Run zero, integer and rational snap on the resulted equations
     for j in range(len(PA_list)):
-        PA = add_snap_expr_on_pareto(pathdir,filename,PA_list[j][-1],PA, "")
+        PA = add_snap_expr_on_pareto(pathdir,filename,PA_list[j][-1],PA, "", logger=logger)
 
     PA_list = PA.get_pareto_points()
     np.savetxt("results/solution_first_snap_%s.txt" %filename,PA_list,fmt="%s", delimiter=',')
@@ -320,16 +322,15 @@ def run_aifeynman(pathdir,filename,BF_try_time,BF_ops_file_type, polyfit_deg=4, 
     for i in range(len(PA_list)):
         try:
             dt = np.loadtxt(pathdir+filename)
-            gd_update = final_gd(dt,PA_list[i][-1])
+            gd_update = final_gd(dt,PA_list[i][-1], logger=logger)
             PA.add(Point(x=gd_update[1],y=gd_update[0],data=gd_update[2]))
         except Exception as e:
-            logger.info(f"Non-fatal exception occurred while running final gradient descent:\n{e}\nContinuing.")
-            logger.debug(traceback.format_exc())
+            log_exception(logger, e)
             continue
 
     PA_list = PA.get_pareto_points()
     for j in range(len(PA_list)):
-        PA = add_snap_expr_on_pareto(pathdir,filename,PA_list[j][-1],PA, DR_file)
+        PA = add_snap_expr_on_pareto(pathdir,filename,PA_list[j][-1],PA, DR_file, logger=logger)
 
     list_dt = np.array(PA.get_pareto_points())
     data_file_len = len(np.loadtxt(pathdir+filename))
@@ -346,7 +347,7 @@ def run_aifeynman(pathdir,filename,BF_try_time,BF_ops_file_type, polyfit_deg=4, 
         test_errors = []
         input_test_data = np.loadtxt(pathdir+filename+"_test")
         for i in range(len(list_dt)):
-            test_errors = test_errors + [get_symbolic_expr_error(input_test_data,str(list_dt[i][-1]))]
+            test_errors = test_errors + [get_symbolic_expr_error(input_test_data,str(list_dt[i][-1]), logger=logger)]
         test_errors = np.array(test_errors)
         # Save all the data to file
         save_data = np.column_stack((test_errors,log_err,log_err_all,list_dt))

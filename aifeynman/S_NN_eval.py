@@ -11,6 +11,7 @@ import pickle
 from torch.optim.lr_scheduler import CosineAnnealingLR
 from matplotlib import pyplot as plt
 import time
+from .logging import log_exception
 
 is_cuda = torch.cuda.is_available()
 
@@ -40,7 +41,7 @@ def rmse_loss(pred, targ):
     return torch.sqrt(F.mse_loss(pred, targ))/denom
 
 
-def NN_eval(pathdir,filename):
+def NN_eval(pathdir,filename, logger=None):
     try:
         n_variables = np.loadtxt(pathdir+filename, dtype='str').shape[1]-1
         variables = np.loadtxt(pathdir+filename, usecols=(0,))
@@ -110,7 +111,7 @@ def NN_eval(pathdir,filename):
         return(rmse_loss(model(factors_val),product_val),model)
 
     except Exception as e:
-        print(e)
+        log_exception(logger, e)
         return (100,0)
 
 

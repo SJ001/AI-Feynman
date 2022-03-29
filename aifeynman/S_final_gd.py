@@ -22,7 +22,7 @@ from .S_get_number_DL_snapped import get_number_DL_snapped
 from .S_get_symbolic_expr_error import get_symbolic_expr_error
 
 # parameters: path to data, RPN expression (obtained from bf)
-def final_gd(data, math_expr, lr = 1e-2, N_epochs = 5000):
+def final_gd(data, math_expr, lr = 1e-2, N_epochs = 5000, logger=None):
     param_dict = {}
     unsnapped_param_dict = {'p':1}
 
@@ -140,5 +140,5 @@ def final_gd(data, math_expr, lr = 1e-2, N_epochs = 5000):
     if n_operations!=0 or n_variables!=0:
         complexity = complexity + (n_variables+n_operations)*np.log2((n_variables+n_operations))
 
-    error = get_symbolic_expr_error(data,str(eq))
+    error = get_symbolic_expr_error(data,str(eq), logger=logger)
     return error, complexity, eq

@@ -16,11 +16,12 @@ import sympy as sp
 from sympy.parsing.sympy_parser import parse_expr
 
 from .resources import _get_resource
+from .logging import log_exception
 
 # sep_type = 3 for add and 2 for mult and 1 for normal
 
 
-def brute_force(pathdir, filename, BF_try_time, BF_ops_file_type, sep_type="*", sigma=10, band=0):
+def brute_force(pathdir, filename, BF_try_time, BF_ops_file_type, sep_type="*", sigma=10, band=0, logger=None):
     try_time = BF_try_time
     try_time_prefactor = BF_try_time
     file_type = BF_ops_file_type
@@ -79,7 +80,7 @@ def brute_force(pathdir, filename, BF_try_time, BF_ops_file_type, sep_type="*", 
                         print(output.strip().decode())
             #subprocess.call(["feynman_sr_mdl_mult"], timeout=try_time)
         except Exception as e:
-            print("Non-fatal error occurred while running brute force process:\n{}\nContinuing.".format(e))
+            log_exception(logger, e)
     if sep_type == "+":
         try:
             with tqdm(total=try_time, desc="Running BF with operator +", position=2, leave=False) as bf_bar:
@@ -96,4 +97,4 @@ def brute_force(pathdir, filename, BF_try_time, BF_ops_file_type, sep_type="*", 
             # subprocess.call(["feynman_sr3"], timeout=try_time)
             #subprocess.call(["feynman_sr_mdl_plus"], timeout=try_time)
         except Exception as e:
-            print("Non-fatal error occurred while running brute force process:\n{}\nContinuing.".format(e))
+            log_exception(logger, e)
