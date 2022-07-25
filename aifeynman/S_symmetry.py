@@ -1,39 +1,19 @@
 # checks for symmetries in the data
 
 from __future__ import print_function
+from typing import Any, Callable, Optional
 import torch
 import os
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.optim as optim
-import pandas as pd
 import numpy as np
 import torch
-from torch.utils import data
-import pickle
-from torch.optim.lr_scheduler import CosineAnnealingLR
-from matplotlib import pyplot as plt
+
+from aifeynman.model import DefaultSimpleNet
 from .S_remove_input_neuron import remove_input_neuron
-import time
 
 is_cuda = torch.cuda.is_available()
 
-class SimpleNet(nn.Module):
-    def __init__(self, ni):
-        super().__init__()
-        self.linear1 = nn.Linear(ni, 128)
-        self.linear2 = nn.Linear(128, 128)
-        self.linear3 = nn.Linear(128, 64)
-        self.linear4 = nn.Linear(64,64)
-        self.linear5 = nn.Linear(64,1)
-
-    def forward(self, x):
-        x = F.tanh(self.linear1(x))
-        x = F.tanh(self.linear2(x))
-        x = F.tanh(self.linear3(x))
-        x = F.tanh(self.linear4(x))
-        x = self.linear5(x)
-        return x
 
 def rmse_loss(pred, targ):
     denom = targ**2
@@ -41,7 +21,7 @@ def rmse_loss(pred, targ):
     return torch.sqrt(F.mse_loss(pred, targ))/denom
 
 # checks if f(x,y)=f(x-y)
-def check_translational_symmetry_minus(pathdir, filename):
+def check_translational_symmetry_minus(pathdir, filename, torch_model_class: Optional[Callable[[Any], nn.Module]]=None):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
 
@@ -57,12 +37,12 @@ def check_translational_symmetry_minus(pathdir, filename):
             for j in range(1,n_variables):
                 v = np.loadtxt(pathdir+"/%s" %filename, usecols=(j,))
                 variables = np.column_stack((variables,v))
-        
+
 
         f_dependent = np.loadtxt(pathdir+"/%s" %filename, usecols=(n_variables,))
         f_dependent = np.reshape(f_dependent,(len(f_dependent),1))
 
-        factors = torch.from_numpy(variables) 
+        factors = torch.from_numpy(variables)
         if is_cuda:
             factors = factors.cuda()
         else:
@@ -76,18 +56,18 @@ def check_translational_symmetry_minus(pathdir, filename):
             product = product
         product = product.float()
 
+        Net = torch_model_class or DefaultSimpleNet
+
         # load the trained model and put it in evaluation mode
         if is_cuda:
-            model = SimpleNet(n_variables).cuda()
+            model = Net(n_variables).cuda()
         else:
-            model = SimpleNet(n_variables)
+            model = Net(n_variables)
         model.load_state_dict(torch.load(pathdir_weights+filename+".h5"))
         model.eval()
 
-        models_one = []
-        models_rest = []
 
-        with torch.no_grad():            
+        with torch.no_grad():
             # make the shift x->x+a for 2 variables at a time (different variables)
             min_error = 1000
             best_i = -1
@@ -116,8 +96,8 @@ def check_translational_symmetry_minus(pathdir, filename):
     except Exception as e:
         print(e)
         return (-1,-1,-1,-1,-1)
-    
-def do_translational_symmetry_minus(pathdir, filename, i,j):
+
+def do_translational_symmetry_minus(pathdir, filename, i,j, torch_model_class: Optional[Callable[[Any], nn.Module]]=None):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
 
@@ -128,11 +108,11 @@ def do_translational_symmetry_minus(pathdir, filename, i,j):
         for k in range(1,n_variables):
             v = np.loadtxt(pathdir+"/%s" %filename, usecols=(k,))
             variables = np.column_stack((variables,v))
-        
+
         f_dependent = np.loadtxt(pathdir+"/%s" %filename, usecols=(n_variables,))
         f_dependent = np.reshape(f_dependent,(len(f_dependent),1))
 
-        factors = torch.from_numpy(variables) 
+        factors = torch.from_numpy(variables)
         if is_cuda:
             factors = factors.cuda()
         else:
@@ -146,18 +126,17 @@ def do_translational_symmetry_minus(pathdir, filename, i,j):
             product = product
         product = product.float()
 
+        Net = torch_model_class or DefaultSimpleNet
+
         # load the trained model and put it in evaluation mode
         if is_cuda:
-            model = SimpleNet(n_variables).cuda()
+            model = Net(n_variables).cuda()
         else:
-            model = SimpleNet(n_variables)
+            model = Net(n_variables)
         model.load_state_dict(torch.load(pathdir_weights+filename+".h5"))
         model.eval()
 
-        models_one = []
-        models_rest = []
-
-        with torch.no_grad():   
+        with torch.no_grad():
             file_name = filename + "-translated_minus"
             ct_median = torch.median(torch.from_numpy(variables[:,j]))
             data_translated = variables
@@ -175,10 +154,10 @@ def do_translational_symmetry_minus(pathdir, filename, i,j):
     except Exception as e:
         print(e)
         return (-1,-1)
-        
+
 
 # checks if f(x,y)=f(x/y)
-def check_translational_symmetry_divide(pathdir, filename):
+def check_translational_symmetry_divide(pathdir, filename, torch_model_class: Optional[Callable[[Any], nn.Module]]=None):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
 
@@ -194,12 +173,12 @@ def check_translational_symmetry_divide(pathdir, filename):
             for j in range(1,n_variables):
                 v = np.loadtxt(pathdir+"/%s" %filename, usecols=(j,))
                 variables = np.column_stack((variables,v))
-        
+
 
         f_dependent = np.loadtxt(pathdir+"/%s" %filename, usecols=(n_variables,))
         f_dependent = np.reshape(f_dependent,(len(f_dependent),1))
 
-        factors = torch.from_numpy(variables) 
+        factors = torch.from_numpy(variables)
         if is_cuda:
             factors = factors.cuda()
         else:
@@ -213,16 +192,16 @@ def check_translational_symmetry_divide(pathdir, filename):
             product = product
         product = product.float()
 
+        Net = torch_model_class or DefaultSimpleNet
+
         # load the trained model and put it in evaluation mode
         if is_cuda:
-            model = SimpleNet(n_variables).cuda()
+            model = Net(n_variables).cuda()
         else:
-            model = SimpleNet(n_variables)
+            model = Net(n_variables)
         model.load_state_dict(torch.load(pathdir_weights+filename+".h5"))
         model.eval()
 
-        models_one = []
-        models_rest = []
 
         with torch.no_grad():
             a = 1.2
@@ -253,9 +232,9 @@ def check_translational_symmetry_divide(pathdir, filename):
     except Exception as e:
         print(e)
         return (-1,-1,-1,-1,-1)
-    
-    
-def do_translational_symmetry_divide(pathdir, filename, i,j):
+
+
+def do_translational_symmetry_divide(pathdir, filename, i,j, torch_model_class: Optional[Callable[[Any], nn.Module]]=None):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
 
@@ -266,11 +245,11 @@ def do_translational_symmetry_divide(pathdir, filename, i,j):
         for k in range(1,n_variables):
             v = np.loadtxt(pathdir+"/%s" %filename, usecols=(k,))
             variables = np.column_stack((variables,v))
-        
+
         f_dependent = np.loadtxt(pathdir+"/%s" %filename, usecols=(n_variables,))
         f_dependent = np.reshape(f_dependent,(len(f_dependent),1))
 
-        factors = torch.from_numpy(variables) 
+        factors = torch.from_numpy(variables)
         if is_cuda:
             factors = factors.cuda()
         else:
@@ -284,18 +263,18 @@ def do_translational_symmetry_divide(pathdir, filename, i,j):
             product = product
         product = product.float()
 
+        Net = torch_model_class or DefaultSimpleNet
+
         # load the trained model and put it in evaluation mode
         if is_cuda:
-            model = SimpleNet(n_variables).cuda()
+            model = Net(n_variables).cuda()
         else:
-            model = SimpleNet(n_variables)
+            model = Net(n_variables)
         model.load_state_dict(torch.load(pathdir_weights+filename+".h5"))
         model.eval()
 
-        models_one = []
-        models_rest = []
 
-        with torch.no_grad():             
+        with torch.no_grad():
             file_name = filename + "-translated_divide"
             data_translated = variables
             ct_median =torch.median(torch.from_numpy(variables[:,j]))
@@ -315,7 +294,7 @@ def do_translational_symmetry_divide(pathdir, filename, i,j):
         return (-1,1)
 
 # checks if f(x,y)=f(x*y)
-def check_translational_symmetry_multiply(pathdir, filename):
+def check_translational_symmetry_multiply(pathdir, filename, torch_model_class: Optional[Callable[[Any], nn.Module]]=None):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
 
@@ -331,12 +310,12 @@ def check_translational_symmetry_multiply(pathdir, filename):
             for j in range(1,n_variables):
                 v = np.loadtxt(pathdir+"/%s" %filename, usecols=(j,))
                 variables = np.column_stack((variables,v))
-        
+
 
         f_dependent = np.loadtxt(pathdir+"/%s" %filename, usecols=(n_variables,))
         f_dependent = np.reshape(f_dependent,(len(f_dependent),1))
 
-        factors = torch.from_numpy(variables) 
+        factors = torch.from_numpy(variables)
         if is_cuda:
             factors = factors.cuda()
         else:
@@ -349,17 +328,16 @@ def check_translational_symmetry_multiply(pathdir, filename):
         else:
             product = product
         product = product.float()
+        Net = torch_model_class or DefaultSimpleNet
 
         # load the trained model and put it in evaluation mode
         if is_cuda:
-            model = SimpleNet(n_variables).cuda()
+            model = Net(n_variables).cuda()
         else:
-            model = SimpleNet(n_variables)
+            model = Net(n_variables)
         model.load_state_dict(torch.load(pathdir_weights+filename+".h5"))
         model.eval()
 
-        models_one = []
-        models_rest = []
 
         with torch.no_grad():
             a = 1.2
@@ -391,7 +369,7 @@ def check_translational_symmetry_multiply(pathdir, filename):
         print(e)
         return (-1,-1,-1,-1,-1)
 
-def do_translational_symmetry_multiply(pathdir, filename, i,j):
+def do_translational_symmetry_multiply(pathdir, filename, i,j, torch_model_class: Optional[Callable[[Any], nn.Module]]=None):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
 
@@ -402,11 +380,11 @@ def do_translational_symmetry_multiply(pathdir, filename, i,j):
         for k in range(1,n_variables):
             v = np.loadtxt(pathdir+"/%s" %filename, usecols=(k,))
             variables = np.column_stack((variables,v))
-        
+
         f_dependent = np.loadtxt(pathdir+"/%s" %filename, usecols=(n_variables,))
         f_dependent = np.reshape(f_dependent,(len(f_dependent),1))
 
-        factors = torch.from_numpy(variables) 
+        factors = torch.from_numpy(variables)
         if is_cuda:
             factors = factors.cuda()
         else:
@@ -420,18 +398,18 @@ def do_translational_symmetry_multiply(pathdir, filename, i,j):
             product = product
         product = product.float()
 
+        Net = torch_model_class or DefaultSimpleNet
+
         # load the trained model and put it in evaluation mode
         if is_cuda:
-            model = SimpleNet(n_variables).cuda()
+            model = Net(n_variables).cuda()
         else:
-            model = SimpleNet(n_variables)
+            model = Net(n_variables)
         model.load_state_dict(torch.load(pathdir_weights+filename+".h5"))
         model.eval()
 
-        models_one = []
-        models_rest = []
 
-        with torch.no_grad():             
+        with torch.no_grad():
             file_name = filename + "-translated_multiply"
             data_translated = variables
             ct_median =torch.median(torch.from_numpy(variables[:,j]))
@@ -451,7 +429,7 @@ def do_translational_symmetry_multiply(pathdir, filename, i,j):
         return (-1,1)
 
 # checks if f(x,y)=f(x+y)
-def check_translational_symmetry_plus(pathdir, filename):
+def check_translational_symmetry_plus(pathdir, filename, torch_model_class: Optional[Callable[[Any], nn.Module]]=None):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
 
@@ -467,12 +445,12 @@ def check_translational_symmetry_plus(pathdir, filename):
             for j in range(1,n_variables):
                 v = np.loadtxt(pathdir+"/%s" %filename, usecols=(j,))
                 variables = np.column_stack((variables,v))
-        
+
 
         f_dependent = np.loadtxt(pathdir+"/%s" %filename, usecols=(n_variables,))
         f_dependent = np.reshape(f_dependent,(len(f_dependent),1))
 
-        factors = torch.from_numpy(variables) 
+        factors = torch.from_numpy(variables)
         if is_cuda:
             factors = factors.cuda()
         else:
@@ -486,16 +464,16 @@ def check_translational_symmetry_plus(pathdir, filename):
             product = product
         product = product.float()
 
+        Net = torch_model_class or DefaultSimpleNet
+
         # load the trained model and put it in evaluation mode
         if is_cuda:
-            model = SimpleNet(n_variables).cuda()
+            model = Net(n_variables).cuda()
         else:
-            model = SimpleNet(n_variables)
+            model = Net(n_variables)
         model.load_state_dict(torch.load(pathdir_weights+filename+".h5"))
         model.eval()
 
-        models_one = []
-        models_rest = []
 
         with torch.no_grad():
             min_error = 1000
@@ -525,8 +503,8 @@ def check_translational_symmetry_plus(pathdir, filename):
     except Exception as e:
         print(e)
         return (-1,-1,-1,-1,-1)
-    
-def do_translational_symmetry_plus(pathdir, filename, i,j):
+
+def do_translational_symmetry_plus(pathdir, filename, i,j, torch_model_class: Optional[Callable[[Any], nn.Module]]=None):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
 
@@ -537,11 +515,11 @@ def do_translational_symmetry_plus(pathdir, filename, i,j):
         for k in range(1,n_variables):
             v = np.loadtxt(pathdir+"/%s" %filename, usecols=(k,))
             variables = np.column_stack((variables,v))
-        
+
         f_dependent = np.loadtxt(pathdir+"/%s" %filename, usecols=(n_variables,))
         f_dependent = np.reshape(f_dependent,(len(f_dependent),1))
 
-        factors = torch.from_numpy(variables) 
+        factors = torch.from_numpy(variables)
         if is_cuda:
             factors = factors.cuda()
         else:
@@ -555,18 +533,18 @@ def do_translational_symmetry_plus(pathdir, filename, i,j):
             product = product
         product = product.float()
 
+        Net = torch_model_class or DefaultSimpleNet
+
         # load the trained model and put it in evaluation mode
         if is_cuda:
-            model = SimpleNet(n_variables).cuda()
+            model = Net(n_variables).cuda()
         else:
-            model = SimpleNet(n_variables)
+            model = Net(n_variables)
         model.load_state_dict(torch.load(pathdir_weights+filename+".h5"))
         model.eval()
 
-        models_one = []
-        models_rest = []
 
-        with torch.no_grad():             
+        with torch.no_grad():
             file_name = filename + "-translated_plus"
             data_translated = variables
             ct_median =torch.median(torch.from_numpy(variables[:,j]))
@@ -580,7 +558,7 @@ def do_translational_symmetry_plus(pathdir, filename, i,j):
             np.savetxt("results/translated_data_plus/"+file_name , data_translated)
             remove_input_neuron(model,n_variables,j,ct_median,"results/NN_trained_models/models/"+filename + "-translated_plus_pretrained.h5")
             return ("results/translated_data_plus/", file_name)
-        
+
     except Exception as e:
         print(e)
         return (-1,-1)

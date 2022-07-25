@@ -1,44 +1,24 @@
 from __future__ import print_function
+from typing import Any, Callable, Optional
 import torch
 import os
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.optim as optim
-import pandas as pd
 import numpy as np
 import torch
-from torch.utils import data
-import pickle
-from torch.optim.lr_scheduler import CosineAnnealingLR
-from matplotlib import pyplot as plt
 from itertools import combinations
-import time
+
+from aifeynman.model import DefaultSimpleNet
 
 is_cuda = torch.cuda.is_available()
 
-class SimpleNet(nn.Module):
-    def __init__(self, ni):
-        super().__init__()
-        self.linear1 = nn.Linear(ni, 128)
-        self.linear2 = nn.Linear(128, 128)
-        self.linear3 = nn.Linear(128, 64)
-        self.linear4 = nn.Linear(64,64)
-        self.linear5 = nn.Linear(64,1)
-
-    def forward(self, x):
-        x = F.tanh(self.linear1(x))
-        x = F.tanh(self.linear2(x))
-        x = F.tanh(self.linear3(x))
-        x = F.tanh(self.linear4(x))
-        x = self.linear5(x)
-        return x
 
 def rmse_loss(pred, targ):
     denom = targ**2
     denom = torch.sqrt(denom.sum()/len(denom))
     return torch.sqrt(F.mse_loss(pred, targ))/denom
 
-def check_separability_plus(pathdir, filename):
+def check_separability_plus(pathdir, filename, torch_model_class: Optional[Callable[[Any], nn.Module]]=None):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
 
@@ -54,12 +34,12 @@ def check_separability_plus(pathdir, filename):
             for j in range(1,n_variables):
                 v = np.loadtxt(pathdir+filename, usecols=(j,))
                 variables = np.column_stack((variables,v))
-        
+
 
         f_dependent = np.loadtxt(pathdir+filename, usecols=(n_variables,))
         f_dependent = np.reshape(f_dependent,(len(f_dependent),1))
 
-        factors = torch.from_numpy(variables) 
+        factors = torch.from_numpy(variables)
         if is_cuda:
             factors = factors.cuda()
         else:
@@ -73,11 +53,12 @@ def check_separability_plus(pathdir, filename):
             product = product
         product = product.float()
 
+        Net = torch_model_class or DefaultSimpleNet
         # load the trained model and put it in evaluation mode
         if is_cuda:
-            model = SimpleNet(n_variables).cuda()
+            model = Net(n_variables).cuda()
         else:
-            model = SimpleNet(n_variables)
+            model = Net(n_variables)
         model.load_state_dict(torch.load(pathdir_weights+filename+".h5"))
         model.eval()
 
@@ -122,13 +103,13 @@ def check_separability_plus(pathdir, filename):
                         best_mu = mu
                         best_sigma = sigma
         return min_error, best_i, best_j, best_mu, best_sigma
-                        
+
     except Exception as e:
         print(e)
-        return (-1,-1,-1,-1,-1)                    
-                    
-                                           
-def do_separability_plus(pathdir, filename, list_i,list_j):
+        return (-1,-1,-1,-1,-1)
+
+
+def do_separability_plus(pathdir, filename, list_i,list_j, torch_model_class: Optional[Callable[[Any], nn.Module]]=None):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
 
@@ -144,12 +125,12 @@ def do_separability_plus(pathdir, filename, list_i,list_j):
             for j in range(1,n_variables):
                 v = np.loadtxt(pathdir+filename, usecols=(j,))
                 variables = np.column_stack((variables,v))
-        
+
 
         f_dependent = np.loadtxt(pathdir+filename, usecols=(n_variables,))
         f_dependent = np.reshape(f_dependent,(len(f_dependent),1))
 
-        factors = torch.from_numpy(variables) 
+        factors = torch.from_numpy(variables)
         if is_cuda:
             factors = factors.cuda()
         else:
@@ -163,18 +144,20 @@ def do_separability_plus(pathdir, filename, list_i,list_j):
             product = product
         product = product.float()
 
+        Net = torch_model_class or DefaultSimpleNet
+
         # load the trained model and put it in evaluation mode
         if is_cuda:
-            model = SimpleNet(n_variables).cuda()
+            model = Net(n_variables).cuda()
         else:
-            model = SimpleNet(n_variables)
+            model = Net(n_variables)
         model.load_state_dict(torch.load(pathdir_weights+filename+".h5"))
         model.eval()
 
         # make some variables at the time equal to the median of factors
         models_one = []
         models_rest = []
-        
+
         fact_vary = factors.clone()
         for k in range(len(factors[0])):
             fact_vary[:,k] = torch.full((len(factors),),torch.median(factors[:,k]))
@@ -192,7 +175,7 @@ def do_separability_plus(pathdir, filename, list_i,list_j):
             data_sep_1 = variables
             data_sep_1 = np.delete(data_sep_1,list_j,axis=1)
             data_sep_1 = np.column_stack((data_sep_1,model(fact_vary_one).cpu()))
-            # save the second half  
+            # save the second half
             data_sep_2 = variables
             data_sep_2 = np.delete(data_sep_2,list_i,axis=1)
             data_sep_2 = np.column_stack((data_sep_2,model(fact_vary_rest).cpu()-model(fact_vary).cpu()))
@@ -209,8 +192,8 @@ def do_separability_plus(pathdir, filename, list_i,list_j):
         print(e)
         return (-1,-1)
 
-        
-def check_separability_multiply(pathdir, filename):
+
+def check_separability_multiply(pathdir, filename, torch_model_class: Optional[Callable[[Any], nn.Module]]=None):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
 
@@ -226,11 +209,11 @@ def check_separability_multiply(pathdir, filename):
             for j in range(1,n_variables):
                 v = np.loadtxt(pathdir+filename, usecols=(j,))
                 variables = np.column_stack((variables,v))
-        
+
 
         f_dependent = np.loadtxt(pathdir+filename, usecols=(n_variables,))
 
-        # Pick only data which is close enough to the maximum value (5 times less or higher)                                                                   
+        # Pick only data which is close enough to the maximum value (5 times less or higher)
         max_output = np.max(abs(f_dependent))
         use_idx = np.where(abs(f_dependent)>=max_output/5)
         f_dependent = f_dependent[use_idx]
@@ -251,11 +234,13 @@ def check_separability_multiply(pathdir, filename):
             product = product
         product = product.float()
 
+        Net = torch_model_class or DefaultSimpleNet
+
         # load the trained model and put it in evaluation mode
         if is_cuda:
-            model = SimpleNet(n_variables).cuda()
+            model = Net(n_variables).cuda()
         else:
-            model = SimpleNet(n_variables)
+            model = Net(n_variables)
         model.load_state_dict(torch.load(pathdir_weights+filename+".h5"))
         model.eval()
 
@@ -299,14 +284,13 @@ def check_separability_multiply(pathdir, filename):
                         best_mu = mu
                         best_sigma = sigma
         return min_error, best_i, best_j, best_mu, best_sigma
-                    
+
     except Exception as e:
         print(e)
-        return (-1,-1,-1,-1,-1)                         
+        return (-1,-1,-1,-1,-1)
 
-                    
-                    
-def do_separability_multiply(pathdir, filename, list_i,list_j):
+
+def do_separability_multiply(pathdir, filename, list_i,list_j, torch_model_class: Optional[Callable[[Any], nn.Module]]=None):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
 
@@ -322,7 +306,7 @@ def do_separability_multiply(pathdir, filename, list_i,list_j):
             for j in range(1,n_variables):
                 v = np.loadtxt(pathdir+filename, usecols=(j,))
                 variables = np.column_stack((variables,v))
-        
+
 
         f_dependent = np.loadtxt(pathdir+filename, usecols=(n_variables,))
         f_dependent = np.reshape(f_dependent,(len(f_dependent),1))
@@ -341,17 +325,15 @@ def do_separability_multiply(pathdir, filename, list_i,list_j):
             product = product
         product = product.float()
 
+        Net = torch_model_class or DefaultSimpleNet
+
         # load the trained model and put it in evaluation mode
         if is_cuda:
-            model = SimpleNet(n_variables).cuda()
+            model = Net(n_variables).cuda()
         else:
-            model = SimpleNet(n_variables)
+            model = Net(n_variables)
         model.load_state_dict(torch.load(pathdir_weights+filename+".h5"))
         model.eval()
-
-        # make some variables at the time equal to the median of factors
-        models_one = []
-        models_rest = []                    
 
         fact_vary = factors.clone()
         for k in range(len(factors[0])):
@@ -361,8 +343,8 @@ def do_separability_multiply(pathdir, filename, list_i,list_j):
         for t1 in list_j:
             fact_vary_one[:,t1] = torch.full((len(factors),),torch.median(factors[:,t1]))
         for t2 in list_i:
-            fact_vary_rest[:,t2] = torch.full((len(factors),),torch.median(factors[:,t2]))        
-        
+            fact_vary_rest[:,t2] = torch.full((len(factors),),torch.median(factors[:,t2]))
+
         with torch.no_grad():
             str1 = filename+"-mult_a"
             str2 = filename+"-mult_b"
@@ -370,7 +352,7 @@ def do_separability_multiply(pathdir, filename, list_i,list_j):
             data_sep_1 = variables
             data_sep_1 = np.delete(data_sep_1,list_j,axis=1)
             data_sep_1 = np.column_stack((data_sep_1,model(fact_vary_one).cpu()))
-            # save the second half  
+            # save the second half
             data_sep_2 = variables
             data_sep_2 = np.delete(data_sep_2,list_i,axis=1)
             data_sep_2 = np.column_stack((data_sep_2,model(fact_vary_rest).cpu()/model(fact_vary).cpu()))
@@ -387,4 +369,4 @@ def do_separability_multiply(pathdir, filename, list_i,list_j):
         print(e)
         return (-1,-1)
 
-        
+
