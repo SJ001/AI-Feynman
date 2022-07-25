@@ -1,17 +1,16 @@
 from __future__ import print_function
+from typing import Any, Callable, Optional
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-import pandas as pd
 import numpy as np
 import torch
 from torch.utils import data
-import pickle
-from matplotlib import pyplot as plt
 import torch.utils.data as utils
-import time
 import os
+
+from aifeynman.model import DefaultSimpleNet
 
 bs = 2048
 wd = 1e-2
@@ -40,7 +39,7 @@ def rmse_loss(pred, targ):
     denom = torch.sqrt(denom.sum()/len(denom))
     return torch.sqrt(F.mse_loss(pred, targ))/denom
 
-def NN_train(pathdir, filename, epochs=1000, lrs=1e-2, N_red_lr=4, pretrained_path=""):
+def NN_train(pathdir, filename, epochs=1000, lrs=1e-2, N_red_lr=4, pretrained_path="", torch_model_class: Optional[Callable[[Any], nn.Module]]=None):
     try:
         os.mkdir("results/NN_trained_models/")
     except:
@@ -83,30 +82,15 @@ def NN_train(pathdir, filename, epochs=1000, lrs=1e-2, N_red_lr=4, pretrained_pa
             product = product
         product = product.float()
 
-        class SimpleNet(nn.Module):
-            def __init__(self, ni):
-                super().__init__()
-                self.linear1 = nn.Linear(ni, 128)
-                self.linear2 = nn.Linear(128, 128)
-                self.linear3 = nn.Linear(128, 64)
-                self.linear4 = nn.Linear(64,64)
-                self.linear5 = nn.Linear(64,1)
-
-            def forward(self, x):
-                x = F.tanh(self.linear1(x))
-                x = F.tanh(self.linear2(x))
-                x = F.tanh(self.linear3(x))
-                x = F.tanh(self.linear4(x))
-                x = self.linear5(x)
-                return x
+        Net = torch_model_class or DefaultSimpleNet
 
         my_dataset = utils.TensorDataset(factors,product) # create your datset
         my_dataloader = utils.DataLoader(my_dataset, batch_size=bs, shuffle=True) # create your dataloader
 
         if is_cuda:
-            model_feynman = SimpleNet(n_variables).cuda()
+            model_feynman = Net(n_variables).cuda()
         else:
-            model_feynman = SimpleNet(n_variables)
+            model_feynman = Net(n_variables)
 
         if pretrained_path!="":
             model_feynman.load_state_dict(torch.load(pretrained_path))

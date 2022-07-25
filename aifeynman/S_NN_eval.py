@@ -1,4 +1,5 @@
 from __future__ import print_function
+from typing import Any, Callable, Optional
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -11,6 +12,8 @@ import pickle
 from torch.optim.lr_scheduler import CosineAnnealingLR
 from matplotlib import pyplot as plt
 import time
+
+from aifeynman.model import DefaultSimpleNet
 
 is_cuda = torch.cuda.is_available()
 
@@ -40,7 +43,7 @@ def rmse_loss(pred, targ):
     return torch.sqrt(F.mse_loss(pred, targ))/denom
 
 
-def NN_eval(pathdir,filename):
+def NN_eval(pathdir,filename, torch_model_class: Optional[Callable[[Any], nn.Module]]=None):
     try:
         n_variables = np.loadtxt(pathdir+filename, dtype='str').shape[1]-1
         variables = np.loadtxt(pathdir+filename, usecols=(0,))
@@ -83,27 +86,12 @@ def NN_eval(pathdir,filename):
             product_val = product_val
         product_val = product_val.float()
 
-        class SimpleNet(nn.Module):
-            def __init__(self, ni):
-                super().__init__()
-                self.linear1 = nn.Linear(ni, 128)
-                self.linear2 = nn.Linear(128, 128)
-                self.linear3 = nn.Linear(128, 64)
-                self.linear4 = nn.Linear(64,64)
-                self.linear5 = nn.Linear(64,1)
-
-            def forward(self, x):
-                x = F.tanh(self.linear1(x))
-                x = F.tanh(self.linear2(x))
-                x = F.tanh(self.linear3(x))
-                x = F.tanh(self.linear4(x))
-                x = self.linear5(x)
-                return x
+        Net = torch_model_class or DefaultSimpleNet
 
         if is_cuda:
-            model = SimpleNet(n_variables).cuda()
+            model = Net(n_variables).cuda()
         else:
-            model = SimpleNet(n_variables)
+            model = Net(n_variables)
 
         model.load_state_dict(torch.load("results/NN_trained_models/models/"+filename+".h5"))
         model.eval()
