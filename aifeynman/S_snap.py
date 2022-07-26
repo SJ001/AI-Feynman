@@ -19,7 +19,7 @@ def bestApproximation(x,imax):
             y = y - i
             k = k + 1
         return c
-    
+
     def contfrac2frac(seq):
         ''' Convert the simple continued fraction in `seq`
             into a fraction, num / den
@@ -28,27 +28,27 @@ def bestApproximation(x,imax):
         for u in reversed(seq):
             num, den = den + num*u, num
         return num, den
-    
+
     def contFracRationalApproximations(c):
         return np.array(list(contfrac2frac(c[:i+1]) for i in range(len(c))))
-    
+
     def contFracApproximations(c):
         q = contFracRationalApproximations(c)
         return q[:,0] / float(q[:,1])
-    
+
     def truncateContFrac(q,imax):
         k = 0
         while k < len(q) and np.maximum(np.abs(q[k,0]), q[k,1]) <= imax:
             k = k + 1
         return q[:k]
-    
+
     def pval(p):
         p = p.astype(float)
         return 1 - np.exp(-p ** 0.87 / 0.36)
-    
+
     xsign = np.sign(x)
     q = truncateContFrac(contFracRationalApproximations(float2contfrac(abs(x),20)),imax)
-    
+
     if len(q) > 0:
         p = np.abs(q[:,0] / q[:,1] - abs(x)).astype(float) * (1 + np.abs(q[:,0])) * q[:,1]
         p = pval(p)
@@ -75,10 +75,10 @@ def rationalSnap(p, top=1):
     """Snap to nearest rational number using continued fraction."""
     p = np.array(p)
     snaps = np.array(list(bestApproximation(x,10) for x in p))
-    chosen = np.argsort(snaps[:, 3])[:top]    
+    chosen = np.argsort(snaps[:, 3])[:top]
     d = dict(list(zip(chosen, snaps[chosen, 1:3])))
     d = {k:  f"{val[0]}/{val[1]}" for k,val in d.items()}
-    
+
     return d
 
 

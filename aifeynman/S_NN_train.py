@@ -54,9 +54,8 @@ def NN_train(pathdir, filename, epochs=1000, lrs=1e-2, N_red_lr=4, pretrained_pa
         n_variables = np.loadtxt(pathdir+"%s" %filename, dtype='str').shape[1]-1
         variables = np.loadtxt(pathdir+"%s" %filename, usecols=(0,))
 
-        # epochs = 200*n_variables
+        epochs = 200*n_variables
         if len(variables)<5000:
-            print('WARNING: tripling epochs since len(variables)<5000...')
             epochs = epochs*3
 
         if n_variables==0 or n_variables==1:
@@ -92,7 +91,7 @@ def NN_train(pathdir, filename, epochs=1000, lrs=1e-2, N_red_lr=4, pretrained_pa
                 self.linear3 = nn.Linear(128, 64)
                 self.linear4 = nn.Linear(64,64)
                 self.linear5 = nn.Linear(64,1)
-            
+
             def forward(self, x):
                 x = F.tanh(self.linear1(x))
                 x = F.tanh(self.linear2(x))
@@ -120,18 +119,18 @@ def NN_train(pathdir, filename, epochs=1000, lrs=1e-2, N_red_lr=4, pretrained_pa
                 model_feynman.train()
                 for i, data in enumerate(my_dataloader):
                     optimizer_feynman.zero_grad()
-                
+
                     if is_cuda:
                         fct = data[0].float().cuda()
                         prd = data[1].float().cuda()
                     else:
                         fct = data[0].float()
                         prd = data[1].float()
-                    
+
                     loss = rmse_loss(model_feynman(fct),prd)
                     loss.backward()
                     optimizer_feynman.step()
-                
+
                 '''
                 # Early stopping
                 if epoch%20==0 and epoch>0:
@@ -145,7 +144,7 @@ def NN_train(pathdir, filename, epochs=1000, lrs=1e-2, N_red_lr=4, pretrained_pa
                         torch.save(model_feynman.state_dict(), "results/NN_trained_models/models/" + filename + ".h5")
                         check_es_loss = loss
                 '''
-                torch.save(model_feynman.state_dict(), "results/NN_trained_models/models/" + filename + ".h5")   
+                torch.save(model_feynman.state_dict(), "results/NN_trained_models/models/" + filename + ".h5")
             lrs = lrs/10
 
         return model_feynman

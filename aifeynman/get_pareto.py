@@ -70,15 +70,15 @@ class ParetoSet(SortedKeyList):
             return Point(x=p[0], y=p[1], data=None)
         else:
             raise TypeError("Must be instance of Point or 2-tuple.")
-    
-    
+
+
     def get_id_list(self):
         id_list = []
         for point in self:
             id_list.append(point.id)
         return id_list
 
-    
+
     def add(self, p):
         """Insert Point into set if minimal in first two indices.
 
@@ -220,14 +220,14 @@ class ParetoSet(SortedKeyList):
 
     def get_pareto_points(self):
         """Returns the x, y and data for each point in the pareto frontier
-        
+
         """
         pareto_points = []
         for i, p in enumerate(self):
             pareto_points = pareto_points + [[p.x, p.y, p.data]]
-        
+
         return pareto_points
-        
+
 
     def from_list(self, A):
         """Convert iterable of Points into ParetoSet.
@@ -241,8 +241,8 @@ class ParetoSet(SortedKeyList):
         """
         for a in A:
             self.add(a)
-    
-    
+
+
     def plot(self):
         """Plotting the Pareto frontier."""
         array = self.to_array()
@@ -254,14 +254,14 @@ class ParetoSet(SortedKeyList):
 if __name__ == "__main__":
     PA = ParetoSet()
     A = np.zeros((40, 2))
-    
+
     for i in range(40):
         x = np.random.rand()
         y = np.random.rand()
-        
+
         A[i, 0] = x
         A[i, 1] = y
-        
+
         PA.add(Point(x=x, y=y, data=None))
     paretoA = PA.to_array()
 

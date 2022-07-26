@@ -17,7 +17,7 @@ def as_tall(x):
 
 
 def multipolyfit(xs, y, deg):
-    
+
     y = asarray(y).squeeze()
     rows = y.shape[0]
     xs = asarray(xs)
@@ -28,9 +28,9 @@ def multipolyfit(xs, y, deg):
         xs = np.reshape(xs,(len(xs),1))
 
     xs = hstack((ones((xs.shape[0], 1), dtype=xs.dtype) , xs))
-    
+
     generators = [basis_vector(num_covariates+1, i) for i in range(num_covariates+1)]
-        
+
     # All combinations of degrees
     powers = map(sum, itertools.combinations_with_replacement(generators, deg))
 
@@ -38,7 +38,7 @@ def multipolyfit(xs, y, deg):
     A = hstack(asarray([as_tall((xs**p).prod(1)) for p in powers]))
     params = lsqr(A, y)[0] # get the best params of the fit
     rms = lsqr(A, y)[4] # get the rms params of the fit
-    
+
     return (params, rms)
 
 

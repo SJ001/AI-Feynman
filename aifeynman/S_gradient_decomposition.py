@@ -31,7 +31,7 @@ def powerset_atleast_2(iterable, max_subset_size):
     return r
 
 def evaluate_derivatives(model, s,  pts):
-    
+
     pts = pts.clone().detach()
     try:
         device = 'cuda' if model.is_cuda else 'cpu'
@@ -59,7 +59,7 @@ def evaluate_derivatives_andrew(model, s, pts):
         pts = pts.cuda()
         model = model.cuda()
         grad_weights = grad_weights.cuda()
-    
+
     pts.requires_grad_(True)
     outs = model(pts)
     grad = torch.autograd.grad(outs, pts, grad_outputs=grad_weights, create_graph=True)[0]
@@ -74,7 +74,7 @@ def build_true_model(func):
 
 def draw_samples(X, y, model, s, NUM_SAMPLES, point = None):
     '''
-    Draw samples by sampling each dimension independently, 
+    Draw samples by sampling each dimension independently,
     keeping the positions at s fixed to given point if exists,
     sampled point if not.
     '''
@@ -205,7 +205,7 @@ def filter_decompositions_relative_scoring(X, y, model, max_subset_size=None, vi
             bench_scores.append(score)
         snr = signal_to_noise(hypot_scores, bench_scores)
         # penalizes larger decompositions
-        snr -= np.log10(2)*len(s) 
+        snr -= np.log10(2)*len(s)
         results.append((snr, s))
         print((snr, s))
         if visualize:
@@ -254,7 +254,7 @@ def identify_decompositions(pathdir,filename, model, max_subset_size=2, visualiz
     data = np.loadtxt(pathdir+filename)
     X = torch.Tensor(data[:, :-1])
     y = torch.Tensor(data[:, [-1]])
-    # Return best decomposition                                                                                                                                                   
+    # Return best decomposition
     all_scores = filter_decompositions_relative_scoring(X, y, model, visualize=visualize)
     assert(all_scores)
     best_decomposition = all_scores[0][1]

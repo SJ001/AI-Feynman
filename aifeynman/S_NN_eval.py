@@ -76,7 +76,7 @@ def NN_eval(pathdir,filename):
         else:
             factors_val = factors_val
         factors_val = factors_val.float()
-        product_val = torch.from_numpy(f_dependent[int(5*len(variables)/6):int(len(variables))])      
+        product_val = torch.from_numpy(f_dependent[int(5*len(variables)/6):int(len(variables))])
         if is_cuda:
             product_val = product_val.cuda()
         else:
@@ -104,7 +104,7 @@ def NN_eval(pathdir,filename):
             model = SimpleNet(n_variables).cuda()
         else:
             model = SimpleNet(n_variables)
-                    
+
         model.load_state_dict(torch.load("results/NN_trained_models/models/"+filename+".h5"))
         model.eval()
         return(rmse_loss(model(factors_val),product_val),model)

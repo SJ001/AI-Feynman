@@ -62,7 +62,7 @@ def check_compositionality(pathdir,filename,model,express,mu,sigma,nu=10):
             else:
                 i = i + 1
 
-    
+
     if i==len(data[0:1000]) and np.mean(list_z)<mu:
         return (1,express,np.mean(list_z),np.std(list_z))
     else:

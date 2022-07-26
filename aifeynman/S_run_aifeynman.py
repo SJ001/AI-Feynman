@@ -41,7 +41,7 @@ def run_AI_all(pathdir,filename,BF_try_time=60,BF_ops_file_type="14ops", polyfit
 
     # Run bf and polyfit
     PA = run_bf_polyfit(pathdir,pathdir,filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg)
-    PA = get_squared(pathdir,"results/mystery_world_squared/",filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg)   
+    PA = get_squared(pathdir,"results/mystery_world_squared/",filename,BF_try_time,BF_ops_file_type, PA, polyfit_deg)
 
     # Run bf and polyfit on modified output
 
@@ -75,7 +75,7 @@ def run_AI_all(pathdir,filename,BF_try_time=60,BF_ops_file_type="14ops", polyfit
         model_feynman = NN_train(pathdir,filename,NN_epochs)
         print("NN loss: ", NN_eval(pathdir,filename), "\n")
 
-    
+
     # Check which symmetry/separability is the best
     # Symmetries
     print("Checking for symmetries...")
@@ -140,7 +140,7 @@ def run_AI_all(pathdir,filename,BF_try_time=60,BF_ops_file_type="14ops", polyfit
     else:
         idx_comp = 0
     print("")
-    
+
     if idx_comp==1:
         idx_min = 6
 
@@ -154,7 +154,7 @@ def run_AI_all(pathdir,filename,BF_try_time=60,BF_ops_file_type="14ops", polyfit
             decomp_idx = identify_decompositions(pathdir,filename, model_feynman)
             brute_force_gen_sym("results/","gradients_gen_sym_%s" %filename,600,"14ops.txt")
             bf_all_output = np.loadtxt("results_gen_sym.dat", dtype="str")
-            
+
             for bf_i in range(len(bf_all_output)):
                 idx_gen_sym_temp = 0
                 try:
@@ -297,8 +297,7 @@ def run_aifeynman(pathdir,filename,BF_try_time,BF_ops_file_type, polyfit_deg=4, 
     # Run gradient descent on the data one more time
     for i in range(len(PA_list)):
         try:
-            dt = np.loadtxt(pathdir+filename)
-            gd_update = final_gd(dt,PA_list[i][-1])
+            gd_update = final_gd(pathdir,filename,PA_list[i][-1])
             PA.add(Point(x=gd_update[1],y=gd_update[0],data=gd_update[2]))
         except:
             continue

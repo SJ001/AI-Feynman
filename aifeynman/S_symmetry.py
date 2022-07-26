@@ -57,12 +57,12 @@ def check_translational_symmetry_minus(pathdir, filename):
             for j in range(1,n_variables):
                 v = np.loadtxt(pathdir+"/%s" %filename, usecols=(j,))
                 variables = np.column_stack((variables,v))
-        
+
 
         f_dependent = np.loadtxt(pathdir+"/%s" %filename, usecols=(n_variables,))
         f_dependent = np.reshape(f_dependent,(len(f_dependent),1))
 
-        factors = torch.from_numpy(variables) 
+        factors = torch.from_numpy(variables)
         if is_cuda:
             factors = factors.cuda()
         else:
@@ -87,7 +87,7 @@ def check_translational_symmetry_minus(pathdir, filename):
         models_one = []
         models_rest = []
 
-        with torch.no_grad():            
+        with torch.no_grad():
             # make the shift x->x+a for 2 variables at a time (different variables)
             min_error = 1000
             best_i = -1
@@ -116,7 +116,7 @@ def check_translational_symmetry_minus(pathdir, filename):
     except Exception as e:
         print(e)
         return (-1,-1,-1,-1,-1)
-    
+
 def do_translational_symmetry_minus(pathdir, filename, i,j):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
@@ -128,11 +128,11 @@ def do_translational_symmetry_minus(pathdir, filename, i,j):
         for k in range(1,n_variables):
             v = np.loadtxt(pathdir+"/%s" %filename, usecols=(k,))
             variables = np.column_stack((variables,v))
-        
+
         f_dependent = np.loadtxt(pathdir+"/%s" %filename, usecols=(n_variables,))
         f_dependent = np.reshape(f_dependent,(len(f_dependent),1))
 
-        factors = torch.from_numpy(variables) 
+        factors = torch.from_numpy(variables)
         if is_cuda:
             factors = factors.cuda()
         else:
@@ -157,7 +157,7 @@ def do_translational_symmetry_minus(pathdir, filename, i,j):
         models_one = []
         models_rest = []
 
-        with torch.no_grad():   
+        with torch.no_grad():
             file_name = filename + "-translated_minus"
             ct_median = torch.median(torch.from_numpy(variables[:,j]))
             data_translated = variables
@@ -175,7 +175,7 @@ def do_translational_symmetry_minus(pathdir, filename, i,j):
     except Exception as e:
         print(e)
         return (-1,-1)
-        
+
 
 # checks if f(x,y)=f(x/y)
 def check_translational_symmetry_divide(pathdir, filename):
@@ -194,12 +194,12 @@ def check_translational_symmetry_divide(pathdir, filename):
             for j in range(1,n_variables):
                 v = np.loadtxt(pathdir+"/%s" %filename, usecols=(j,))
                 variables = np.column_stack((variables,v))
-        
+
 
         f_dependent = np.loadtxt(pathdir+"/%s" %filename, usecols=(n_variables,))
         f_dependent = np.reshape(f_dependent,(len(f_dependent),1))
 
-        factors = torch.from_numpy(variables) 
+        factors = torch.from_numpy(variables)
         if is_cuda:
             factors = factors.cuda()
         else:
@@ -253,8 +253,8 @@ def check_translational_symmetry_divide(pathdir, filename):
     except Exception as e:
         print(e)
         return (-1,-1,-1,-1,-1)
-    
-    
+
+
 def do_translational_symmetry_divide(pathdir, filename, i,j):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
@@ -266,11 +266,11 @@ def do_translational_symmetry_divide(pathdir, filename, i,j):
         for k in range(1,n_variables):
             v = np.loadtxt(pathdir+"/%s" %filename, usecols=(k,))
             variables = np.column_stack((variables,v))
-        
+
         f_dependent = np.loadtxt(pathdir+"/%s" %filename, usecols=(n_variables,))
         f_dependent = np.reshape(f_dependent,(len(f_dependent),1))
 
-        factors = torch.from_numpy(variables) 
+        factors = torch.from_numpy(variables)
         if is_cuda:
             factors = factors.cuda()
         else:
@@ -295,7 +295,7 @@ def do_translational_symmetry_divide(pathdir, filename, i,j):
         models_one = []
         models_rest = []
 
-        with torch.no_grad():             
+        with torch.no_grad():
             file_name = filename + "-translated_divide"
             data_translated = variables
             ct_median =torch.median(torch.from_numpy(variables[:,j]))
@@ -331,12 +331,12 @@ def check_translational_symmetry_multiply(pathdir, filename):
             for j in range(1,n_variables):
                 v = np.loadtxt(pathdir+"/%s" %filename, usecols=(j,))
                 variables = np.column_stack((variables,v))
-        
+
 
         f_dependent = np.loadtxt(pathdir+"/%s" %filename, usecols=(n_variables,))
         f_dependent = np.reshape(f_dependent,(len(f_dependent),1))
 
-        factors = torch.from_numpy(variables) 
+        factors = torch.from_numpy(variables)
         if is_cuda:
             factors = factors.cuda()
         else:
@@ -402,11 +402,11 @@ def do_translational_symmetry_multiply(pathdir, filename, i,j):
         for k in range(1,n_variables):
             v = np.loadtxt(pathdir+"/%s" %filename, usecols=(k,))
             variables = np.column_stack((variables,v))
-        
+
         f_dependent = np.loadtxt(pathdir+"/%s" %filename, usecols=(n_variables,))
         f_dependent = np.reshape(f_dependent,(len(f_dependent),1))
 
-        factors = torch.from_numpy(variables) 
+        factors = torch.from_numpy(variables)
         if is_cuda:
             factors = factors.cuda()
         else:
@@ -431,7 +431,7 @@ def do_translational_symmetry_multiply(pathdir, filename, i,j):
         models_one = []
         models_rest = []
 
-        with torch.no_grad():             
+        with torch.no_grad():
             file_name = filename + "-translated_multiply"
             data_translated = variables
             ct_median =torch.median(torch.from_numpy(variables[:,j]))
@@ -467,12 +467,12 @@ def check_translational_symmetry_plus(pathdir, filename):
             for j in range(1,n_variables):
                 v = np.loadtxt(pathdir+"/%s" %filename, usecols=(j,))
                 variables = np.column_stack((variables,v))
-        
+
 
         f_dependent = np.loadtxt(pathdir+"/%s" %filename, usecols=(n_variables,))
         f_dependent = np.reshape(f_dependent,(len(f_dependent),1))
 
-        factors = torch.from_numpy(variables) 
+        factors = torch.from_numpy(variables)
         if is_cuda:
             factors = factors.cuda()
         else:
@@ -525,7 +525,7 @@ def check_translational_symmetry_plus(pathdir, filename):
     except Exception as e:
         print(e)
         return (-1,-1,-1,-1,-1)
-    
+
 def do_translational_symmetry_plus(pathdir, filename, i,j):
     try:
         pathdir_weights = "results/NN_trained_models/models/"
@@ -537,11 +537,11 @@ def do_translational_symmetry_plus(pathdir, filename, i,j):
         for k in range(1,n_variables):
             v = np.loadtxt(pathdir+"/%s" %filename, usecols=(k,))
             variables = np.column_stack((variables,v))
-        
+
         f_dependent = np.loadtxt(pathdir+"/%s" %filename, usecols=(n_variables,))
         f_dependent = np.reshape(f_dependent,(len(f_dependent),1))
 
-        factors = torch.from_numpy(variables) 
+        factors = torch.from_numpy(variables)
         if is_cuda:
             factors = factors.cuda()
         else:
@@ -566,7 +566,7 @@ def do_translational_symmetry_plus(pathdir, filename, i,j):
         models_one = []
         models_rest = []
 
-        with torch.no_grad():             
+        with torch.no_grad():
             file_name = filename + "-translated_plus"
             data_translated = variables
             ct_median =torch.median(torch.from_numpy(variables[:,j]))
@@ -580,7 +580,7 @@ def do_translational_symmetry_plus(pathdir, filename, i,j):
             np.savetxt("results/translated_data_plus/"+file_name , data_translated)
             remove_input_neuron(model,n_variables,j,ct_median,"results/NN_trained_models/models/"+filename + "-translated_plus_pretrained.h5")
             return ("results/translated_data_plus/", file_name)
-        
+
     except Exception as e:
         print(e)
         return (-1,-1)

@@ -17,7 +17,7 @@ def RPN_to_eq(expr):
             elif i == "0":
                 stack = np.append(stack,"0")
             elif i == "1":
-                stack = np.append(stack,"1")  
+                stack = np.append(stack,"1")
             else:
                 stack = np.append(stack,"x" + str(ord(i)-97))
         elif i in operations_2:
