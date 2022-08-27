@@ -1,6 +1,6 @@
 # Calculates the complexity of a number to be used for the Pareto frontier
 
-import numpy as np 
+import numpy as np
 
 def get_number_DL(n):
     epsilon = 1e-10

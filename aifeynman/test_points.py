@@ -34,7 +34,7 @@ def project_plane(normal, point, guess):
 class TestPoints:
     def __init__(self, eq, symbols, X, y, bitmask, mode='general'):
         '''
-        mode is in {'general', 'add', 'minus', 'times', 'divide'} 
+        mode is in {'general', 'add', 'minus', 'times', 'divide'}
         eq, symbols are None if mode is not general
         '''
         self.mode = mode
@@ -63,7 +63,7 @@ class TestPoints:
         self.lambda_grads = [sympy.lambdify(self.symbols, x) for x in self.symp_grads]
         self.low_range = np.percentile(self.X[:, self.bitmask], 0, axis=0)
         self.high_range = np.percentile(self.X[:, self.bitmask], 100, axis=0)
-        
+
         self.init_median_projection()
         self.init_scatter()
 
@@ -84,7 +84,7 @@ class TestPoints:
         num_grads = self.evaluate_gradients(pt)
         num_grads /= np.linalg.norm(num_grads)
         return [project_plane(num_grads, pt, self.median_point)]
-    
+
 
     def find_initial_guess_scatter(self, pt, low=2, high=3):
         guess = self.find_initial_guess_median_projection(pt)
@@ -93,7 +93,7 @@ class TestPoints:
         candidates = list(range(max(0, target_index-low), min(self.X.shape[0], target_index+high)))
         results = [self.X[self.hindices[guess], self.bitmask] for guess in candidates]
         return results
-    
+
     def find_initial_guess_random(self, pt, num=2):
         return [self.X[t, self.bitmask] for t in np.random.randint(0, self.X.shape[0], num)]
 
@@ -110,8 +110,8 @@ class TestPoints:
     def optimize_bfgs(self, guess, target):
         MAXITER = 20
         res = scipy.optimize.minimize(lambda x: .5 * (self.lambda_eq(*x) - target)**2,
-                                    guess, method='BFGS', 
-                                    jac=lambda x: self.evaluate_gradients(x) * (self.lambda_eq(*x) - target), 
+                                    guess, method='BFGS',
+                                    jac=lambda x: self.evaluate_gradients(x) * (self.lambda_eq(*x) - target),
                                     options={'maxiter':MAXITER, 'disp': False})
         if res.success:
             return res.x
@@ -146,8 +146,8 @@ class TestPoints:
             if result is not None and self.in_domain(result):
                 results.append(result)
         return max(results, key=lambda x: np.linalg.norm(pt - x), default=None)
-        
-    
+
+
     def analyze_reference_point(self, pt, opt, disp):
         reference_point_rel_error = relative_error(self.lambda_eq(*opt), self.lambda_eq(*pt))
         reference_point_distance = np.linalg.norm(opt - pt)

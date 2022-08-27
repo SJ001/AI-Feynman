@@ -41,14 +41,11 @@ setup(
     include_package_data=True,
     ext_modules=[sr1, sr2, sr3, sr_mdl_mult, sr_mdl_plus, sr_mdl4, sr_mdl5],
     python_requires='>3.6',
-    install_requires=['matplotlib',
-                      'numpy',
-                      'seaborn',
-                      'sklearn',
+    install_requires=['numpy',
                       'sortedcontainers',
+                      'scikit-learn==0.24.1',
                       'sympy >= 1.4',
                       'torch >= 1.4.0',
-                      'torchvision',
                       ],
     entry_points={
         'console_scripts': [
