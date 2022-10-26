@@ -93,7 +93,20 @@ def run_AI_all(pathdir,filename,BF_try_time=60,BF_ops_file_type="14ops", polyfit
     if symmetry_plus_result[0]==-1:
         idx_min = -1
     else:
-        idx_min = np.argmin(np.array([symmetry_plus_result[0], symmetry_minus_result[0], symmetry_multiply_result[0], symmetry_divide_result[0], separability_plus_result[0], separability_multiply_result[0]]))
+        results = (
+            symmetry_plus_result,
+            symmetry_minus_result,
+            symmetry_multiply_result,
+            symmetry_divide_result,
+            separability_plus_result,
+            separability_multiply_result,
+        )
+        gen_errors = (result[0] for result in results)
+
+        # When using cuda, errors can be returned as torch.Tensor objects.
+        # [TODO] Can we do a single check instead of testing all of them???
+        errors = [e.item() if isinstance(e, torch.Tensor) else e for e in gen_errors]
+        idx_min = np.argmin(errors)
 
     print("")
     # Check if compositionality is better than the best so far
