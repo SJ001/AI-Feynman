@@ -1,0 +1,3 @@
+[build-system]
+# Minimum requirements for the build system to execute, as per PEP 508
+requires = ["numpy", "setuptools", "wheel", "Cython"]
