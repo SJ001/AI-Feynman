@@ -3,6 +3,7 @@ from collections import namedtuple
 import matplotlib.pyplot as plt
 import numpy as np
 from sortedcontainers import SortedKeyList
+import pandas as pd
 
 
 class Point(object):
@@ -240,8 +241,33 @@ class ParetoSet(SortedKeyList):
 
         """
         for a in A:
-            self.add(a)
-    
+            self.add(Point(*a))
+
+
+
+    def to_list(self):
+        """Extract lst of pareto coordinates from self
+
+        Args:
+            None
+
+        Returns:
+            l: list of tuples (x, y) for each point on the pareto frontier
+
+        """
+        return [(p.x, p.y, p.data) for p in self]
+
+    def to_file(self, filename):
+        arr = []
+        for p in self:
+            arr.append([str(p.x), str(p.y), str(p.data)])
+        arr = np.array(arr, dtype=str)
+        np.savetxt(filename, arr, fmt='%s')
+
+    def from_file(self, filename):
+        arr = np.loadtxt(filename, dtype=str)
+        for p in arr:
+            self.add(Point(float(p[0]), float(p[1]), p[2]))
     
     def plot(self):
         """Plotting the Pareto frontier."""
@@ -249,6 +275,18 @@ class ParetoSet(SortedKeyList):
         plt.figure(figsize=(8, 6))
         plt.plot(array[:, 0], array[:, 1], 'r.')
         plt.show()
+
+    def df(self):
+        """Returns pandas.DataFrame with current pareto frontier"""
+        compls = []
+        losss = []
+        exprs = []
+        for compl, loss, expr in self.get_pareto_points():
+            compls.append(np.round(compl, 2))
+            losss.append(np.round(loss, 2))
+            exprs.append(expr)
+        d = {'Complexity': compls, 'MDL Loss': losss, 'Expression': exprs}
+        return pd.DataFrame(data=d)
 
 
 if __name__ == "__main__":

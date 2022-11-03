@@ -246,9 +246,9 @@ Actual hook
 Returns pair (numpy with 2k columns. First k are data points, next k are gradients), (bitmask as numpy array)
 '''
 
-def identify_decompositions(pathdir,filename, model, max_subset_size=2, visualize=False):
-    print("identify_decompositions",pathdir,filename)
-    data = np.loadtxt(pathdir+filename)
+def identify_decompositions(data, model, max_subset_size=2, visualize=False):
+    #print("identify_decompositions",pathdir,filename)
+    #data = np.loadtxt(pathdir+filename)
     X = torch.Tensor(data[:, :-1])
     y = torch.Tensor(data[:, [-1]])
     # Return best decomposition                                                                                                                                                   
@@ -256,8 +256,8 @@ def identify_decompositions(pathdir,filename, model, max_subset_size=2, visualiz
     assert(all_scores)
     best_decomposition = all_scores[0][1]
     gradients = extract_gradients(X, y, model, best_decomposition, 10000)
-    np.savetxt("results/gradients_gen_sym_%s" %filename, gradients)
+    #np.savetxt("results/gradients_gen_sym_%s" %filename, gradients)
     ll = np.arange(0,X.shape[1],1)
     print("mask", to_numpy_mask(best_decomposition, X.shape[1]))
-    return ll[to_numpy_mask(best_decomposition, X.shape[1])]
+    return ll[to_numpy_mask(best_decomposition, X.shape[1])], gradients
 

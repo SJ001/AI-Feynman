@@ -41,98 +41,90 @@ def rmse_loss(pred, targ):
     denom = torch.sqrt(denom.sum()/len(denom))
     return torch.sqrt(F.mse_loss(pred, targ))/denom
 
-def NN_train(pathdir, filename, epochs=1000, lrs=1e-2, N_red_lr=1, pretrained_path=""):
-    try:
-        os.mkdir("results/NN_trained_models/")
-    except:
-        pass
 
-    try:
-        os.mkdir("results/NN_trained_models/models/")
-    except:
-        pass
-    try:
-        n_variables = np.loadtxt(pathdir+"%s" %filename, dtype='str').shape[1]-1
-        variables = np.loadtxt(pathdir+"%s" %filename, usecols=(0,))
+def NN_train(XY, epochs=1000, lrs=1e-2, N_red_lr=1, pretrained_path=""):
+    variables = XY[:, :-1]
+    n_variables = variables.shape[1]
 
-        # epochs = 200*n_variables
-        if len(variables)<5000:
-            print('WARNING: tripling epochs since len(variables)<5000...')
-            epochs = epochs*3
+    f_dependent = XY[:, -1]
+    f_dependent = np.reshape(f_dependent, (len(f_dependent), 1))
 
-        if n_variables==0 or n_variables==1:
-            return 0
+    # epochs = 200*n_variables
+    if len(variables)<5000:
+        print('WARNING: tripling epochs since len(variables)<5000...')
+        epochs = epochs*3
 
-        else:
-            for j in range(1,n_variables):
-                v = np.loadtxt(pathdir+"%s" %filename, usecols=(j,))
-                variables = np.column_stack((variables,v))
+    if n_variables==0 or n_variables==1:
+        return 0
 
-        f_dependent = np.loadtxt(pathdir+"%s" %filename, usecols=(n_variables,))
-        f_dependent = np.reshape(f_dependent,(len(f_dependent),1))
+    factors = torch.from_numpy(variables)
+    if is_cuda:
+        factors = factors.cuda()
+    else:
+        factors = factors
+    factors = factors.float()
 
-        factors = torch.from_numpy(variables)
-        if is_cuda:
-            factors = factors.cuda()
-        else:
-            factors = factors
-        factors = factors.float()
+    product = torch.from_numpy(f_dependent)
+    if is_cuda:
+        product = product.cuda()
+    else:
+        product = product
+    product = product.float()
 
-        product = torch.from_numpy(f_dependent)
-        if is_cuda:
-            product = product.cuda()
-        else:
-            product = product
-        product = product.float()
+    class SimpleNet(nn.Module):
+        def __init__(self, ni):
+            super().__init__()
+            self.linear1 = nn.Linear(ni, 128)
+            self.linear2 = nn.Linear(128, 128)
+            self.linear3 = nn.Linear(128, 64)
+            self.linear4 = nn.Linear(64,64)
+            self.linear5 = nn.Linear(64,1)
 
-        class SimpleNet(nn.Module):
-            def __init__(self, ni):
-                super().__init__()
-                self.linear1 = nn.Linear(ni, 128)
-                self.linear2 = nn.Linear(128, 128)
-                self.linear3 = nn.Linear(128, 64)
-                self.linear4 = nn.Linear(64,64)
-                self.linear5 = nn.Linear(64,1)
-            
-            def forward(self, x):
-                x = F.tanh(self.linear1(x))
-                x = F.tanh(self.linear2(x))
-                x = F.tanh(self.linear3(x))
-                x = F.tanh(self.linear4(x))
-                x = self.linear5(x)
-                return x
+        def forward(self, x):
+            x = F.tanh(self.linear1(x))
+            x = F.tanh(self.linear2(x))
+            x = F.tanh(self.linear3(x))
+            x = F.tanh(self.linear4(x))
+            x = self.linear5(x)
+            return x
 
-        my_dataset = utils.TensorDataset(factors,product) # create your datset
-        my_dataloader = utils.DataLoader(my_dataset, batch_size=bs, shuffle=True) # create your dataloader
+    my_dataset = utils.TensorDataset(factors,product) # create your datset
+    my_dataloader = utils.DataLoader(my_dataset, batch_size=bs, shuffle=True) # create your dataloader
 
-        if is_cuda:
-            model_feynman = SimpleNet(n_variables).cuda()
-        else:
-            model_feynman = SimpleNet(n_variables)
+    if is_cuda:
+        model_feynman = SimpleNet(n_variables).cuda()
+    else:
+        model_feynman = SimpleNet(n_variables)
 
-        if pretrained_path!="":
-            model_feynman.load_state_dict(torch.load(pretrained_path))
+    if pretrained_path!="":
+        model_feynman.load_state_dict(torch.load(pretrained_path))
 
-        check_es_loss = 10000
-
-        for i_i in range(N_red_lr):
-            optimizer_feynman = optim.Adam(model_feynman.parameters(), lr = lrs)
-            for epoch in tqdm(range(epochs)):
+    N = len(my_dataloader)
+    #print(N)
+    for i_i in range(N_red_lr):
+        optimizer_feynman = optim.Adam(model_feynman.parameters(), lr = lrs)
+        with tqdm(range(epochs), desc="Training neural network") as pbar:
+            for epoch in pbar:
                 model_feynman.train()
+                acc_loss = 0
                 for i, data in enumerate(my_dataloader):
+                    #print(data[0].shape)
                     optimizer_feynman.zero_grad()
-                
+
                     if is_cuda:
                         fct = data[0].float().cuda()
                         prd = data[1].float().cuda()
                     else:
                         fct = data[0].float()
                         prd = data[1].float()
-                    
-                    loss = rmse_loss(model_feynman(fct),prd)
+
+                    loss = rmse_loss(model_feynman(fct), prd)
                     loss.backward()
                     optimizer_feynman.step()
-                
+
+                    acc_loss += loss.cpu().detach().numpy()
+                pbar.set_description(f"Training loss: {np.round(acc_loss/N, 3)}")
+
                 '''
                 # Early stopping
                 if epoch%20==0 and epoch>0:
@@ -146,13 +138,6 @@ def NN_train(pathdir, filename, epochs=1000, lrs=1e-2, N_red_lr=1, pretrained_pa
                         torch.save(model_feynman.state_dict(), "results/NN_trained_models/models/" + filename + ".h5")
                         check_es_loss = loss
                 '''
-                torch.save(model_feynman.state_dict(), "results/NN_trained_models/models/" + filename + ".h5")   
-            lrs = lrs/10
+        lrs = lrs/10
 
-        return model_feynman
-
-    except NameError:
-        print("Error in file: %s" %filename)
-        raise
-
-
+    return model_feynman

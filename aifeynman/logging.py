@@ -22,3 +22,5 @@ def log_exception(logger, e):
     if logger is not None:
         logger.info(e)
         logger.debug(traceback.format_exc())
+    else:
+        print(traceback.format_exc())

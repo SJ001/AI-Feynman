@@ -17,7 +17,7 @@ import os
 
 is_cuda = torch.cuda.is_available()
 
-def remove_input_neuron(net,n_inp,idx_neuron,ct_median,save_filename):
+def remove_input_neuron(net,n_inp,idx_neuron,ct_median):
     removed_weights = net.linear1.weight[:,idx_neuron]
     # Remove the weights associated with the removed input neuron                                                                                                               
     t = torch.transpose(net.linear1.weight,0,1)
@@ -29,5 +29,6 @@ def remove_input_neuron(net,n_inp,idx_neuron,ct_median,save_filename):
         net.linear1.bias = nn.Parameter(net.linear1.bias+torch.tensor(ct_median*removed_weights).float().cuda())
     else:
         net.linear1.bias = nn.Parameter(net.linear1.bias+torch.tensor(ct_median*removed_weights).float())
-    torch.save(net.state_dict(), save_filename)
+    #torch.save(net.state_dict(), save_filename)
+    return net
 

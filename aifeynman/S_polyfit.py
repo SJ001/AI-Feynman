@@ -22,18 +22,36 @@ def mk_sympy_function(coeffs, num_covariates, deg):
     else:
         return coeffs[0]
 
-def polyfit(maxdeg, filename, logger=None):
-    n_variables = np.loadtxt(filename, dtype='str').shape[1]-1
-    variables = np.loadtxt(filename, usecols=(0,))
-    means = [np.mean(variables)]
+def polyfit(XY, maxdeg, logger=None):
+    #n_variables1 = np.loadtxt(filename, dtype='str').shape[1]-1
+    n_variables = XY.shape[1] - 1
 
-    for j in range(1,n_variables):
-        v = np.loadtxt(filename, usecols=(j,))
-        means = means + [np.mean(v)]
-        variables = np.column_stack((variables,v))
+    #variables1 = np.loadtxt(filename, usecols=(0,))
+    #means1 = [np.mean(variables1)]
 
-    f_dependent = np.loadtxt(filename, usecols=(n_variables,))
+    #for j in range(1,n_variables):
+    #    v = np.loadtxt(filename, usecols=(j,))
+    #    means1 = means1 + [np.mean(v)]
+    #    variables1 = np.column_stack((variables1,v))
 
+    # TODO: variables used to be a (n, )-array when input_dim is 1, now it is (n, 1). Make sure that this is not a problem
+    variables = XY[:, :-1]
+    means = [np.mean(variables[:, i]) for i in range(variables.shape[1])]
+
+    #if variables1.shape[1] == 1:
+    #   variables1 = variables1.flatten()
+
+    #f_dependent1 = np.loadtxt(filename, usecols=(n_variables,))
+    f_dependent = XY[:, -1]
+
+    #print(f_dependent.shape, f_dependent1.shape)
+
+    #print(variables.shape, variables1.shape)
+
+    #assert np.array_equal(f_dependent, f_dependent1)
+    #assert np.array_equal(variables, variables1)
+    #assert means == means1
+    #exit()
     if n_variables>1:
         C_1_2 = fractional_matrix_power(np.cov(variables.T),-1/2)
         x = []
@@ -85,5 +103,5 @@ def polyfit(maxdeg, filename, logger=None):
         except ValueError:
             pass
 
-    return (eq, params_error)
+    return eq, params_error
 

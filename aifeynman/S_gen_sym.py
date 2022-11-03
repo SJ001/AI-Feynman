@@ -16,11 +16,11 @@ is_cuda = torch.cuda.is_available()
 
 
 # fix this to work with the other variables constant
-def check_gen_sym(pathdir,filename,model,gen_sym_idx,express,mu,sigma,nu=10):
+def check_gen_sym(data,model,gen_sym_idx,express,mu,sigma,nu=10):
     gen_sym_idx = np.append(gen_sym_idx,-1)
-    data_all = np.loadtxt(pathdir+filename)
+    data_all = data
     # Choose only the data to be separated
-    data = np.loadtxt(pathdir+filename)[:,gen_sym_idx]
+    data = np.copy(data)[:,gen_sym_idx]
     # Turn the equation from RPN to normal mathematical expression
     eq = RPN_to_eq(express)
     
@@ -37,6 +37,7 @@ def check_gen_sym(pathdir,filename,model,gen_sym_idx,express,mu,sigma,nu=10):
     length_fixed = len(fixed)
 
     bm = np.ones(len(data[0])-1,dtype=bool)
+
     obj = test_points.init_general_test_point(eq, data[:,:-1], data[:,-1], bm)
 
     list_z = np.array([])
@@ -84,12 +85,12 @@ def check_gen_sym(pathdir,filename,model,gen_sym_idx,express,mu,sigma,nu=10):
         return (0,express,100,100)
 
 
-def do_gen_sym(pathdir, filename, gen_sym_idx,express):
+def do_gen_sym(data, gen_sym_idx,express):
     gen_sym_idx = np.append(gen_sym_idx,-1)
-    data_all = np.loadtxt(pathdir+filename)
+    data_all = data
 
     # Choose only the data to be separated
-    data = np.loadtxt(pathdir+filename)[:,gen_sym_idx]
+    data = np.copy(data)[:,gen_sym_idx]
     # Turn the equation from RPN to normal mathematical expression
     eq = RPN_to_eq(express)
     # Get the variables appearing in the equation
@@ -113,15 +114,7 @@ def do_gen_sym(pathdir, filename, gen_sym_idx,express):
     #save_data = np.column_stack((new_data,data_all))
     save_data = data_all
 
-    try:
-        os.mkdir("results/gen_sym")
-    except:
-        pass
-
-    file_name = filename + "-gen_sym"
-    np.savetxt("results/gen_sym/"+file_name,save_data)
-
-    return ("results/gen_sym/", file_name)
+    return save_data
 
 def add_gen_sym_on_pareto(PA1,PA, gen_sym_idx, express):
     # Turn the equation from RPN to normal mathematical expression

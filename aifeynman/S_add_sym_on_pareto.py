@@ -10,7 +10,7 @@ from sympy import Symbol, lambdify, N
 from .get_pareto import Point, ParetoSet
 from .S_get_expr_complexity import get_expr_complexity
 
-def add_sym_on_pareto(pathdir,filename,PA1,idx1,idx2,PA,sym_typ):
+def add_sym_on_pareto(PA1,idx1,idx2,PA,sym_typ):
     possible_vars = ["x%s" %i for i in np.arange(0,30,1)]
     PA1 = np.array(PA1.get_pareto_points()).astype('str')
     for i in range(len(PA1)):

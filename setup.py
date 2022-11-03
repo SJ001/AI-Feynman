@@ -1,4 +1,3 @@
-#import setuptools
 from numpy.distutils.core import Extension, setup
 from Cython.Build import cythonize
 
@@ -7,7 +6,7 @@ source_files = Extension(
                         sources=["aifeynman/cython_wrapper.pyx", "aifeynman/bruteforce.cpp"],
                         define_macros=[('NPY_NO_DEPRECATED_API', 'NPY_1_7_API_VERSION')],
                         language='c++',
-                        extra_compile_args=["-O3", "-Wall"] # "-pg" for profiler support
+                        extra_compile_args=["-O3", "-Wall"] # add "-pg" for profiler support
                         )
 
 with open("README.md", "r") as fh:

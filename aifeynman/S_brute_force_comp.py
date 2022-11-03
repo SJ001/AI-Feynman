@@ -1,68 +1,51 @@
-# runs BF on data and saves the best RPN expressions in results.dat. This is used to find function proportional to the desired one using gradients
-# all the .dat files are created after I run this script
-# the .scr are needed to run the fortran code
-
-import csv
-import os
-import shutil
-import subprocess
-import sys
-from subprocess import call
-
-import numpy as np
-import sympy as sp
-from sympy.parsing.sympy_parser import parse_expr
-
-from .resources import _get_resource
 from .logging import log_exception
+import ctypes
+from numpy import ctypeslib as npct
+from cython_wrapper import bf_grad_search
+import numpy as np
 
 
-def brute_force_comp(pathdir, filename, BF_try_time, BF_ops_file_type, sigma=10, band=0, logger=None):
-
-    try_time = BF_try_time
-    try_time_prefactor = BF_try_time
-    file_type = BF_ops_file_type
-
+def brute_force_comp(data, results_path, aritytemplates_path, BF_try_time, sigma=10, band=0, logger=None):
     try:
-        os.remove(pathdir + "results_comp.dat")
-    except:
-        pass
+        '''
+        try:
+            # using .load_library() without the file extension should work cross-platform?
+            # https://numpy.org/devdocs/reference/routines.ctypeslib.html
+            # TODO: SWAP HARDCODED MODULE LINK
+            
+            cpp_bf_module = npct.load_library("main", cpp_module_path)
+        except OSError:
+            raise OSError(
+                f"Brute force c++ module could not be loaded from directory {cpp_module_path}. Make sure that the module was compiled properly.")
+            
+        # configure c types
+        cpp_bf_module.bf_gradient.argtypes = [npct.ndpointer(dtype=ctypes.c_float, ndim=2),
+                                              ctypes.c_int,
+                                              ctypes.c_int,
+                                              ctypes.c_int,
+                                              ctypes.c_float,
+                                              ctypes.c_float,
+                                              ctypes.c_wchar_p,
+                                              ctypes.c_wchar_p
+                                              ]
 
-    try:
-        os.remove("brute_solutions.dat")
-    except:
-        pass
-
-    try:
-        os.remove("brute_constant.dat")
-    except:
-        pass
-
-    try:
-        os.remove("brute_formulas.dat")
-    except:
-        pass
-
-    print("Trying to solve mysteries with brute force...")
-    print("Trying to solve {}".format(pathdir+filename))
-
-    shutil.copy2(pathdir+filename, pathdir + "mystery.dat")
-
-    data = "'{}' '{}' {} {} {:f} {:f}".format(_get_resource(file_type),
-                                                                     _get_resource(
-        "arity2templates.txt"),
-        pathdir + "mystery.dat",
-        pathdir + "results_comp.dat",
-        sigma,
-        band)
-
-    with open("args.dat", 'w') as f:
-        f.write(data)
-
-    try:
-        subprocess.call(["feynman_sr_mdl4"], timeout=try_time)
+        data_ctypes = data.astype(ctypes.c_float)
+        sigma_ctypes = ctypes.c_float(sigma)
+        band_ctypes = ctypes.c_float(band)
+        try:
+            cpp_bf_module.bf_gradient(
+                data_ctypes,
+                data.shape[0],
+                data.shape[1],
+                BF_try_time,
+                band_ctypes,
+                sigma_ctypes,
+                results_path,
+                aritytemplates_path
+            )
+        except KeyboardInterrupt:
+            raise KeyboardInterrupt("Propagated from c++ subprocess.")
+        '''
+        bf_grad_search(data, data.shape[0], data.shape[1], BF_try_time, float(band), float(sigma), results_path, aritytemplates_path)
     except Exception as e:
         log_exception(logger, e)
-        pass
-
-    return 1

@@ -5,12 +5,10 @@ from .S_run_bf_polyfit import run_bf_polyfit
 from .logging import log_exception
 
 
-def get_transform(pathdir, filename, BF_try_time, BF_ops_file_type, PA, basis_func, polyfit_deg=3, logger=None):
-    pathdir_write_to = pathdir + "results/mystery_world_{}/".format(basis_func)
-    try:
-        os.mkdir(pathdir_write_to)
-    except OSError:
-        pass
+def get_transform(XY, BF_try_time, aritytemplates_path, PA, basis_func, polyfit_deg=3, logger=None, processes=2):
+
+    # TODO: Add custom function definitions here.
+    #  Also add custom inverse string representation in bruteforce result postprocessing
     basis_func_definition = {
         "asin": lambda d: np.arcsin(d),
         "acos": lambda d: np.arccos(d),
@@ -26,7 +24,7 @@ def get_transform(pathdir, filename, BF_try_time, BF_ops_file_type, PA, basis_fu
         "": lambda d: d
     }
 
-    data = np.loadtxt(pathdir + filename)
+    data = np.copy(XY)
     try:
         f = basis_func_definition[basis_func]
     except KeyError:
@@ -34,9 +32,9 @@ def get_transform(pathdir, filename, BF_try_time, BF_ops_file_type, PA, basis_fu
         logger.debug(traceback.format_exc())
         return PA
     try:
-        data[:,-1] = f(data[:,-1])
-        np.savetxt(pathdir_write_to + filename, data)
-        PA = run_bf_polyfit(pathdir, pathdir_write_to, filename, BF_try_time, BF_ops_file_type, PA, polyfit_deg, basis_func, logger)
+        # Transform the target vector using basis_func, then try to fit to the transformed data
+        data[:, -1] = f(data[:, -1])
+        PA = run_bf_polyfit(data, BF_try_time, aritytemplates_path, PA, polyfit_deg, basis_func, logger, processes)
     except Exception as e:
         log_exception(logger, e)
         return PA

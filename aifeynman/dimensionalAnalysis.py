@@ -39,7 +39,8 @@ def dimensionalAnalysis(pathdir, filename, eq_symbols):
 
     dependent_var = eq_symbols[-1]
 
-    file_sym = open(filename + "_dim_red_variables.txt" ,"w")
+    dim_red_variables = []
+    file_sym = open(pathdir + filename + "_dim_red_variables.txt" ,"w")
     file_sym.write(filename)
     file_sym.write(", ")
 
@@ -71,6 +72,7 @@ def dimensionalAnalysis(pathdir, filename, eq_symbols):
         for j in range(len(input)):
             file_sym.write(str(input[j]))
             file_sym.write(", ")
+            dim_red_variables.append(str(input[j]))
         file_sym.write("\n")
     else:
         # get the symbolic form of the solved part
@@ -82,6 +84,7 @@ def dimensionalAnalysis(pathdir, filename, eq_symbols):
             sol = sol*input_sym[i]**np.round(solved_powers[i],2)
         file_sym.write(str(sol))
         file_sym.write(", ")
+        dim_red_variables.append(str(sol))
 
         # get the symbolic form of the unsolved part
         unsolved_powers = dimensional_analysis(input,output,units)[1]
@@ -94,6 +97,7 @@ def dimensionalAnalysis(pathdir, filename, eq_symbols):
                 uns = uns*input_sym[j]**unsolved_powers[i][j]
             file_sym.write(str(uns))
             file_sym.write(", ")
+            dim_red_variables.append(str(uns))
             unsolved = unsolved + [uns]
         file_sym.write("\n")
 

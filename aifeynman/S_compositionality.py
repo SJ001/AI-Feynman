@@ -2,6 +2,7 @@ import numpy as np
 from .RPN_to_eq import RPN_to_eq
 from scipy.optimize import fsolve
 from sympy import lambdify, N
+from sympy.parsing.sympy_parser import parse_expr
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -14,9 +15,14 @@ warnings.filterwarnings("ignore")
 is_cuda = torch.cuda.is_available()
 
 
-def check_compositionality(pathdir,filename,model,express,mu,sigma,nu=10):
-    data = np.loadtxt(pathdir+filename)
+def get_number_of_variables(express):
+    eq = RPN_to_eq(express)
+    parsed_eq = parse_expr(eq)
+    symbols = parsed_eq.free_symbols
+    return len(symbols)
 
+
+def check_compositionality(data, model,express,mu,sigma,nu=10):
     eq = RPN_to_eq(express)
     # Get the variables appearing in the equation
     possible_vars = ["x%s" %i for i in np.arange(0,30,1)]
@@ -62,15 +68,14 @@ def check_compositionality(pathdir,filename,model,express,mu,sigma,nu=10):
             else:
                 i = i + 1
 
-    
     if i==len(data[0:1000]) and np.mean(list_z)<mu:
-        return (1,express,np.mean(list_z),np.std(list_z))
+        return 1, express, np.mean(list_z), np.std(list_z)
     else:
-        return (0,express,100,100)
+        return 0, express, 100, 100
 
 
-def do_compositionality(pathdir,filename,express):
-    data = np.loadtxt(pathdir+filename)
+def do_compositionality(data, express):
+
     eq = RPN_to_eq(express)
     # Get the variables appearing in the equation
     possible_vars = ["x%s" %i for i in np.arange(0,30,1)]
@@ -86,15 +91,7 @@ def do_compositionality(pathdir,filename,express):
     new_data = f(*np.transpose(data[:,0:-1]))
     save_data = np.column_stack((new_data,data[:,-1]))
 
-    try:
-        os.mkdir("results/compositionality")
-    except:
-        pass
-
-    file_name = filename + "-comp"
-    np.savetxt("results/compositionality/"+file_name,save_data)
-
-    return ("results/compositionality/", file_name)
+    return save_data
 
 
 def add_comp_on_pareto(PA1,PA,express):

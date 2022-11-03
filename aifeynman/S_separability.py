@@ -39,8 +39,9 @@ def rmse_loss(pred, targ):
     denom = torch.sqrt(denom.sum()/len(denom))
     return torch.sqrt(F.mse_loss(pred, targ))/denom
 
-def check_separability_plus(pathdir, filename, logger=None):
+def check_separability_plus(model, XY, logger=None):
     try:
+        '''
         pathdir_weights = "results/NN_trained_models/models/"
 
         # load the data
@@ -59,6 +60,13 @@ def check_separability_plus(pathdir, filename, logger=None):
 
         f_dependent = np.loadtxt(pathdir+filename, usecols=(n_variables,))
         f_dependent = np.reshape(f_dependent,(len(f_dependent),1))
+        '''
+
+        variables = XY[:, :-1]
+        n_variables = variables.shape[1]
+
+        f_dependent = XY[:, -1]
+        f_dependent = np.reshape(f_dependent, (len(f_dependent), 1))
 
         factors = torch.from_numpy(variables) 
         if is_cuda:
@@ -75,11 +83,11 @@ def check_separability_plus(pathdir, filename, logger=None):
         product = product.float()
 
         # load the trained model and put it in evaluation mode
-        if is_cuda:
-            model = SimpleNet(n_variables).cuda()
-        else:
-            model = SimpleNet(n_variables)
-        model.load_state_dict(torch.load(pathdir_weights+filename+".h5"))
+        #if is_cuda:
+        #    model = SimpleNet(n_variables).cuda()
+        #else:
+        #    model = SimpleNet(n_variables)
+        #model.load_state_dict(torch.load(pathdir_weights+filename+".h5"))
         model.eval()
 
         # make some variables at the time equal to the median of factors
@@ -122,6 +130,8 @@ def check_separability_plus(pathdir, filename, logger=None):
                         best_j = rest_indx
                         best_mu = mu
                         best_sigma = sigma
+        if is_cuda:
+            min_error = min_error.cpu()
         return min_error, best_i, best_j, best_mu, best_sigma
                         
     except Exception as e:
@@ -129,107 +139,52 @@ def check_separability_plus(pathdir, filename, logger=None):
         return (-1,-1,-1,-1,-1)
                     
                                            
-def do_separability_plus(pathdir, filename, list_i,list_j, logger=None):
+def do_separability_plus(data, model, list_i,list_j):
+    variables = data[:, :-1]
+    n_variables = variables.shape[1]
+
+    if n_variables==1:
+        print("just one variable for ADD")
+        # if there is just one variable you have nothing to separate
+        return (-1,-1,-1)
+
+    factors = torch.from_numpy(variables)
+    if is_cuda:
+        factors = factors.cuda()
+    else:
+        factors = factors
+    factors = factors.float()
+
+    model.eval()
+
+    fact_vary = factors.clone()
+    for k in range(len(factors[0])):
+        fact_vary[:,k] = torch.full((len(factors),),torch.median(factors[:,k]))
+    fact_vary_one = factors.clone()
+    fact_vary_rest = factors.clone()
+    for t1 in list_j:
+        fact_vary_one[:,t1] = torch.full((len(factors),),torch.median(factors[:,t1]))
+    for t2 in list_i:
+        fact_vary_rest[:,t2] = torch.full((len(factors),),torch.median(factors[:,t2]))
+
+    with torch.no_grad():
+        # save the first half
+        data_sep_1 = variables
+        data_sep_1 = np.delete(data_sep_1,list_j,axis=1)
+        data_sep_1 = np.column_stack((data_sep_1,model(fact_vary_one).cpu()))
+        # save the second half
+        data_sep_2 = variables
+        data_sep_2 = np.delete(data_sep_2,list_i,axis=1)
+        data_sep_2 = np.column_stack((data_sep_2,model(fact_vary_rest).cpu()-model(fact_vary).cpu()))
+    return data_sep_1, data_sep_2
+
+        
+def check_separability_multiply(model, XY, logger=None):
     try:
-        pathdir_weights = "results/NN_trained_models/models/"
+        variables = XY[:, :-1]
+        n_variables = variables.shape[1]
 
-        # load the data
-        n_variables = np.loadtxt(pathdir+filename, dtype='str').shape[1]-1
-        variables = np.loadtxt(pathdir+filename, usecols=(0,))
-
-        if n_variables==1:
-            print(filename, "just one variable for ADD")
-            # if there is just one variable you have nothing to separate
-            return (-1,-1,-1)
-        else:
-            for j in range(1,n_variables):
-                v = np.loadtxt(pathdir+filename, usecols=(j,))
-                variables = np.column_stack((variables,v))
-        
-
-        f_dependent = np.loadtxt(pathdir+filename, usecols=(n_variables,))
-        f_dependent = np.reshape(f_dependent,(len(f_dependent),1))
-
-        factors = torch.from_numpy(variables) 
-        if is_cuda:
-            factors = factors.cuda()
-        else:
-            factors = factors
-        factors = factors.float()
-
-        product = torch.from_numpy(f_dependent)
-        if is_cuda:
-            product = product.cuda()
-        else:
-            product = product
-        product = product.float()
-
-        # load the trained model and put it in evaluation mode
-        if is_cuda:
-            model = SimpleNet(n_variables).cuda()
-        else:
-            model = SimpleNet(n_variables)
-        model.load_state_dict(torch.load(pathdir_weights+filename+".h5"))
-        model.eval()
-
-        # make some variables at the time equal to the median of factors
-        models_one = []
-        models_rest = []
-        
-        fact_vary = factors.clone()
-        for k in range(len(factors[0])):
-            fact_vary[:,k] = torch.full((len(factors),),torch.median(factors[:,k]))
-        fact_vary_one = factors.clone()
-        fact_vary_rest = factors.clone()
-        for t1 in list_j:
-            fact_vary_one[:,t1] = torch.full((len(factors),),torch.median(factors[:,t1]))
-        for t2 in list_i:
-            fact_vary_rest[:,t2] = torch.full((len(factors),),torch.median(factors[:,t2]))
-
-        with torch.no_grad():
-            str1 = filename+"-add_a"
-            str2 = filename+"-add_b"
-            # save the first half
-            data_sep_1 = variables
-            data_sep_1 = np.delete(data_sep_1,list_j,axis=1)
-            data_sep_1 = np.column_stack((data_sep_1,model(fact_vary_one).cpu()))
-            # save the second half  
-            data_sep_2 = variables
-            data_sep_2 = np.delete(data_sep_2,list_i,axis=1)
-            data_sep_2 = np.column_stack((data_sep_2,model(fact_vary_rest).cpu()-model(fact_vary).cpu()))
-            try:
-                os.mkdir("results/separable_add/")
-            except:
-                pass
-            np.savetxt("results/separable_add/"+str1,data_sep_1)
-            np.savetxt("results/separable_add/"+str2,data_sep_2)
-            # if it is separable, return the 2 new files created and the index of the column with the separable variable
-            return ("results/separable_add/",str1,"results/separable_add/",str2)
-
-    except Exception as e:
-        log_exception(logger, e)
-        return (-1,-1)
-
-        
-def check_separability_multiply(pathdir, filename, logger=None):
-    try:
-        pathdir_weights = "results/NN_trained_models/models/"
-
-        # load the data
-        n_variables = np.loadtxt(pathdir+filename, dtype='str').shape[1]-1
-        variables = np.loadtxt(pathdir+filename, usecols=(0,))
-
-        if n_variables==1:
-            print(filename, "just one variable for ADD")
-            # if there is just one variable you have nothing to separate
-            return (-1,-1,-1)
-        else:
-            for j in range(1,n_variables):
-                v = np.loadtxt(pathdir+filename, usecols=(j,))
-                variables = np.column_stack((variables,v))
-        
-
-        f_dependent = np.loadtxt(pathdir+filename, usecols=(n_variables,))
+        f_dependent = XY[:, -1]
 
         # Pick only data which is close enough to the maximum value (5 times less or higher)                                                                   
         max_output = np.max(abs(f_dependent))
@@ -253,11 +208,11 @@ def check_separability_multiply(pathdir, filename, logger=None):
         product = product.float()
 
         # load the trained model and put it in evaluation mode
-        if is_cuda:
-            model = SimpleNet(n_variables).cuda()
-        else:
-            model = SimpleNet(n_variables)
-        model.load_state_dict(torch.load(pathdir_weights+filename+".h5"))
+        #if is_cuda:
+        #    model = SimpleNet(n_variables).cuda()
+        #else:
+        #    model = SimpleNet(n_variables)
+        #model.load_state_dict(torch.load(pathdir_weights+filename+".h5"))
         model.eval()
 
         # make some variables at the time equal to the median of factors
@@ -299,6 +254,8 @@ def check_separability_multiply(pathdir, filename, logger=None):
                         best_j = rest_indx
                         best_mu = mu
                         best_sigma = sigma
+        if is_cuda:
+            min_error = min_error.cpu()
         return min_error, best_i, best_j, best_mu, best_sigma
                     
     except Exception as e:
@@ -307,85 +264,44 @@ def check_separability_multiply(pathdir, filename, logger=None):
 
                     
                     
-def do_separability_multiply(pathdir, filename, list_i,list_j, logger=None):
-    try:
-        pathdir_weights = "results/NN_trained_models/models/"
+def do_separability_multiply(data, model, list_i,list_j):
+    variables = data[:, :-1]
+    n_variables = variables.shape[1]
 
-        # load the data
-        n_variables = np.loadtxt(pathdir+filename, dtype='str').shape[1]-1
-        variables = np.loadtxt(pathdir+filename, usecols=(0,))
+    if n_variables==1:
+        print("just one variable for ADD")
+        # if there is just one variable you have nothing to separate
+        return (-1,-1,-1)
 
-        if n_variables==1:
-            print(filename, "just one variable for ADD")
-            # if there is just one variable you have nothing to separate
-            return (-1,-1,-1)
-        else:
-            for j in range(1,n_variables):
-                v = np.loadtxt(pathdir+filename, usecols=(j,))
-                variables = np.column_stack((variables,v))
-        
 
-        f_dependent = np.loadtxt(pathdir+filename, usecols=(n_variables,))
-        f_dependent = np.reshape(f_dependent,(len(f_dependent),1))
+    factors = torch.from_numpy(variables)
+    if is_cuda:
+        factors = factors.cuda()
+    else:
+        factors = factors
+    factors = factors.float()
 
-        factors = torch.from_numpy(variables)
-        if is_cuda:
-            factors = factors.cuda()
-        else:
-            factors = factors
-        factors = factors.float()
+    model.eval()
 
-        product = torch.from_numpy(f_dependent)
-        if is_cuda:
-            product = product.cuda()
-        else:
-            product = product
-        product = product.float()
+    fact_vary = factors.clone()
+    for k in range(len(factors[0])):
+        fact_vary[:,k] = torch.full((len(factors),),torch.median(factors[:,k]))
+    fact_vary_one = factors.clone()
+    fact_vary_rest = factors.clone()
+    for t1 in list_j:
+        fact_vary_one[:,t1] = torch.full((len(factors),),torch.median(factors[:,t1]))
+    for t2 in list_i:
+        fact_vary_rest[:,t2] = torch.full((len(factors),),torch.median(factors[:,t2]))
 
-        # load the trained model and put it in evaluation mode
-        if is_cuda:
-            model = SimpleNet(n_variables).cuda()
-        else:
-            model = SimpleNet(n_variables)
-        model.load_state_dict(torch.load(pathdir_weights+filename+".h5"))
-        model.eval()
-
-        # make some variables at the time equal to the median of factors
-        models_one = []
-        models_rest = []                    
-
-        fact_vary = factors.clone()
-        for k in range(len(factors[0])):
-            fact_vary[:,k] = torch.full((len(factors),),torch.median(factors[:,k]))
-        fact_vary_one = factors.clone()
-        fact_vary_rest = factors.clone()
-        for t1 in list_j:
-            fact_vary_one[:,t1] = torch.full((len(factors),),torch.median(factors[:,t1]))
-        for t2 in list_i:
-            fact_vary_rest[:,t2] = torch.full((len(factors),),torch.median(factors[:,t2]))        
-        
-        with torch.no_grad():
-            str1 = filename+"-mult_a"
-            str2 = filename+"-mult_b"
-            # save the first half
-            data_sep_1 = variables
-            data_sep_1 = np.delete(data_sep_1,list_j,axis=1)
-            data_sep_1 = np.column_stack((data_sep_1,model(fact_vary_one).cpu()))
-            # save the second half  
-            data_sep_2 = variables
-            data_sep_2 = np.delete(data_sep_2,list_i,axis=1)
-            data_sep_2 = np.column_stack((data_sep_2,model(fact_vary_rest).cpu()/model(fact_vary).cpu()))
-            try:
-                os.mkdir("results/separable_mult/")
-            except:
-                pass
-            np.savetxt("results/separable_mult/"+str1,data_sep_1)
-            np.savetxt("results/separable_mult/"+str2,data_sep_2)
-            # if it is separable, return the 2 new files created and the index of the column with the separable variable
-            return ("results/separable_mult/",str1,"results/separable_mult/",str2)
-
-    except Exception as e:
-        log_exception(logger, e)
-        return (-1,-1)
+    with torch.no_grad():
+        # save the first half
+        data_sep_1 = variables
+        data_sep_1 = np.delete(data_sep_1,list_j,axis=1)
+        data_sep_1 = np.column_stack((data_sep_1,model(fact_vary_one).cpu()))
+        # save the second half
+        data_sep_2 = variables
+        data_sep_2 = np.delete(data_sep_2,list_i,axis=1)
+        data_sep_2 = np.column_stack((data_sep_2,model(fact_vary_rest).cpu()/model(fact_vary).cpu()))
+        return data_sep_1, data_sep_2
 
         

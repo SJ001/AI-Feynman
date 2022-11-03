@@ -2,7 +2,6 @@
 """
 
 
-from .S_run_aifeynman import run_aifeynman
 from .get_demos import get_demos
 from .symbolicregressor_class import SymbolicRegressor
 
@@ -11,4 +10,4 @@ __version__ = "2.0.0"
 __license__ = "MIT"
 __copyright__ = "Copyright 2020 Silviu-Marian Udrescu"
 
-__all__ = ["run_aifeynman"]
+__all__ = ["SymbolicRegressor"]

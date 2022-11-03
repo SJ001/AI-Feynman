@@ -41,35 +41,12 @@ def rmse_loss(pred, targ):
     return torch.sqrt(F.mse_loss(pred, targ))/denom
 
 
-def NN_eval(pathdir,filename, logger=None):
+def NN_eval(model, XY, logger=None):
     try:
-        n_variables = np.loadtxt(pathdir+filename, dtype='str').shape[1]-1
-        variables = np.loadtxt(pathdir+filename, usecols=(0,))
+        variables = XY[:, :-1]
 
-        if n_variables==0:
-            return 0
-        elif n_variables==1:
-            variables = np.reshape(variables,(len(variables),1))
-        else:
-            for j in range(1,n_variables):
-                v = np.loadtxt(pathdir+filename, usecols=(j,))
-                variables = np.column_stack((variables,v))
-
-        f_dependent = np.loadtxt(pathdir+filename, usecols=(n_variables,))
-        f_dependent = np.reshape(f_dependent,(len(f_dependent),1))
-
-        factors = torch.from_numpy(variables[0:int(5*len(variables)/6)])
-        if is_cuda:
-            factors = factors.cuda()
-        else:
-            factors = factors
-        factors = factors.float()
-        product = torch.from_numpy(f_dependent[0:int(5*len(f_dependent)/6)])
-        if is_cuda:
-            product = product.cuda()
-        else:
-            product = product
-        product = product.float()
+        f_dependent = XY[:, -1]
+        f_dependent = np.reshape(f_dependent, (len(f_dependent), 1))
 
         factors_val = torch.from_numpy(variables[int(5*len(variables)/6):int(len(variables))])
         if is_cuda:
@@ -101,14 +78,14 @@ def NN_eval(pathdir,filename, logger=None):
                 x = self.linear5(x)
                 return x
 
-        if is_cuda:
-            model = SimpleNet(n_variables).cuda()
-        else:
-            model = SimpleNet(n_variables)
+        #if is_cuda:
+        #    model = SimpleNet(n_variables).cuda()
+        #else:
+        #    model = SimpleNet(n_variables)
                     
-        model.load_state_dict(torch.load("results/NN_trained_models/models/"+filename+".h5"))
+        #model.load_state_dict(torch.load("results/NN_trained_models/models/"+filename+".h5"))
         model.eval()
-        return(rmse_loss(model(factors_val),product_val),model)
+        return rmse_loss(model(factors_val), product_val)
 
     except Exception as e:
         log_exception(logger, e)

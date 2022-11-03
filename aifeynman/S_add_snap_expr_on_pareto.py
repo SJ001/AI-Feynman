@@ -34,8 +34,8 @@ def intify(expr):
     return expr.xreplace(dict(zip(ints, [int(i) for i in ints])))
 
 # parameters: path to data, math (not RPN) expression
-def add_snap_expr_on_pareto(pathdir, filename, math_expr, PA, DR_file="", logger=None):
-    input_data = np.loadtxt(pathdir+filename)
+def add_snap_expr_on_pareto(data, math_expr, PA, overall_factor="", vars_name=None, logger=None):
+    input_data = data
     def unsnap_recur(expr, param_dict, unsnapped_param_dict):
         """Recursively transform each numerical value into a learnable parameter."""
         import sympy
@@ -130,14 +130,17 @@ def add_snap_expr_on_pareto(pathdir, filename, math_expr, PA, DR_file="", logger
             # Calculate the complexity of the new, snapped expression
             #expr = simplify(powsimp(snapped_expr[i]))
             expr = snapped_expr[i]
+            #print("TRES:", expr, type(expr))
             for s in (expr.free_symbols):
                 s = symbols(str(s), real = True)
             expr =  parse_expr(str(snapped_expr[i]),locals())
+            #print("DOS:", expr, type(expr))
             expr = intify(expr)
+            #print("UNO:", expr, type(expr))
             is_atomic_number = lambda expr: expr.is_Atom and expr.is_number
             numbers_expr = [subexpression for subexpression in preorder_traversal(expr) if is_atomic_number(subexpression)]
 
-            if DR_file=="":
+            if overall_factor=="":
                 snapped_complexity = 0
                 for j in numbers_expr:
                     snapped_complexity = snapped_complexity + get_number_DL_snapped(float(j))
@@ -149,13 +152,15 @@ def add_snap_expr_on_pareto(pathdir, filename, math_expr, PA, DR_file="", logger
 
             # If a da file is provided, replace the variables with the actual ones before calculating the complexity
             else:
-                dr_data = np.loadtxt(DR_file,dtype="str",delimiter=",")
+                #dr_data = np.loadtxt(DR_file,dtype="str",delimiter=",")
 
                 expr = str(expr)
-                old_vars = ["x%s" %k for k in range(len(dr_data)-3)]
+                #old_vars = ["x%s" %k for k in range(len(dr_data)-3)]
+                old_vars = ["x%s" % k for k in range(len(vars_name))]
+
                 for i_dr in range(len(old_vars)):
-                    expr = expr.replace(old_vars[i_dr],"("+dr_data[i_dr+2]+")")
-                expr = "("+dr_data[1]+")*(" + expr +")"
+                    expr = expr.replace(old_vars[i_dr],"("+vars_name[i_dr]+")")
+                expr = "("+overall_factor+")*(" + expr +")"
 
                 expr = parse_expr(expr)
                 for s in (expr.free_symbols):

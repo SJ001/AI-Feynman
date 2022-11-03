@@ -34,7 +34,7 @@ def get_symbolic_expr_error(data,expr, logger=None):
         else:
             try:
                 return np.mean(np.log2(1+abs(f(*real_variables)[good_idx]-data[good_idx][:,-1])*2**30))
-            except IndexError:
+            except (IndexError, TypeError):
                 return np.mean(np.log2(1+abs(f(*real_variables)-data[:,-1])*2**30))
     except Exception as e:
         log_exception(logger, e)
