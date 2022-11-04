@@ -18,9 +18,6 @@ import traceback
 from cython_wrapper import bf_search
 import logging
 
-from contextlib import redirect_stdout
-import os
-
 
 def run_bf_polyfit(XY,BF_try_time, aritytemplates_path, PA, polyfit_deg, bases, pbar, logger, processes=2):
     global bf_workerprocess
@@ -28,9 +25,6 @@ def run_bf_polyfit(XY,BF_try_time, aritytemplates_path, PA, polyfit_deg, bases, 
     def bf_workerprocess(data, sep_type, output_type):
         with tempfile.NamedTemporaryFile() as bf_results:
             bf_results_path = bf_results.name
-            logger = logging.getLogger('bf_results_path')
-            print(os.getpid())
-            logger.write = lambda msg: logger.debug(msg) if msg != '\n' else None
             logger.debug(f"Brute force results location: {bf_results_path}")
             # run BF on the data
             #print(f"Checking for brute force {sep_type} and output_type {output_type}")
@@ -39,8 +33,7 @@ def run_bf_polyfit(XY,BF_try_time, aritytemplates_path, PA, polyfit_deg, bases, 
             band = 0.01
             sigma = 5.0
             try:
-                with redirect_stdout(logger):
-                    bf_search(data, data.shape[0], data.shape[1], BF_try_time, sep_type, band, sigma,
+                bf_search(data, data.shape[0], data.shape[1], BF_try_time, sep_type, band, sigma,
                             bf_results_path, aritytemplates_path)
                 bf_all_output = np.loadtxt(bf_results_path, dtype="str")
             except Exception as e:
