@@ -77,7 +77,7 @@ def run_bf_polyfit(XY,BF_try_time, aritytemplates_path, PA, polyfit_deg, bases, 
             pbar.update(2)
             continue
         # first try to fit polynomial to transformed data
-        PA = run_polyfit(np.copy(data_transformed), basis_func, polyfit_deg, PA, logger)
+        PA = run_polyfit(np.copy(data_transformed), XY, basis_func, polyfit_deg, PA, logger)
 
         # then try brute force with separators + and *
         for sep_type in ["*", "+"]:
@@ -115,7 +115,7 @@ def run_bf_polyfit(XY,BF_try_time, aritytemplates_path, PA, polyfit_deg, bases, 
                 for i, bf_result in enumerate(bf_results):
                     pbar.set_description("Processing brute force results")
                     curr_data, sep_type, output_type = multiprocessing_arguments[i]
-                    PA = bf_result_processing(bf_result, sep_type, output_type, curr_data, PA, logger)
+                    PA = bf_result_processing(bf_result, sep_type, output_type, curr_data, XY, PA, logger)
                     pbar.update(1)
                 multiprocessing_arguments = []
 
@@ -143,7 +143,7 @@ def run_bf_polyfit(XY,BF_try_time, aritytemplates_path, PA, polyfit_deg, bases, 
         for i, bf_result in enumerate(bf_results):
             pbar.set_description("Processing brute force results")
             curr_data, sep_type, output_type = multiprocessing_arguments[i]
-            PA = bf_result_processing(bf_result, sep_type, output_type, curr_data, PA, logger)
+            PA = bf_result_processing(bf_result, sep_type, output_type, curr_data, XY, PA, logger)
             pbar.update(1)
 
         print("Pareto frontier in the current branch:")
@@ -157,11 +157,11 @@ def run_bf_polyfit(XY,BF_try_time, aritytemplates_path, PA, polyfit_deg, bases, 
     return PA
 
 
-def run_polyfit(data, output_type, polyfit_deg, PA, logger):
+def run_polyfit(data_transformed, data_original, output_type, polyfit_deg, PA, logger):
     # run polyfit on the data
     print(f"Running polyfit on transformed data, {output_type}")
     try:
-        polyfit_result = polyfit(data, polyfit_deg, logger=logger)
+        polyfit_result = polyfit(data_transformed, polyfit_deg, logger=logger)
         eqn = str(polyfit_result[0])
         logger.debug(f"Polyfit result is: {eqn}")
         # Calculate the complexity of the polyfit expression the same way as for gradient descent case
@@ -190,7 +190,7 @@ def run_polyfit(data, output_type, polyfit_deg, PA, logger):
         elif output_type=="tan":
             eqn = "atan(" + eqn + ")"
 
-        polyfit_err = get_symbolic_expr_error(data,eqn, logger=logger)
+        polyfit_err = get_symbolic_expr_error(data_original, eqn, logger=logger)
         expr = parse_expr(eqn)
         is_atomic_number = lambda expr: expr.is_Atom and expr.is_number
         numbers_expr = [subexpression for subexpression in preorder_traversal(expr) if is_atomic_number(subexpression)]
@@ -210,7 +210,7 @@ def run_polyfit(data, output_type, polyfit_deg, PA, logger):
         #run zero snap on polyfit output
         PA_poly = ParetoSet()
         PA_poly.add(Point(x=complexity, y=polyfit_err, data=str(eqn)))
-        PA_poly = add_snap_expr_on_pareto(data, str(eqn), PA_poly, logger=logger)
+        PA_poly = add_snap_expr_on_pareto(data_original, str(eqn), PA_poly, logger=logger)
 
         for l in range(len(PA_poly.get_pareto_points())):
             PA.add(Point(PA_poly.get_pareto_points()[l][0],PA_poly.get_pareto_points()[l][1],PA_poly.get_pareto_points()[l][2]))
@@ -221,7 +221,7 @@ def run_polyfit(data, output_type, polyfit_deg, PA, logger):
     return PA
 
 
-def bf_result_processing(bf_result, sep_type, output_type, data, PA, logger):
+def bf_result_processing(bf_result, sep_type, output_type, data_transformed, data_original, PA, logger):
     if bf_result.size == 0:
         logger.info(f"Brute force module returned no result for operator {sep_type} and output type {output_type}.")
         return PA
@@ -274,7 +274,7 @@ def bf_result_processing(bf_result, sep_type, output_type, data, PA, logger):
 
 
                 eqns = eqns + [eqn]
-                error = get_symbolic_expr_error(data, eqn, logger=logger)
+                error = get_symbolic_expr_error(data_original, eqn, logger=logger)
                 errors = errors + [error]
                 expr = parse_expr(eqn)
                 is_atomic_number = lambda expr: expr.is_Atom and expr.is_number
@@ -296,12 +296,15 @@ def bf_result_processing(bf_result, sep_type, output_type, data, PA, logger):
                 continue
 
         for i in range(len(complexity)):
+            logger.debug(f"Adding ({complexity[i]}, {errors[i]}, {eqns[i]}) to PA.")
             PA.add(Point(x=complexity[i], y=errors[i], data=eqns[i]))
+            logger.debug(f"PA is now:")
+            logger.debug(PA.df())
 
         # run gradient descent of BF output parameters and add the results to the Pareto plot
         for i in range(len(express)):
             try:
-                bf_gd_update = RPN_to_pytorch(data, eqns[i], logger=logger)
+                bf_gd_update = RPN_to_pytorch(data_original, eqns[i], logger=logger)
                 logger.debug(f"gd. Adding ({bf_gd_update[1]}, {bf_gd_update[0]}, {bf_gd_update[2]}) to PA.")
                 PA.add(Point(x=bf_gd_update[1], y=bf_gd_update[0], data=bf_gd_update[2]))
                 logger.debug(f"PA is now:")
