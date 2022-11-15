@@ -10,6 +10,7 @@ from .S_final_gd import final_gd
 from .S_run_aifeynman import run_AI_all
 from .S_get_symbolic_expr_error import get_symbolic_expr_error
 from .S_add_snap_expr_on_pareto import add_snap_expr_on_pareto
+from .S_get_number_DL_snapped import get_number_DL_snapped
 
 
 class SymbolicRegressor:
@@ -132,23 +133,31 @@ class SymbolicRegressor:
         except Exception as e:
             logger.warning("Dimensional analysis could not be completed. See debug log for more information.")
             log_exception(logger, e)
+        if X.size == 0:
+            self.logger.debug("All variables reduced in dimensional reduction. Finding the correct coefficient by the mean of the remaining column.")
+            c = sum(Y)[0] / Y.size
+            error = get_symbolic_expr_error(Y, str(c), self.logger)
+            compl = get_number_DL_snapped(float(c))
+            self.PA.add(Point(x=compl, y=error, data=str(c)))
+            XY = Y
+            XY_train = Y
+            XY_test = Y
+        else:
+            # Split the data into train and test set
+            XY = np.column_stack((X, Y))[:,:]
 
-        # Split the data into train and test set
-        XY = np.column_stack((X, Y))[:,:]
+            sep_idx = np.random.permutation(len(XY))
 
-        sep_idx = np.random.permutation(len(XY))
+            XY_train = XY[sep_idx[0:(100 - self.test_percentage) * len(XY) // 100]]
+            XY_test = XY[sep_idx[self.test_percentage * len(XY) // 100:len(XY)]]
 
-        XY_train = XY[sep_idx[0:(100 - self.test_percentage) * len(XY) // 100]]
-        XY_test = XY[sep_idx[self.test_percentage * len(XY) // 100:len(XY)]]
+            # Run the code on the train data
+            self.PA = run_AI_all(XY_train, self.BF_try_time, self.polyfit_deg, self.NN_epochs, PA=self.PA,
+                            logger=self.logger, bases=self.bases, processes=self.num_processes, disable_progressbar=self.disable_progressbar)
 
-        # Run the code on the train data
-        self.PA = run_AI_all(XY_train, self.BF_try_time, self.polyfit_deg, self.NN_epochs, PA=self.PA,
-                        logger=self.logger, bases=self.bases, processes=self.num_processes, disable_progressbar=self.disable_progressbar)
         PA_list = self.PA.get_pareto_points()
-
         print("Post-processing the results...")
         self.result_before_snap = PA_list
-
 
         # TODO: implement and uncomment?
         ''' 
@@ -326,11 +335,6 @@ class SymbolicRegressor:
             new_vars = np.array(new_vars, dtype=np.float64)
 
             new_dependent = deps.reshape((deps.shape[0], 1)) / func.reshape((func.shape[0], 1))
-            if new_vars.size == 0:
-                print("All variables are reduced in dimensional analysis. Either the target is a monomial of the "
-                      "input variables or incorrect units were given. Dimensional analysis result is therefore "
-                      "discarded.")
-                return X, Y, eq_symbols, ""
 
             #all_variables = np.vstack((new_vars, new_dependent)).T
             return new_vars.T, new_dependent, file_sym_list, overall_factor
