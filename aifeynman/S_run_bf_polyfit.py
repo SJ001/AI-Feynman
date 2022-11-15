@@ -214,6 +214,7 @@ def run_polyfit(data_transformed, data_original, output_type, polyfit_deg, PA, l
 
         for l in range(len(PA_poly.get_pareto_points())):
             PA.add(Point(PA_poly.get_pareto_points()[l][0],PA_poly.get_pareto_points()[l][1],PA_poly.get_pareto_points()[l][2]))
+            logger.debug(f"Adding ({PA_poly.get_pareto_points()[l][0]}, {PA_poly.get_pareto_points()[l][1]}, {PA_poly.get_pareto_points()[l][2]}) yields Pareto frontier:\n{PA.df()}")
 
     except Exception as e:
         log_exception(logger, e)
@@ -296,19 +297,15 @@ def bf_result_processing(bf_result, sep_type, output_type, data_transformed, dat
                 continue
 
         for i in range(len(complexity)):
-            logger.debug(f"Adding ({complexity[i]}, {errors[i]}, {eqns[i]}) to PA.")
             PA.add(Point(x=complexity[i], y=errors[i], data=eqns[i]))
-            logger.debug(f"PA is now:")
-            logger.debug(PA.df())
+            logger.debug(f"Adding ({complexity[i]}, {errors[i]}, {eqns[i]}) to PA, which is now:\n{PA.df()}")
 
         # run gradient descent of BF output parameters and add the results to the Pareto plot
         for i in range(len(express)):
             try:
                 bf_gd_update = RPN_to_pytorch(data_original, eqns[i], logger=logger)
-                logger.debug(f"gd. Adding ({bf_gd_update[1]}, {bf_gd_update[0]}, {bf_gd_update[2]}) to PA.")
                 PA.add(Point(x=bf_gd_update[1], y=bf_gd_update[0], data=bf_gd_update[2]))
-                logger.debug(f"PA is now:")
-                logger.debug(PA.df())
+                logger.debug(f"Adding ({bf_gd_update[1]}, {bf_gd_update[0]}, {bf_gd_update[2]}) yields Pareto frontier:\n{PA.df()}")
             except Exception as e:
                 log_exception(logger, e)
                 return PA

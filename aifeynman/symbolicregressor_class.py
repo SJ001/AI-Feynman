@@ -173,6 +173,7 @@ class SymbolicRegressor:
                 dt = XY
                 gd_update = final_gd(dt, PA_list[i][-1], logger=logger)
                 self.PA.add(Point(x=gd_update[1], y=gd_update[0], data=gd_update[2]))
+                logger.debug(f"Adding ({gd_update[1]}, {gd_update[0]}, {gd_update[2]}) to PA, which is now:\n{self.PA.df()}")
             except Exception as e:
                 log_exception(logger, e)
                 continue

@@ -33,8 +33,10 @@ def get_symbolic_expr_error(data,expr, logger=None):
             return 1000000
         else:
             try:
-                return np.mean(np.log2(1+abs(f(*real_variables)[good_idx]-data[good_idx][:,-1])*2**30))
+                error = np.mean(np.log2(1+abs(f(*real_variables)[good_idx]-data[good_idx][:,-1])*2**30))
+                return error
             except (IndexError, TypeError):
+                logger.debug("Index- or TypeError found. Calculating mean without good_idx.")
                 return np.mean(np.log2(1+abs(f(*real_variables)-data[:,-1])*2**30))
     except Exception as e:
         log_exception(logger, e)

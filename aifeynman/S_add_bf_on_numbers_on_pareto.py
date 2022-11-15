@@ -119,6 +119,7 @@ def add_bf_on_numbers_on_pareto(pathdir, filename, PA, math_expr, logger=None):
                 snapped_complexity = snapped_complexity + (n_variables+n_operations)*np.log2((n_variables+n_operations))
 
             PA.add(Point(x=snapped_complexity, y=snapped_error, data=str(expr)))
+            logger.debug(f"Adding ({snapped_complexity}, {snapped_error}, {str(expr)}) to PA, which is now:\n{PA.df()}")
         except Exception as e:
             log_exception(logger, e)
             continue
