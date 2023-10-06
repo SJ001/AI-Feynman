@@ -44,7 +44,7 @@ setup(
     install_requires=['matplotlib',
                       'numpy',
                       'seaborn',
-                      'sklearn',
+                      'scikit-learn',
                       'sortedcontainers',
                       'sympy >= 1.4',
                       'torch >= 1.4.0',
